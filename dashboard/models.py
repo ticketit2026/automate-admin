@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from django.contrib.auth.models import User
 from helpdesk.models import Ticket
 from admin_automation.models import InternalLetter
 from workflow.models import LeaveRequest, PurchaseRequest, MissionRequest
