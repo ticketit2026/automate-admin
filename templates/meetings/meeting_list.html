@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">📅 جلسات</h2>
+<table class="w-full border-collapse bg-white shadow rounded-xl">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="p-4">عنوان جلسه</th>
+            <th class="p-4">تاریخ</th>
+            <th class="p-4">محل</th>
+            <th class="p-4">صورتجلسه</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in meetings %}
+        <tr class="border-b">
+            <td class="p-4">{{ m.title }}</td>
+            <td class="p-4">{{ m.date }}</td>
+            <td class="p-4">{{ m.location }}</td>
+            <td class="p-4 text-blue-600 hover:underline cursor-pointer">مشاهده صورتجلسه</td>
+        </tr>
+        {% empty %}<tr><td colspan="4" class="p-8 text-center">هیچ جلسه‌ای ثبت نشده.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

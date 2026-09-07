@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اتوماسیون اداری - سازمان من</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Tahoma', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="flex h-screen">
+        <!-- سایدبار ساده -->
+        <div class="w-64 bg-white shadow-xl p-6">
+            <h1 class="text-2xl font-bold text-blue-600 mb-8">🚀 اتوماسیون اداری</h1>
+            <nav class="space-y-4">
+                <a href="/dashboard/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
+                    <i class="fas fa-chart-pie"></i> داشبورد مدیریت
+                </a>
+                <a href="/helpdesk/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
+                    <i class="fas fa-headset"></i> IT Help Desk
+                </a>
+                <a href="/admin-automation/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
+                    <i class="fas fa-file-alt"></i> نامه‌های اداری
+                </a>
+                <a href="/workflow/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
+                    <i class="fas fa-sync-alt"></i> گردش کار
+                </a>
+                <a href="/meetings/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
+                    <i class="fas fa-calendar"></i> جلسات
+                </a>
+                <a href="/documents/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
+                    <i class="fas fa-folder"></i> اسناد و بایگانی
+                </a>
+            </nav>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <div class="flex-1 overflow-auto p-8">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">📁 اسناد و بایگانی</h2>
+<table class="w-full border-collapse bg-white shadow rounded-xl">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="p-4">عنوان فایل</th>
+            <th class="p-4">دسته‌بندی</th>
+            <th class="p-4">بارگذاری شده توسط</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in documents %}
+        <tr>
+            <td class="p-4">{{ d.title }}</td>
+            <td class="p-4">{{ d.category }}</td>
+            <td class="p-4">{{ d.uploaded_by }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="3" class="p-8 text-center">هیچ فایلی در بایگانی نیست.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

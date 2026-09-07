@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">📄 نامه‌های اداری</h2>
+
+<table class="w-full border-collapse bg-white shadow rounded-xl overflow-hidden">
+    <thead class="bg-gray-100">
+        <tr>
+            <th class="p-4 text-right">عنوان نامه</th>
+            <th class="p-4 text-right">نوع</th>
+            <th class="p-4 text-right">فرستنده/گیرنده</th>
+            <th class="p-4 text-right">وضعیت</th>
+            <th class="p-4 text-right">تاریخ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for l in letters %}
+        <tr class="border-b hover:bg-gray-50">
+            <td class="p-4">{{ l.title }}</td>
+            <td class="p-4">{{ l.document_type }}</td>
+            <td class="p-4">{{ l.sent_to }}</td>
+            <td class="p-4">
+                <span class="px-3 py-1 text-xs rounded-full
+                    {% if l.status == 'draft' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-green-100 text-green-700{% endif %}">
+                    {{ l.status }}
+                </span>
+            </td>
+            <td class="p-4">{{ l.created_at|date:"Y/m/d" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="p-8 text-center">هیچ نامه‌ای ثبت نشده.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

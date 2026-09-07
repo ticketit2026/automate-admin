@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-3xl font-bold mb-8">📊 داشبورد مدیریت</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-3xl shadow text-center">
+        <div class="text-4xl font-bold text-blue-600">{{ tickets }}</div>
+        <p class="text-gray-500 mt-2">تیکت IT Help Desk</p>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow text-center">
+        <div class="text-4xl font-bold text-green-600">{{ letters }}</div>
+        <p class="text-gray-500 mt-2">نامه‌های اداری</p>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow text-center">
+        <div class="text-4xl font-bold text-orange-600">{{ leaves }}<span class="text-sm">در انتظار</span></div>
+        <p class="text-gray-500 mt-2">مرخصی</p>
+    </div>
+    <!-- بقیه کارت‌ها هم اضافه می‌کنم اگر بخوای -->
+</div>
+{% endblock %}
