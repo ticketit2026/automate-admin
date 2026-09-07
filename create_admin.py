@@ -13,18 +13,14 @@ password = os.getenv("ADMIN_PASSWORD")
 
 if username and password:
     user, created = User.objects.get_or_create(
-        username=username,
-        defaults={
-            "is_staff": True,
-            "is_superuser": True,
-        }
+        username=username
     )
 
-    if created:
-        user.set_password(password)
-        user.save()
-        print(f"Superuser '{username}' created successfully.")
-    else:
-        print(f"Superuser '{username}' already exists.")
+    user.is_staff = True
+    user.is_superuser = True
+    user.set_password(password)
+    user.save()
+
+    print(f"Admin user '{username}' is ready.")
 else:
     print("ADMIN_USERNAME or ADMIN_PASSWORD is not set.")
