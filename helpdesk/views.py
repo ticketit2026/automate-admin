@@ -1,8 +1,10 @@
-from django.contrib import admin
+from django.shortcuts import render
 from .models import Ticket
 
-@admin.register(Ticket)
-class TicketAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'priority', 'assigned_to', 'created_by')
-    list_filter = ('status', 'priority')
-    search_fields = ('title', 'description')
+
+def ticket_list(request):
+    tickets = Ticket.objects.all().order_by('-created_at')
+
+    return render(request, 'helpdesk/ticket_list.html', {
+        'tickets': tickets
+    })
