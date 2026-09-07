@@ -1,4 +1,6 @@
 ```html
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
@@ -8,147 +10,355 @@
 
     <title>{% block title %}اتوماسیون اداری{% endblock %}</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome -->
-    <link
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        rel="stylesheet"
-    >
-
     <style>
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: Tahoma, Arial, sans-serif;
-            background: #f5f7fb;
+            background: #f4f7fb;
+            color: #1e293b;
         }
 
-        /* اسکرول بار */
-        ::-webkit-scrollbar {
-            width: 7px;
+        a {
+            text-decoration: none;
+            color: inherit;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+        /* =========================
+           Layout
+        ========================= */
+
+        .app {
+            display: flex;
+            min-height: 100vh;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+
+        /* =========================
+           Sidebar
+        ========================= */
+
+        .sidebar {
+            width: 270px;
+            background: #ffffff;
+            border-left: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+
+        .logo {
+            padding: 25px 22px;
+            border-bottom: 1px solid #f0f2f5;
         }
 
-        /* منوی فعال */
-        .menu-item.active {
-            background: linear-gradient(
-                135deg,
-                #2563eb,
-                #1d4ed8
-            );
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
             color: white;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.20);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, .2);
         }
 
-        .menu-item.active i {
-            color: white;
+
+        .logo-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #1e293b;
         }
 
-        /* Hover منو */
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+
+        /* =========================
+           Navigation
+        ========================= */
+
+        .navigation {
+            padding: 20px 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+
+        .menu-title {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 0 10px 10px;
+            font-weight: bold;
+        }
+
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+
         .menu-item {
-            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 15px;
+            border-radius: 12px;
+            color: #64748b;
+            font-size: 13px;
+            transition: .2s;
         }
+
 
         .menu-item:hover {
+            background: #eff6ff;
+            color: #2563eb;
             transform: translateX(-3px);
         }
 
-        /* کارت‌ها */
-        .dashboard-card {
-            transition: all 0.25s ease;
+
+        .menu-icon {
+            width: 25px;
+            text-align: center;
+            font-size: 17px;
         }
 
-        .dashboard-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+
+        .menu-badge {
+            margin-right: auto;
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 3px 7px;
+            border-radius: 20px;
+            font-size: 9px;
         }
 
-        /* سایدبار */
-        .sidebar {
-            transition: all 0.3s ease;
+
+        /* =========================
+           User
+        ========================= */
+
+        .user-box {
+            padding: 15px;
+            border-top: 1px solid #f0f2f5;
         }
 
-        /* موبایل */
-        @media (max-width: 768px) {
+
+        .user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 14px;
+        }
+
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #dbeafe;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+
+        .user-info {
+            flex: 1;
+        }
+
+
+        .user-name {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+
+        .user-role {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+
+        .logout {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+
+        .logout:hover {
+            color: #ef4444;
+        }
+
+
+        /* =========================
+           Main
+        ========================= */
+
+        .main {
+            margin-right: 270px;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+        }
+
+
+        /* =========================
+           Header
+        ========================= */
+
+        .header {
+            height: 75px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 35px;
+        }
+
+
+        .header-title {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+
+        .header-subtitle {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+
+        .header-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+
+        .header-button:hover {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+
+        /* =========================
+           Content
+        ========================= */
+
+        .content {
+            padding: 35px;
+        }
+
+
+        /* =========================
+           Responsive
+        ========================= */
+
+        @media (max-width: 900px) {
 
             .sidebar {
-                position: fixed;
-                right: -280px;
-                top: 0;
-                bottom: 0;
-                z-index: 50;
-                width: 260px;
+                right: -270px;
+                transition: .3s;
             }
 
             .sidebar.open {
                 right: 0;
             }
 
-            .mobile-overlay {
-                display: none;
+            .main {
+                margin-right: 0;
+                width: 100%;
             }
 
-            .mobile-overlay.show {
-                display: block;
+            .content {
+                padding: 20px;
             }
+
         }
 
+
     </style>
+
+    {% block extra_css %}{% endblock %}
 
 </head>
 
 
 <body>
 
-<div class="min-h-screen flex">
+<div class="app">
 
 
-    <!-- ========================= -->
-    <!-- سایدبار -->
-    <!-- ========================= -->
+    <!-- =========================
+         Sidebar
+    ========================= -->
 
-    <aside
-        id="sidebar"
-        class="sidebar w-72 bg-white border-l border-gray-200 shadow-sm flex flex-col"
-    >
+    <aside class="sidebar" id="sidebar">
 
-        <!-- لوگو -->
-        <div class="p-6 border-b border-gray-100">
 
-            <div class="flex items-center gap-3">
+        <div class="logo">
 
-                <div
-                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg"
-                >
-                    <i class="fas fa-building text-xl"></i>
+            <div class="logo-box">
+
+                <div class="logo-icon">
+                    ⚙
                 </div>
 
                 <div>
 
-                    <h1 class="font-bold text-gray-800 text-lg">
+                    <div class="logo-title">
                         اتوماسیون اداری
-                    </h1>
+                    </div>
 
-                    <p class="text-xs text-gray-400 mt-1">
+                    <div class="logo-subtitle">
                         سیستم مدیریت سازمان
-                    </p>
+                    </div>
 
                 </div>
 
@@ -157,27 +367,19 @@
         </div>
 
 
-        <!-- منو -->
-        <div class="flex-1 p-4 overflow-y-auto">
+        <div class="navigation">
 
-            <p class="text-xs text-gray-400 font-bold px-3 mb-3">
+            <div class="menu-title">
                 منوی اصلی
-            </p>
+            </div>
 
 
-            <nav class="space-y-2">
+            <nav class="menu">
 
 
-                <!-- داشبورد -->
+                <a href="/dashboard/" class="menu-item">
 
-                <a
-                    href="/dashboard/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-chart-pie"></i>
-                    </div>
+                    <span class="menu-icon">📊</span>
 
                     <span>
                         داشبورد مدیریت
@@ -186,40 +388,24 @@
                 </a>
 
 
-                <!-- Help Desk -->
+                <a href="/helpdesk/" class="menu-item">
 
-                <a
-                    href="/helpdesk/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-headset"></i>
-                    </div>
+                    <span class="menu-icon">🎧</span>
 
                     <span>
                         IT Help Desk
                     </span>
 
-                    <span
-                        class="mr-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full"
-                    >
+                    <span class="menu-badge">
                         تیکت
                     </span>
 
                 </a>
 
 
-                <!-- نامه‌ها -->
+                <a href="/admin-automation/" class="menu-item">
 
-                <a
-                    href="/admin-automation/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-envelope"></i>
-                    </div>
+                    <span class="menu-icon">✉️</span>
 
                     <span>
                         نامه‌های اداری
@@ -228,16 +414,9 @@
                 </a>
 
 
-                <!-- گردش کار -->
+                <a href="/workflow/" class="menu-item">
 
-                <a
-                    href="/workflow/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-diagram-project"></i>
-                    </div>
+                    <span class="menu-icon">🔄</span>
 
                     <span>
                         گردش کار
@@ -246,16 +425,9 @@
                 </a>
 
 
-                <!-- جلسات -->
+                <a href="/meetings/" class="menu-item">
 
-                <a
-                    href="/meetings/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-calendar-days"></i>
-                    </div>
+                    <span class="menu-icon">📅</span>
 
                     <span>
                         جلسات
@@ -264,16 +436,9 @@
                 </a>
 
 
-                <!-- اسناد -->
+                <a href="/documents/" class="menu-item">
 
-                <a
-                    href="/documents/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
+                    <span class="menu-icon">📁</span>
 
                     <span>
                         اسناد و بایگانی
@@ -281,26 +446,18 @@
 
                 </a>
 
-            </nav>
+
+                <div style="height:25px"></div>
 
 
-            <!-- بخش مدیریت -->
-
-            <p class="text-xs text-gray-400 font-bold px-3 mt-8 mb-3">
-                مدیریت سیستم
-            </p>
+                <div class="menu-title">
+                    مدیریت سیستم
+                </div>
 
 
-            <nav class="space-y-2">
+                <a href="/admin/" class="menu-item">
 
-                <a
-                    href="/admin/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
-
-                    <div class="w-8 text-center">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
+                    <span class="menu-icon">👤</span>
 
                     <span>
                         مدیریت کاربران
@@ -309,14 +466,9 @@
                 </a>
 
 
-                <a
-                    href="/admin/"
-                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                >
+                <a href="/admin/" class="menu-item">
 
-                    <div class="w-8 text-center">
-                        <i class="fas fa-gear"></i>
-                    </div>
+                    <span class="menu-icon">⚙️</span>
 
                     <span>
                         تنظیمات
@@ -324,178 +476,93 @@
 
                 </a>
 
+
             </nav>
 
         </div>
 
 
-        <!-- پروفایل کاربر -->
+        <!-- User -->
 
-        <div class="p-4 border-t border-gray-100">
+        <div class="user-box">
 
-            <div
-                class="flex items-center gap-3 bg-gray-50 rounded-2xl p-3"
-            >
+            <div class="user">
 
-                <div
-                    class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"
-                >
-                    <i class="fas fa-user"></i>
+                <div class="user-avatar">
+                    👤
                 </div>
 
-                <div class="flex-1 min-w-0">
+                <div class="user-info">
 
-                    <p class="font-bold text-sm text-gray-700 truncate">
+                    <div class="user-name">
                         کاربر سیستم
-                    </p>
+                    </div>
 
-                    <p class="text-xs text-gray-400">
+                    <div class="user-role">
                         کاربر سازمان
-                    </p>
+                    </div>
 
                 </div>
 
-                <a
-                    href="/admin/logout/"
-                    class="text-gray-400 hover:text-red-500"
-                    title="خروج"
-                >
-                    <i class="fas fa-right-from-bracket"></i>
+                <a href="/admin/logout/" class="logout">
+                    ↪
                 </a>
 
             </div>
 
         </div>
 
+
     </aside>
 
 
 
-    <!-- Overlay موبایل -->
+    <!-- =========================
+         Main
+    ========================= -->
 
-    <div
-        id="overlay"
-        class="mobile-overlay fixed inset-0 bg-black/40 z-40"
-        onclick="toggleSidebar()"
-    ></div>
+    <main class="main">
 
 
-
-    <!-- ========================= -->
-    <!-- بخش اصلی -->
-    <!-- ========================= -->
-
-    <main class="flex-1 min-w-0">
+        <header class="header">
 
 
-        <!-- ========================= -->
-        <!-- Header -->
-        <!-- ========================= -->
+            <div>
 
-        <header
-            class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 lg:px-8"
-        >
+                <div class="header-title">
 
-            <div class="flex items-center gap-4">
+                    {% block page_title %}
+                    داشبورد مدیریت
+                    {% endblock %}
 
-                <!-- دکمه موبایل -->
+                </div>
 
-                <button
-                    onclick="toggleSidebar()"
-                    class="md:hidden w-10 h-10 rounded-xl bg-gray-100 text-gray-600"
-                >
-                    <i class="fas fa-bars"></i>
-                </button>
-
-
-                <div>
-
-                    <h2 class="text-xl font-bold text-gray-800">
-                        {% block page_title %}
-                        داشبورد
-                        {% endblock %}
-                    </h2>
-
-                    <p class="text-xs text-gray-400 mt-1">
-                        خوش آمدید 👋
-                    </p>
-
+                <div class="header-subtitle">
+                    سیستم اتوماسیون اداری
                 </div>
 
             </div>
 
 
-            <!-- سمت چپ Header -->
+            <div class="header-actions">
 
-            <div class="flex items-center gap-3">
-
-
-                <!-- جستجو -->
-
-                <button
-                    class="w-10 h-10 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-500 transition"
-                    title="جستجو"
-                >
-                    <i class="fas fa-search"></i>
+                <button class="header-button">
+                    🔍
                 </button>
 
-
-                <!-- اعلان -->
-
-                <button
-                    class="relative w-10 h-10 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-500 transition"
-                    title="اعلان‌ها"
-                >
-
-                    <i class="fas fa-bell"></i>
-
-                    <span
-                        class="absolute top-1 left-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
-                    ></span>
-
+                <button class="header-button">
+                    🔔
                 </button>
-
-
-                <!-- پروفایل -->
-
-                <div
-                    class="hidden sm:flex items-center gap-3 mr-2 pr-3 border-r border-gray-200"
-                >
-
-                    <div class="text-left">
-
-                        <p class="text-sm font-bold text-gray-700">
-                            کاربر سیستم
-                        </p>
-
-                        <p class="text-xs text-gray-400">
-                            آنلاین
-                        </p>
-
-                    </div>
-
-                    <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center"
-                    >
-                        <i class="fas fa-user"></i>
-                    </div>
-
-                </div>
 
             </div>
+
 
         </header>
 
 
-
-        <!-- ========================= -->
-        <!-- محتوای صفحات -->
-        <!-- ========================= -->
-
-        <section class="p-6 lg:p-8">
+        <section class="content">
 
             {% block content %}
-
             {% endblock %}
 
         </section>
@@ -504,51 +571,6 @@
     </main>
 
 </div>
-
-
-
-<!-- ========================= -->
-<!-- JavaScript -->
-<!-- ========================= -->
-
-<script>
-
-    function toggleSidebar() {
-
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("overlay");
-
-        sidebar.classList.toggle("open");
-        overlay.classList.toggle("show");
-
-    }
-
-
-    /*
-        تشخیص صفحه فعال
-        بر اساس URL فعلی
-    */
-
-    const currentPath = window.location.pathname;
-
-    document.querySelectorAll(".menu-item").forEach(function(item) {
-
-        const href = item.getAttribute("href");
-
-        if (
-            href &&
-            href !== "/admin/" &&
-            currentPath.startsWith(href)
-        ) {
-
-            item.classList.add("active");
-
-        }
-
-    });
-
-</script>
-
 
 </body>
 </html>
