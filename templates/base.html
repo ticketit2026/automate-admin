@@ -1,46 +1,555 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اتوماسیون اداری - سازمان من</title>
+
+    <title>{% block title %}اتوماسیون اداری{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        rel="stylesheet"
+    >
+
     <style>
-        body { font-family: 'Tahoma', sans-serif; }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            background: #f5f7fb;
+        }
+
+        /* اسکرول بار */
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* منوی فعال */
+        .menu-item.active {
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #1d4ed8
+            );
+            color: white;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.20);
+        }
+
+        .menu-item.active i {
+            color: white;
+        }
+
+        /* Hover منو */
+        .menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            transform: translateX(-3px);
+        }
+
+        /* کارت‌ها */
+        .dashboard-card {
+            transition: all 0.25s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        /* سایدبار */
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+
+        /* موبایل */
+        @media (max-width: 768px) {
+
+            .sidebar {
+                position: fixed;
+                right: -280px;
+                top: 0;
+                bottom: 0;
+                z-index: 50;
+                width: 260px;
+            }
+
+            .sidebar.open {
+                right: 0;
+            }
+
+            .mobile-overlay {
+                display: none;
+            }
+
+            .mobile-overlay.show {
+                display: block;
+            }
+        }
+
     </style>
+
 </head>
-<body class="bg-gray-50 text-gray-800">
-    <div class="flex h-screen">
-        <!-- سایدبار ساده -->
-        <div class="w-64 bg-white shadow-xl p-6">
-            <h1 class="text-2xl font-bold text-blue-600 mb-8">🚀 اتوماسیون اداری</h1>
-            <nav class="space-y-4">
-                <a href="/dashboard/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
-                    <i class="fas fa-chart-pie"></i> داشبورد مدیریت
-                </a>
-                <a href="/helpdesk/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
-                    <i class="fas fa-headset"></i> IT Help Desk
-                </a>
-                <a href="/admin-automation/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
-                    <i class="fas fa-file-alt"></i> نامه‌های اداری
-                </a>
-                <a href="/workflow/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
-                    <i class="fas fa-sync-alt"></i> گردش کار
-                </a>
-                <a href="/meetings/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
-                    <i class="fas fa-calendar"></i> جلسات
-                </a>
-                <a href="/documents/" class="block py-3 px-4 rounded-xl hover:bg-blue-50 flex items-center gap-3">
-                    <i class="fas fa-folder"></i> اسناد و بایگانی
-                </a>
-            </nav>
+
+
+<body>
+
+<div class="min-h-screen flex">
+
+
+    <!-- ========================= -->
+    <!-- سایدبار -->
+    <!-- ========================= -->
+
+    <aside
+        id="sidebar"
+        class="sidebar w-72 bg-white border-l border-gray-200 shadow-sm flex flex-col"
+    >
+
+        <!-- لوگو -->
+        <div class="p-6 border-b border-gray-100">
+
+            <div class="flex items-center gap-3">
+
+                <div
+                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg"
+                >
+                    <i class="fas fa-building text-xl"></i>
+                </div>
+
+                <div>
+
+                    <h1 class="font-bold text-gray-800 text-lg">
+                        اتوماسیون اداری
+                    </h1>
+
+                    <p class="text-xs text-gray-400 mt-1">
+                        سیستم مدیریت سازمان
+                    </p>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <!-- محتوای اصلی -->
-        <div class="flex-1 overflow-auto p-8">
-            {% block content %}{% endblock %}
+
+        <!-- منو -->
+        <div class="flex-1 p-4 overflow-y-auto">
+
+            <p class="text-xs text-gray-400 font-bold px-3 mb-3">
+                منوی اصلی
+            </p>
+
+
+            <nav class="space-y-2">
+
+
+                <!-- داشبورد -->
+
+                <a
+                    href="/dashboard/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+
+                    <span>
+                        داشبورد مدیریت
+                    </span>
+
+                </a>
+
+
+                <!-- Help Desk -->
+
+                <a
+                    href="/helpdesk/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-headset"></i>
+                    </div>
+
+                    <span>
+                        IT Help Desk
+                    </span>
+
+                    <span
+                        class="mr-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full"
+                    >
+                        تیکت
+                    </span>
+
+                </a>
+
+
+                <!-- نامه‌ها -->
+
+                <a
+                    href="/admin-automation/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+
+                    <span>
+                        نامه‌های اداری
+                    </span>
+
+                </a>
+
+
+                <!-- گردش کار -->
+
+                <a
+                    href="/workflow/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-diagram-project"></i>
+                    </div>
+
+                    <span>
+                        گردش کار
+                    </span>
+
+                </a>
+
+
+                <!-- جلسات -->
+
+                <a
+                    href="/meetings/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-calendar-days"></i>
+                    </div>
+
+                    <span>
+                        جلسات
+                    </span>
+
+                </a>
+
+
+                <!-- اسناد -->
+
+                <a
+                    href="/documents/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+
+                    <span>
+                        اسناد و بایگانی
+                    </span>
+
+                </a>
+
+            </nav>
+
+
+            <!-- بخش مدیریت -->
+
+            <p class="text-xs text-gray-400 font-bold px-3 mt-8 mb-3">
+                مدیریت سیستم
+            </p>
+
+
+            <nav class="space-y-2">
+
+                <a
+                    href="/admin/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+
+                    <span>
+                        مدیریت کاربران
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="/admin/"
+                    class="menu-item flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                >
+
+                    <div class="w-8 text-center">
+                        <i class="fas fa-gear"></i>
+                    </div>
+
+                    <span>
+                        تنظیمات
+                    </span>
+
+                </a>
+
+            </nav>
+
         </div>
-    </div>
+
+
+        <!-- پروفایل کاربر -->
+
+        <div class="p-4 border-t border-gray-100">
+
+            <div
+                class="flex items-center gap-3 bg-gray-50 rounded-2xl p-3"
+            >
+
+                <div
+                    class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"
+                >
+                    <i class="fas fa-user"></i>
+                </div>
+
+                <div class="flex-1 min-w-0">
+
+                    <p class="font-bold text-sm text-gray-700 truncate">
+                        کاربر سیستم
+                    </p>
+
+                    <p class="text-xs text-gray-400">
+                        کاربر سازمان
+                    </p>
+
+                </div>
+
+                <a
+                    href="/admin/logout/"
+                    class="text-gray-400 hover:text-red-500"
+                    title="خروج"
+                >
+                    <i class="fas fa-right-from-bracket"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- Overlay موبایل -->
+
+    <div
+        id="overlay"
+        class="mobile-overlay fixed inset-0 bg-black/40 z-40"
+        onclick="toggleSidebar()"
+    ></div>
+
+
+
+    <!-- ========================= -->
+    <!-- بخش اصلی -->
+    <!-- ========================= -->
+
+    <main class="flex-1 min-w-0">
+
+
+        <!-- ========================= -->
+        <!-- Header -->
+        <!-- ========================= -->
+
+        <header
+            class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 lg:px-8"
+        >
+
+            <div class="flex items-center gap-4">
+
+                <!-- دکمه موبایل -->
+
+                <button
+                    onclick="toggleSidebar()"
+                    class="md:hidden w-10 h-10 rounded-xl bg-gray-100 text-gray-600"
+                >
+                    <i class="fas fa-bars"></i>
+                </button>
+
+
+                <div>
+
+                    <h2 class="text-xl font-bold text-gray-800">
+                        {% block page_title %}
+                        داشبورد
+                        {% endblock %}
+                    </h2>
+
+                    <p class="text-xs text-gray-400 mt-1">
+                        خوش آمدید 👋
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- سمت چپ Header -->
+
+            <div class="flex items-center gap-3">
+
+
+                <!-- جستجو -->
+
+                <button
+                    class="w-10 h-10 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-500 transition"
+                    title="جستجو"
+                >
+                    <i class="fas fa-search"></i>
+                </button>
+
+
+                <!-- اعلان -->
+
+                <button
+                    class="relative w-10 h-10 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-500 transition"
+                    title="اعلان‌ها"
+                >
+
+                    <i class="fas fa-bell"></i>
+
+                    <span
+                        class="absolute top-1 left-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+                    ></span>
+
+                </button>
+
+
+                <!-- پروفایل -->
+
+                <div
+                    class="hidden sm:flex items-center gap-3 mr-2 pr-3 border-r border-gray-200"
+                >
+
+                    <div class="text-left">
+
+                        <p class="text-sm font-bold text-gray-700">
+                            کاربر سیستم
+                        </p>
+
+                        <p class="text-xs text-gray-400">
+                            آنلاین
+                        </p>
+
+                    </div>
+
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center"
+                    >
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ========================= -->
+        <!-- محتوای صفحات -->
+        <!-- ========================= -->
+
+        <section class="p-6 lg:p-8">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- ========================= -->
+<!-- JavaScript -->
+<!-- ========================= -->
+
+<script>
+
+    function toggleSidebar() {
+
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("overlay");
+
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("show");
+
+    }
+
+
+    /*
+        تشخیص صفحه فعال
+        بر اساس URL فعلی
+    */
+
+    const currentPath = window.location.pathname;
+
+    document.querySelectorAll(".menu-item").forEach(function(item) {
+
+        const href = item.getAttribute("href");
+
+        if (
+            href &&
+            href !== "/admin/" &&
+            currentPath.startsWith(href)
+        ) {
+
+            item.classList.add("active");
+
+        }
+
+    });
+
+</script>
+
+
 </body>
 </html>
+```
