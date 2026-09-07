@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.shortcuts import redirect
 
 urlpatterns = [
-    path('', lambda request: redirect('/admin/')),
+    path('', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path('helpdesk/', include('helpdesk.urls')),
     path('admin-automation/', include('admin_automation.urls')),
