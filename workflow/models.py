@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from django.contrib.auth.models import User
 
 class LeaveRequest(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE)
