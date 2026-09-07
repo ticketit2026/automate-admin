@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from django.contrib.auth.models import User
 
 class Document(models.Model):
     title = models.CharField(max_length=200)
