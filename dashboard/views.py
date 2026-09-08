@@ -12,10 +12,22 @@ def overview(request):
 
     letters_count = InternalLetter.objects.count()
 
+    pending_leaves = LeaveRequest.objects.filter(
+        status='pending'
+    ).count()
+
+    pending_purchases = PurchaseRequest.objects.filter(
+        status='pending'
+    ).count()
+
+    pending_missions = MissionRequest.objects.filter(
+        status='pending'
+    ).count()
+
     pending_requests = (
-        LeaveRequest.objects.filter(status='pending').count()
-        + PurchaseRequest.objects.filter(status='pending').count()
-        + MissionRequest.objects.filter(status='pending').count()
+        pending_leaves
+        + pending_purchases
+        + pending_missions
     )
 
     meetings_count = Meeting.objects.count()
@@ -24,6 +36,9 @@ def overview(request):
         'tickets_count': tickets_count,
         'letters_count': letters_count,
         'pending_requests': pending_requests,
+        'pending_leaves': pending_leaves,
+        'pending_purchases': pending_purchases,
+        'pending_missions': pending_missions,
         'meetings_count': meetings_count,
     }
 
