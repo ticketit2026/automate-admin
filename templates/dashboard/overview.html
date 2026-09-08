@@ -8,44 +8,1124 @@
 میزکار
 {% endblock %}
 
+{% block extra_css %}
+
+<style>
+
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    .dashboard {
+        width: 100%;
+    }
+
+    /* =========================
+       WELCOME
+    ========================= */
+
+    .welcome {
+        background: linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+
+        border-radius: 22px;
+
+        padding: 28px 32px;
+
+        color: white;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin-bottom: 25px;
+
+        box-shadow:
+            0 12px 30px rgba(37, 99, 235, 0.18);
+    }
+
+    .welcome-text h1 {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    .welcome-text p {
+        font-size: 12px;
+        opacity: 0.85;
+    }
+
+    .welcome-icon {
+        width: 70px;
+        height: 70px;
+
+        border-radius: 20px;
+
+        background: rgba(255,255,255,0.15);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 32px;
+    }
+
+
+    /* =========================
+       STAT CARDS
+    ========================= */
+
+    .stats-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 18px;
+
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: #ffffff;
+
+        border: 1px solid #eef1f5;
+
+        border-radius: 18px;
+
+        padding: 20px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 15px;
+
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 12px 25px rgba(15, 23, 42, 0.07);
+    }
+
+    .stat-icon {
+        width: 52px;
+        height: 52px;
+
+        min-width: 52px;
+
+        border-radius: 15px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 22px;
+    }
+
+    .blue-icon {
+        background: #eff6ff;
+    }
+
+    .purple-icon {
+        background: #f5f3ff;
+    }
+
+    .orange-icon {
+        background: #fff7ed;
+    }
+
+    .green-icon {
+        background: #ecfdf5;
+    }
+
+    .stat-info {
+        min-width: 0;
+    }
+
+    .stat-title {
+        color: #94a3b8;
+
+        font-size: 11px;
+
+        margin-bottom: 5px;
+    }
+
+    .stat-number {
+        font-size: 24px;
+
+        font-weight: bold;
+
+        color: #1e293b;
+    }
+
+    .stat-description {
+        color: #94a3b8;
+
+        font-size: 9px;
+
+        margin-top: 3px;
+    }
+
+
+    /* =========================
+       MAIN GRID
+    ========================= */
+
+    .dashboard-grid {
+        display: grid;
+
+        grid-template-columns:
+            1.5fr 1fr;
+
+        gap: 20px;
+
+        margin-bottom: 25px;
+    }
+
+    .panel {
+        background: #ffffff;
+
+        border: 1px solid #eef1f5;
+
+        border-radius: 18px;
+
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 18px 20px;
+
+        border-bottom: 1px solid #eef1f5;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .panel-title {
+        font-size: 14px;
+
+        font-weight: bold;
+
+        color: #1e293b;
+    }
+
+    .panel-subtitle {
+        font-size: 9px;
+
+        color: #94a3b8;
+
+        margin-top: 3px;
+    }
+
+    .panel-link {
+        font-size: 10px;
+
+        color: #2563eb;
+
+        padding: 6px 10px;
+
+        border-radius: 8px;
+
+        transition: background 0.2s ease;
+    }
+
+    .panel-link:hover {
+        background: #eff6ff;
+    }
+
+
+    /* =========================
+       REQUEST ITEMS
+    ========================= */
+
+    .request-list {
+        padding: 8px 15px 15px;
+    }
+
+    .request-item {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 14px 8px;
+
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .request-item:last-child {
+        border-bottom: none;
+    }
+
+    .request-right {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+    }
+
+    .request-icon {
+        width: 40px;
+        height: 40px;
+
+        border-radius: 12px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-size: 17px;
+    }
+
+    .leave-icon {
+        background: #fff7ed;
+    }
+
+    .purchase-icon {
+        background: #eff6ff;
+    }
+
+    .mission-icon {
+        background: #ecfdf5;
+    }
+
+    .request-name {
+        font-size: 11px;
+
+        font-weight: bold;
+
+        color: #334155;
+    }
+
+    .request-description {
+        font-size: 9px;
+
+        color: #94a3b8;
+
+        margin-top: 3px;
+    }
+
+    .request-number {
+        min-width: 32px;
+
+        height: 28px;
+
+        padding: 0 8px;
+
+        border-radius: 8px;
+
+        background: #fef2f2;
+
+        color: #dc2626;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-size: 11px;
+
+        font-weight: bold;
+    }
+
+
+    /* =========================
+       QUICK ACTIONS
+    ========================= */
+
+    .quick-actions {
+        padding: 15px;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 10px;
+    }
+
+    .quick-action {
+        padding: 16px 12px;
+
+        border: 1px solid #eef1f5;
+
+        border-radius: 14px;
+
+        background: #f8fafc;
+
+        text-align: center;
+
+        transition:
+            background 0.2s ease,
+            transform 0.2s ease,
+            border-color 0.2s ease;
+    }
+
+    .quick-action:hover {
+        background: #eff6ff;
+
+        border-color: #bfdbfe;
+
+        transform: translateY(-2px);
+    }
+
+    .quick-icon {
+        font-size: 23px;
+
+        margin-bottom: 8px;
+    }
+
+    .quick-title {
+        font-size: 10px;
+
+        font-weight: bold;
+
+        color: #334155;
+    }
+
+    .quick-description {
+        font-size: 8px;
+
+        color: #94a3b8;
+
+        margin-top: 3px;
+    }
+
+
+    /* =========================
+       SYSTEM STATUS
+    ========================= */
+
+    .system-status {
+        padding: 18px 20px;
+    }
+
+    .status-row {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 12px 0;
+
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .status-row:last-child {
+        border-bottom: none;
+    }
+
+    .status-info {
+        display: flex;
+
+        align-items: center;
+
+        gap: 9px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+
+        border-radius: 50%;
+
+        background: #22c55e;
+
+        box-shadow:
+            0 0 0 4px #dcfce7;
+    }
+
+    .status-name {
+        font-size: 10px;
+
+        color: #475569;
+    }
+
+    .status-value {
+        font-size: 9px;
+
+        color: #16a34a;
+
+        font-weight: bold;
+    }
+
+
+    /* =========================
+       BOTTOM INFO
+    ========================= */
+
+    .info-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, 1fr);
+
+        gap: 18px;
+    }
+
+    .info-card {
+        background: white;
+
+        border: 1px solid #eef1f5;
+
+        border-radius: 18px;
+
+        padding: 20px;
+    }
+
+    .info-card-icon {
+        font-size: 24px;
+
+        margin-bottom: 12px;
+    }
+
+    .info-card-title {
+        font-size: 12px;
+
+        font-weight: bold;
+
+        color: #334155;
+
+        margin-bottom: 5px;
+    }
+
+    .info-card-text {
+        font-size: 9px;
+
+        color: #94a3b8;
+
+        line-height: 1.8;
+    }
+
+
+    /* =========================
+       EMPTY
+    ========================= */
+
+    .empty {
+        padding: 35px 20px;
+
+        text-align: center;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 1100px) {
+
+        .stats-grid {
+            grid-template-columns:
+                repeat(2, 1fr);
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns:
+                repeat(2, 1fr);
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .welcome {
+            padding: 22px;
+
+        }
+
+        .welcome-text h1 {
+            font-size: 18px;
+        }
+
+        .welcome-icon {
+            width: 55px;
+            height: 55px;
+
+            font-size: 25px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
 {% block content %}
 
-<div style="
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-">
+<div class="dashboard">
 
-    <h1>میزکار اتوماسیون اداری</h1>
+```
+<!-- =========================
+     WELCOME
+========================= -->
 
-    <p style="margin-top: 15px;">
-        داشبورد با موفقیت اجرا شد.
-    </p>
+<div class="welcome">
 
-    <div style="margin-top: 25px;">
+    <div class="welcome-text">
 
-        <p>
-            تعداد تیکت‌ها:
-            <strong>{{ tickets_count }}</strong>
-        </p>
+        <h1>
+            خوش آمدید 👋
+        </h1>
 
         <p>
-            تعداد نامه‌ها:
-            <strong>{{ letters_count }}</strong>
-        </p>
-
-        <p>
-            درخواست‌های در انتظار:
-            <strong>{{ pending_requests }}</strong>
-        </p>
-
-        <p>
-            جلسات:
-            <strong>{{ meetings_count }}</strong>
+            به میزکار اتوماسیون اداری سازمان خوش آمدید.
+            از این بخش می‌توانید وضعیت فعالیت‌های سازمان را مشاهده کنید.
         </p>
 
     </div>
+
+    <div class="welcome-icon">
+        📊
+    </div>
+
+</div>
+
+
+<!-- =========================
+     STATISTICS
+========================= -->
+
+<div class="stats-grid">
+
+
+    <!-- Tickets -->
+
+    <div class="stat-card">
+
+        <div class="stat-icon blue-icon">
+            🎧
+        </div>
+
+        <div class="stat-info">
+
+            <div class="stat-title">
+                تیکت‌های پشتیبانی
+            </div>
+
+            <div class="stat-number">
+                {{ tickets_count|default:"0" }}
+            </div>
+
+            <div class="stat-description">
+                مجموع تیکت‌های ثبت شده
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Letters -->
+
+    <div class="stat-card">
+
+        <div class="stat-icon purple-icon">
+            ✉️
+        </div>
+
+        <div class="stat-info">
+
+            <div class="stat-title">
+                نامه‌های اداری
+            </div>
+
+            <div class="stat-number">
+                {{ letters_count|default:"0" }}
+            </div>
+
+            <div class="stat-description">
+                مجموع نامه‌های ثبت شده
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Pending -->
+
+    <div class="stat-card">
+
+        <div class="stat-icon orange-icon">
+            ⏳
+        </div>
+
+        <div class="stat-info">
+
+            <div class="stat-title">
+                درخواست‌های در انتظار
+            </div>
+
+            <div class="stat-number">
+                {{ pending_requests|default:"0" }}
+            </div>
+
+            <div class="stat-description">
+                نیازمند بررسی و تأیید
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Meetings -->
+
+    <div class="stat-card">
+
+        <div class="stat-icon green-icon">
+            📅
+        </div>
+
+        <div class="stat-info">
+
+            <div class="stat-title">
+                جلسات
+            </div>
+
+            <div class="stat-number">
+                {{ meetings_count|default:"0" }}
+            </div>
+
+            <div class="stat-description">
+                مجموع جلسات ثبت شده
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================
+     MAIN DASHBOARD
+========================= -->
+
+<div class="dashboard-grid">
+
+
+    <!-- Pending Requests -->
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <div class="panel-title">
+                    درخواست‌های در انتظار
+                </div>
+
+                <div class="panel-subtitle">
+                    مواردی که نیاز به بررسی دارند
+                </div>
+
+            </div>
+
+            <a
+                href="/workflow/"
+                class="panel-link"
+            >
+                مشاهده همه
+            </a>
+
+        </div>
+
+
+        <div class="request-list">
+
+
+            <div class="request-item">
+
+                <div class="request-right">
+
+                    <div class="request-icon leave-icon">
+                        🏖️
+                    </div>
+
+                    <div>
+
+                        <div class="request-name">
+                            درخواست مرخصی
+                        </div>
+
+                        <div class="request-description">
+                            درخواست‌های منتظر تأیید
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="request-number">
+                    {{ pending_leaves|default:"0" }}
+                </div>
+
+            </div>
+
+
+            <div class="request-item">
+
+                <div class="request-right">
+
+                    <div class="request-icon purchase-icon">
+                        🛒
+                    </div>
+
+                    <div>
+
+                        <div class="request-name">
+                            درخواست خرید
+                        </div>
+
+                        <div class="request-description">
+                            درخواست‌های خرید منتظر تأیید
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="request-number">
+                    {{ pending_purchases|default:"0" }}
+                </div>
+
+            </div>
+
+
+            <div class="request-item">
+
+                <div class="request-right">
+
+                    <div class="request-icon mission-icon">
+                        🚗
+                    </div>
+
+                    <div>
+
+                        <div class="request-name">
+                            درخواست مأموریت
+                        </div>
+
+                        <div class="request-description">
+                            مأموریت‌های منتظر تأیید
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="request-number">
+                    {{ pending_missions|default:"0" }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- Quick Actions -->
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <div class="panel-title">
+                    دسترسی سریع
+                </div>
+
+                <div class="panel-subtitle">
+                    پرکاربردترین بخش‌های سیستم
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+
+            <a
+                href="/helpdesk/"
+                class="quick-action"
+            >
+
+                <div class="quick-icon">
+                    🎧
+                </div>
+
+                <div class="quick-title">
+                    ثبت تیکت
+                </div>
+
+                <div class="quick-description">
+                    درخواست پشتیبانی
+                </div>
+
+            </a>
+
+
+            <a
+                href="/admin-automation/"
+                class="quick-action"
+            >
+
+                <div class="quick-icon">
+                    ✉️
+                </div>
+
+                <div class="quick-title">
+                    نامه اداری
+                </div>
+
+                <div class="quick-description">
+                    مدیریت نامه‌ها
+                </div>
+
+            </a>
+
+
+            <a
+                href="/workflow/"
+                class="quick-action"
+            >
+
+                <div class="quick-icon">
+                    🔄
+                </div>
+
+                <div class="quick-title">
+                    گردش کار
+                </div>
+
+                <div class="quick-description">
+                    درخواست‌های سازمان
+                </div>
+
+            </a>
+
+
+            <a
+                href="/meetings/"
+                class="quick-action"
+            >
+
+                <div class="quick-icon">
+                    📅
+                </div>
+
+                <div class="quick-title">
+                    جلسات
+                </div>
+
+                <div class="quick-description">
+                    برنامه جلسات
+                </div>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================
+     SYSTEM STATUS
+========================= -->
+
+<div class="panel" style="margin-bottom: 25px;">
+
+    <div class="panel-header">
+
+        <div>
+
+            <div class="panel-title">
+                وضعیت سیستم
+            </div>
+
+            <div class="panel-subtitle">
+                وضعیت سرویس‌های اصلی اتوماسیون
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="system-status">
+
+
+        <div class="status-row">
+
+            <div class="status-info">
+
+                <span class="status-dot"></span>
+
+                <span class="status-name">
+                    سامانه اتوماسیون اداری
+                </span>
+
+            </div>
+
+            <span class="status-value">
+                فعال
+            </span>
+
+        </div>
+
+
+        <div class="status-row">
+
+            <div class="status-info">
+
+                <span class="status-dot"></span>
+
+                <span class="status-name">
+                    سیستم پشتیبانی IT
+                </span>
+
+            </div>
+
+            <span class="status-value">
+                فعال
+            </span>
+
+        </div>
+
+
+        <div class="status-row">
+
+            <div class="status-info">
+
+                <span class="status-dot"></span>
+
+                <span class="status-name">
+                    گردش کار
+                </span>
+
+            </div>
+
+            <span class="status-value">
+                فعال
+            </span>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     INFORMATION CARDS
+========================= -->
+
+<div class="info-grid">
+
+
+    <div class="info-card">
+
+        <div class="info-card-icon">
+            💡
+        </div>
+
+        <div class="info-card-title">
+            راهنمای سیستم
+        </div>
+
+        <div class="info-card-text">
+            برای ثبت درخواست پشتیبانی،
+            ایجاد نامه و پیگیری فرآیندهای سازمانی
+            از منوی سمت راست استفاده کنید.
+        </div>
+
+    </div>
+
+
+    <div class="info-card">
+
+        <div class="info-card-icon">
+            🔔
+        </div>
+
+        <div class="info-card-title">
+            اعلان‌ها
+        </div>
+
+        <div class="info-card-text">
+            درخواست‌های جدید، تیکت‌ها و
+            مواردی که نیاز به اقدام دارند
+            از طریق اعلان‌ها قابل پیگیری هستند.
+        </div>
+
+    </div>
+
+
+    <div class="info-card">
+
+        <div class="info-card-icon">
+            🔐
+        </div>
+
+        <div class="info-card-title">
+            امنیت سیستم
+        </div>
+
+        <div class="info-card-text">
+            اطلاعات کاربران و درخواست‌های سازمانی
+            در محیط داخلی سیستم مدیریت می‌شوند.
+        </div>
+
+    </div>
+
+
+</div>
+```
 
 </div>
 
