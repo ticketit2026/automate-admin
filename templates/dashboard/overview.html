@@ -1,5 +1,52 @@
-from django.http import HttpResponse
+{% extends 'base.html' %}
 
+{% block title %}
+میزکار | اتوماسیون اداری
+{% endblock %}
 
-def overview(request):
-    return HttpResponse("Dashboard OK")
+{% block page_title %}
+میزکار
+{% endblock %}
+
+{% block content %}
+
+<div style="
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+">
+
+    <h1>میزکار اتوماسیون اداری</h1>
+
+    <p style="margin-top: 15px;">
+        داشبورد با موفقیت اجرا شد.
+    </p>
+
+    <div style="margin-top: 25px;">
+
+        <p>
+            تعداد تیکت‌ها:
+            <strong>{{ tickets_count }}</strong>
+        </p>
+
+        <p>
+            تعداد نامه‌ها:
+            <strong>{{ letters_count }}</strong>
+        </p>
+
+        <p>
+            درخواست‌های در انتظار:
+            <strong>{{ pending_requests }}</strong>
+        </p>
+
+        <p>
+            جلسات:
+            <strong>{{ meetings_count }}</strong>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}
