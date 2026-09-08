@@ -9,20 +9,11 @@ from meetings.models import Meeting
 def overview(request):
 
     tickets_count = Ticket.objects.count()
-
     letters_count = InternalLetter.objects.count()
 
-    pending_leaves = LeaveRequest.objects.filter(
-        status='pending'
-    ).count()
-
-    pending_missions = MissionRequest.objects.filter(
-        status='pending'
-    ).count()
-
-    pending_purchases = PurchaseRequest.objects.filter(
-        status='pending'
-    ).count()
+    pending_leaves = LeaveRequest.objects.filter(status='pending').count()
+    pending_missions = MissionRequest.objects.filter(status='pending').count()
+    pending_purchases = PurchaseRequest.objects.filter(status='pending').count()
 
     pending_requests = (
         pending_leaves
@@ -35,12 +26,10 @@ def overview(request):
     context = {
         'tickets_count': tickets_count,
         'letters_count': letters_count,
-
         'pending_requests': pending_requests,
         'pending_leaves': pending_leaves,
         'pending_missions': pending_missions,
         'pending_purchases': pending_purchases,
-
         'meetings_count': meetings_count,
     }
 
