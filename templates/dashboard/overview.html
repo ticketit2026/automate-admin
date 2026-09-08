@@ -8,661 +8,691 @@
 میزکار
 {% endblock %}
 
+
 {% block extra_css %}
 
 <style>
 
-    /* =========================
-       DASHBOARD
-    ========================= */
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard {
+    width: 100%;
+}
+
+
+/* =====================================================
+   WELCOME
+===================================================== */
+
+.welcome-box {
+
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    color: white;
+
+    border-radius: 20px;
+
+    padding: 30px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 12px 30px rgba(37, 99, 235, 0.18);
+}
+
+.welcome-title {
+
+    font-size: 23px;
+
+    font-weight: bold;
+
+    margin-bottom: 8px;
+}
+
+.welcome-text {
+
+    font-size: 12px;
+
+    opacity: 0.9;
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.stats-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+}
+
+
+.stat-card {
+
+    background: white;
+
+    border:
+        1px solid #eef1f5;
+
+    border-radius: 18px;
+
+    padding: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.stat-card:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 10px 25px
+        rgba(15, 23, 42, 0.07);
+}
+
+
+.stat-icon {
+
+    width: 50px;
+
+    height: 50px;
+
+    min-width: 50px;
+
+    border-radius: 14px;
+
+    background: #eff6ff;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 22px;
+}
+
+
+.stat-info {
+
+    flex: 1;
+}
+
+
+.stat-title {
+
+    font-size: 11px;
+
+    color: #94a3b8;
+
+    margin-bottom: 5px;
+}
+
+
+.stat-number {
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    color: #1e293b;
+}
+
+
+/* =====================================================
+   MAIN GRID
+===================================================== */
+
+.dashboard-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1.4fr 1fr;
+
+    gap: 22px;
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.dashboard-card {
+
+    background: white;
+
+    border:
+        1px solid #eef1f5;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+}
+
+
+.card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        18px 20px;
+
+    border-bottom:
+        1px solid #eef1f5;
+}
+
+
+.card-title {
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    color: #1e293b;
+}
+
+
+.card-link {
+
+    font-size: 10px;
+
+    color: #2563eb;
+
+    transition: 0.2s;
+}
+
+
+.card-link:hover {
+
+    color: #1d4ed8;
+}
+
+
+/* =====================================================
+   QUICK ACTIONS
+===================================================== */
+
+.quick-actions {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 12px;
+
+    padding: 18px;
+}
+
+
+.quick-action {
+
+    border:
+        1px solid #eef1f5;
+
+    border-radius: 14px;
+
+    padding: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    background: #fafbfc;
+
+    transition:
+        background 0.2s ease,
+        border 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.quick-action:hover {
+
+    background: #eff6ff;
+
+    border-color: #bfdbfe;
+
+    transform:
+        translateY(-2px);
+}
+
+
+.quick-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    min-width: 42px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 19px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(15, 23, 42, 0.05);
+}
+
+
+.quick-info {
+
+    min-width: 0;
+}
+
+
+.quick-title {
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    color: #334155;
+}
+
+
+.quick-subtitle {
+
+    font-size: 9px;
+
+    color: #94a3b8;
+
+    margin-top: 3px;
+}
+
+
+/* =====================================================
+   TASK LIST
+===================================================== */
+
+.task-list {
+
+    padding:
+        5px 20px 15px;
+}
+
+
+.task {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px 0;
+
+    border-bottom:
+        1px solid #f1f5f9;
+}
+
+
+.task:last-child {
+
+    border-bottom: none;
+}
+
+
+.task-icon {
+
+    width: 40px;
+
+    height: 40px;
+
+    min-width: 40px;
+
+    border-radius: 11px;
+
+    background: #f8fafc;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+
+.task-info {
+
+    flex: 1;
+}
+
+
+.task-title {
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    color: #334155;
+}
+
+
+.task-time {
+
+    font-size: 9px;
+
+    color: #94a3b8;
+
+    margin-top: 3px;
+}
+
+
+.task-status {
+
+    font-size: 9px;
+
+    background: #fef3c7;
+
+    color: #92400e;
+
+    padding:
+        5px 9px;
+
+    border-radius: 20px;
+}
+
+
+/* =====================================================
+   ACTIVITY
+===================================================== */
+
+.activity {
+
+    padding:
+        5px 20px 15px;
+}
+
+
+.activity-item {
+
+    display: flex;
+
+    gap: 12px;
+
+    padding: 14px 0;
+
+    border-bottom:
+        1px solid #f1f5f9;
+}
+
+
+.activity-item:last-child {
+
+    border-bottom: none;
+}
+
+
+.activity-dot {
+
+    width: 9px;
+
+    height: 9px;
+
+    min-width: 9px;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    margin-top: 6px;
+}
+
+
+.activity-text {
+
+    font-size: 10px;
+
+    color: #475569;
+}
+
+
+.activity-time {
+
+    font-size: 8px;
+
+    color: #94a3b8;
+
+    margin-top: 3px;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-state {
+
+    padding: 25px 20px;
+
+    text-align: center;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+
+.empty-icon {
+
+    font-size: 25px;
+
+    margin-bottom: 8px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+    .stats-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .stats-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .quick-actions {
+
+        grid-template-columns: 1fr;
+    }
 
     .welcome-box {
-        background: linear-gradient(135deg, #2563eb, #4f46e5);
-        color: white;
-        border-radius: 20px;
-        padding: 28px 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.18);
+
+        padding: 22px;
     }
 
     .welcome-title {
-        font-size: 23px;
-        font-weight: bold;
-        margin-bottom: 7px;
+
+        font-size: 19px;
     }
 
-    .welcome-text {
-        font-size: 12px;
-        opacity: 0.9;
-    }
-
-
-    /* =========================
-       STAT CARDS
-    ========================= */
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 18px;
-        margin-bottom: 28px;
-    }
-
-    .stat-card {
-        background: white;
-        border: 1px solid #eef1f5;
-        border-radius: 18px;
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        transition: 0.2s;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.07);
-    }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 21px;
-        background: #eff6ff;
-    }
-
-    .stat-title {
-        font-size: 11px;
-        color: #94a3b8;
-        margin-bottom: 4px;
-    }
-
-    .stat-number {
-        font-size: 23px;
-        font-weight: bold;
-        color: #1e293b;
-    }
-
-
-    /* =========================
-       SECTION
-    ========================= */
-
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: 1.4fr 1fr;
-        gap: 22px;
-    }
-
-    .dashboard-card {
-        background: white;
-        border: 1px solid #eef1f5;
-        border-radius: 18px;
-        overflow: hidden;
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 18px 20px;
-        border-bottom: 1px solid #eef1f5;
-    }
-
-    .card-title {
-        font-size: 14px;
-        font-weight: bold;
-        color: #1e293b;
-    }
-
-    .card-link {
-        font-size: 10px;
-        color: #2563eb;
-    }
-
-
-    /* =========================
-       QUICK ACTIONS
-    ========================= */
-
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        padding: 18px;
-    }
-
-    .quick-action {
-        border: 1px solid #eef1f5;
-        border-radius: 14px;
-        padding: 16px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transition: 0.2s;
-        background: #fafbfc;
-    }
-
-    .quick-action:hover {
-        background: #eff6ff;
-        border-color: #bfdbfe;
-        color: #2563eb;
-    }
-
-    .quick-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 11px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
-    }
-
-    .quick-title {
-        font-size: 11px;
-        font-weight: bold;
-    }
-
-    .quick-subtitle {
-        font-size: 9px;
-        color: #94a3b8;
-        margin-top: 3px;
-    }
-
-
-    /* =========================
-       TASKS
-    ========================= */
-
-    .task-list {
-        padding: 5px 20px 15px;
-    }
-
-    .task {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 15px 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .task:last-child {
-        border-bottom: none;
-    }
-
-    .task-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 11px;
-        background: #f8fafc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-    }
-
-    .task-info {
-        flex: 1;
-    }
-
-    .task-title {
-        font-size: 11px;
-        font-weight: bold;
-        color: #334155;
-    }
-
-    .task-time {
-        font-size: 9px;
-        color: #94a3b8;
-        margin-top: 3px;
-    }
-
-    .task-status {
-        font-size: 9px;
-        background: #fef3c7;
-        color: #92400e;
-        padding: 5px 9px;
-        border-radius: 20px;
-    }
-
-
-    /* =========================
-       RECENT ACTIVITY
-    ========================= */
-
-    .activity {
-        padding: 5px 20px 15px;
-    }
-
-    .activity-item {
-        display: flex;
-        gap: 12px;
-        padding: 14px 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-
-    .activity-dot {
-        width: 9px;
-        height: 9px;
-        min-width: 9px;
-        border-radius: 50%;
-        background: #2563eb;
-        margin-top: 6px;
-    }
-
-    .activity-text {
-        font-size: 10px;
-        color: #475569;
-    }
-
-    .activity-time {
-        font-size: 8px;
-        color: #94a3b8;
-        margin-top: 3px;
-    }
-
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media (max-width: 1100px) {
-
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .dashboard-grid {
-            grid-template-columns: 1fr;
-        }
-
-    }
-
-
-    @media (max-width: 600px) {
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .quick-actions {
-            grid-template-columns: 1fr;
-        }
-
-        .welcome-box {
-            padding: 22px;
-        }
-
-        .welcome-title {
-            font-size: 19px;
-        }
-
-    }
+}
 
 </style>
 
 {% endblock %}
 
+
 {% block content %}
 
-<!-- =========================
-     WELCOME
-========================= -->
+<div class="dashboard">
 
-<div class="welcome-box">
 
-```
-<div class="welcome-title">
-    سلام 👋 به میزکار اتوماسیون خوش آمدید
-</div>
+    <!-- =================================================
+         WELCOME
+    ================================================== -->
 
-<div class="welcome-text">
-    از این بخش می‌توانید درخواست‌ها، مکاتبات، جلسات و امور سازمانی خود را مدیریت کنید.
-</div>
-```
+    <div class="welcome-box">
 
-</div>
+        <div class="welcome-title">
 
-<!-- =========================
-     STATISTICS
-========================= -->
+            سلام 👋 به میزکار اتوماسیون خوش آمدید
 
-<div class="stats-grid">
-
-```
-<div class="stat-card">
-
-    <div class="stat-icon">
-        📥
-    </div>
-
-    <div>
-        <div class="stat-title">
-            کارهای در انتظار
         </div>
 
-        <div class="stat-number">
-            0
-        </div>
-    </div>
+        <div class="welcome-text">
 
-</div>
+            از این بخش می‌توانید درخواست‌ها،
+            مکاتبات، جلسات و امور سازمانی خود را مدیریت کنید.
 
-
-<div class="stat-card">
-
-    <div class="stat-icon">
-        ✉️
-    </div>
-
-    <div>
-        <div class="stat-title">
-            نامه‌های داخلی
-        </div>
-
-        <div class="stat-number">
-            0
-        </div>
-    </div>
-
-</div>
-
-
-<div class="stat-card">
-
-    <div class="stat-icon">
-        🎫
-    </div>
-
-    <div>
-        <div class="stat-title">
-            تیکت‌های IT
-        </div>
-
-        <div class="stat-number">
-            0
-        </div>
-    </div>
-
-</div>
-
-
-<div class="stat-card">
-
-    <div class="stat-icon">
-        📝
-    </div>
-
-    <div>
-        <div class="stat-title">
-            درخواست‌ها
-        </div>
-
-        <div class="stat-number">
-            0
-        </div>
-    </div>
-
-</div>
-```
-
-</div>
-
-<!-- =========================
-     MAIN GRID
-========================= -->
-
-<div class="dashboard-grid">
-
-```
-<!-- QUICK ACTIONS -->
-
-<div class="dashboard-card">
-
-    <div class="card-header">
-
-        <div class="card-title">
-            دسترسی سریع
         </div>
 
     </div>
 
 
-    <div class="quick-actions">
+    <!-- =================================================
+         STATISTICS
+    ================================================== -->
+
+    <div class="stats-grid">
 
 
-        <a href="/admin-automation/" class="quick-action">
+        <!-- Pending -->
 
-            <div class="quick-icon">
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📥
+            </div>
+
+            <div class="stat-info">
+
+                <div class="stat-title">
+                    کارهای در انتظار
+                </div>
+
+                <div class="stat-number">
+                    {{ pending_requests }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Letters -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
                 ✉️
             </div>
 
-            <div>
+            <div class="stat-info">
 
-                <div class="quick-title">
-                    مکاتبات اداری
+                <div class="stat-title">
+                    نامه‌های داخلی
                 </div>
 
-                <div class="quick-subtitle">
-                    مشاهده و ثبت نامه
+                <div class="stat-number">
+                    {{ letters_count }}
                 </div>
 
             </div>
 
-        </a>
+        </div>
 
 
-        <a href="/helpdesk/" class="quick-action">
+        <!-- Tickets -->
 
-            <div class="quick-icon">
+        <div class="stat-card">
+
+            <div class="stat-icon">
                 🎫
             </div>
 
-            <div>
+            <div class="stat-info">
 
-                <div class="quick-title">
-                    پشتیبانی IT
+                <div class="stat-title">
+                    تیکت‌های IT
                 </div>
 
-                <div class="quick-subtitle">
-                    ثبت و پیگیری تیکت
+                <div class="stat-number">
+                    {{ tickets_count }}
                 </div>
 
             </div>
 
-        </a>
+        </div>
 
 
-        <a href="/workflow/" class="quick-action">
+        <!-- Requests -->
 
-            <div class="quick-icon">
+        <div class="stat-card">
+
+            <div class="stat-icon">
                 📝
             </div>
 
-            <div>
+            <div class="stat-info">
 
-                <div class="quick-title">
-                    درخواست‌های اداری
+                <div class="stat-title">
+                    درخواست‌ها
                 </div>
 
-                <div class="quick-subtitle">
-                    مرخصی، مأموریت و خرید
+                <div class="stat-number">
+                    {{ pending_requests }}
                 </div>
 
-            </div>
-
-        </a>
-
-
-        <a href="/meetings/" class="quick-action">
-
-            <div class="quick-icon">
-                📅
-            </div>
-
-            <div>
-
-                <div class="quick-title">
-                    جلسات
-                </div>
-
-                <div class="quick-subtitle">
-                    مشاهده جلسات سازمان
-                </div>
-
-            </div>
-
-        </a>
-
-
-        <a href="/documents/" class="quick-action">
-
-            <div class="quick-icon">
-                📁
-            </div>
-
-            <div>
-
-                <div class="quick-title">
-                    اسناد و بایگانی
-                </div>
-
-                <div class="quick-subtitle">
-                    دسترسی به اسناد
-                </div>
-
-            </div>
-
-        </a>
-
-
-        <a href="/admin/auth/user/" class="quick-action">
-
-            <div class="quick-icon">
-                👥
-            </div>
-
-            <div>
-
-                <div class="quick-title">
-                    مدیریت کاربران
-                </div>
-
-                <div class="quick-subtitle">
-                    کاربران و گروه‌ها
-                </div>
-
-            </div>
-
-        </a>
-
-
-    </div>
-
-</div>
-
-
-<!-- PENDING TASKS -->
-
-<div class="dashboard-card">
-
-    <div class="card-header">
-
-        <div class="card-title">
-            کارهای در انتظار اقدام
-        </div>
-
-        <a href="/workflow/" class="card-link">
-            مشاهده همه
-        </a>
-
-    </div>
-
-
-    <div class="task-list">
-
-
-        <div class="task">
-
-            <div class="task-icon">
-                🏖️
-            </div>
-
-            <div class="task-info">
-
-                <div class="task-title">
-                    درخواست مرخصی
-                </div>
-
-                <div class="task-time">
-                    در انتظار بررسی
-                </div>
-
-            </div>
-
-            <div class="task-status">
-                جدید
-            </div>
-
-        </div>
-
-
-        <div class="task">
-
-            <div class="task-icon">
-                🚗
-            </div>
-
-            <div class="task-info">
-
-                <div class="task-title">
-                    درخواست مأموریت
-                </div>
-
-                <div class="task-time">
-                    در انتظار بررسی
-                </div>
-
-            </div>
-
-            <div class="task-status">
-                جدید
-            </div>
-
-        </div>
-
-
-        <div class="task">
-
-            <div class="task-icon">
-                🛒
-            </div>
-
-            <div class="task-info">
-
-                <div class="task-title">
-                    درخواست خرید
-                </div>
-
-                <div class="task-time">
-                    در انتظار بررسی
-                </div>
-
-            </div>
-
-            <div class="task-status">
-                جدید
             </div>
 
         </div>
@@ -670,88 +700,468 @@
 
     </div>
 
-</div>
+
+    <!-- =================================================
+         MAIN GRID
+    ================================================== -->
+
+    <div class="dashboard-grid">
 
 
-<!-- RECENT ACTIVITY -->
+        <!-- =================================================
+             QUICK ACTIONS
+        ================================================== -->
 
-<div class="dashboard-card">
+        <div class="dashboard-card">
 
-    <div class="card-header">
+            <div class="card-header">
 
-        <div class="card-title">
-            فعالیت‌های اخیر
-        </div>
-
-    </div>
-
-
-    <div class="activity">
-
-        <div class="activity-item">
-
-            <div class="activity-dot"></div>
-
-            <div>
-
-                <div class="activity-text">
-                    هنوز فعالیتی ثبت نشده است.
+                <div class="card-title">
+                    دسترسی سریع
                 </div>
 
-                <div class="activity-time">
-                    سیستم آماده استفاده است
-                </div>
+            </div>
+
+
+            <div class="quick-actions">
+
+
+                <a
+                    href="/admin-automation/"
+                    class="quick-action"
+                >
+
+                    <div class="quick-icon">
+                        ✉️
+                    </div>
+
+                    <div class="quick-info">
+
+                        <div class="quick-title">
+                            مکاتبات اداری
+                        </div>
+
+                        <div class="quick-subtitle">
+                            مشاهده و ثبت نامه
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="/helpdesk/"
+                    class="quick-action"
+                >
+
+                    <div class="quick-icon">
+                        🎫
+                    </div>
+
+                    <div class="quick-info">
+
+                        <div class="quick-title">
+                            پشتیبانی IT
+                        </div>
+
+                        <div class="quick-subtitle">
+                            ثبت و پیگیری تیکت
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="/workflow/"
+                    class="quick-action"
+                >
+
+                    <div class="quick-icon">
+                        📝
+                    </div>
+
+                    <div class="quick-info">
+
+                        <div class="quick-title">
+                            درخواست‌های اداری
+                        </div>
+
+                        <div class="quick-subtitle">
+                            مرخصی، مأموریت و خرید
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="/meetings/"
+                    class="quick-action"
+                >
+
+                    <div class="quick-icon">
+                        📅
+                    </div>
+
+                    <div class="quick-info">
+
+                        <div class="quick-title">
+                            جلسات
+                        </div>
+
+                        <div class="quick-subtitle">
+                            مشاهده جلسات سازمان
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="/documents/"
+                    class="quick-action"
+                >
+
+                    <div class="quick-icon">
+                        📁
+                    </div>
+
+                    <div class="quick-info">
+
+                        <div class="quick-title">
+                            اسناد و بایگانی
+                        </div>
+
+                        <div class="quick-subtitle">
+                            دسترسی به اسناد
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="/admin/auth/user/"
+                    class="quick-action"
+                >
+
+                    <div class="quick-icon">
+                        👥
+                    </div>
+
+                    <div class="quick-info">
+
+                        <div class="quick-title">
+                            مدیریت کاربران
+                        </div>
+
+                        <div class="quick-subtitle">
+                            کاربران و گروه‌ها
+                        </div>
+
+                    </div>
+
+                </a>
+
 
             </div>
 
         </div>
 
-    </div>
 
-</div>
+        <!-- =================================================
+             PENDING TASKS
+        ================================================== -->
 
+        <div class="dashboard-card">
 
-<!-- TODAY -->
+            <div class="card-header">
 
-<div class="dashboard-card">
-
-    <div class="card-header">
-
-        <div class="card-title">
-            برنامه امروز
-        </div>
-
-        <a href="/meetings/" class="card-link">
-            تقویم جلسات
-        </a>
-
-    </div>
-
-
-    <div class="activity">
-
-        <div class="activity-item">
-
-            <div class="activity-dot"></div>
-
-            <div>
-
-                <div class="activity-text">
-                    جلسه‌ای برای امروز ثبت نشده است.
+                <div class="card-title">
+                    کارهای در انتظار اقدام
                 </div>
 
-                <div class="activity-time">
-                    برنامه کاری امروز
+                <a
+                    href="/workflow/"
+                    class="card-link"
+                >
+                    مشاهده همه
+                </a>
+
+            </div>
+
+
+            <div class="task-list">
+
+
+                <!-- Leave -->
+
+                <div class="task">
+
+                    <div class="task-icon">
+                        🏖️
+                    </div>
+
+                    <div class="task-info">
+
+                        <div class="task-title">
+                            درخواست مرخصی
+                        </div>
+
+                        <div class="task-time">
+                            {{ pending_leaves }} درخواست در انتظار بررسی
+                        </div>
+
+                    </div>
+
+                    {% if pending_leaves > 0 %}
+
+                        <div class="task-status">
+                            جدید
+                        </div>
+
+                    {% else %}
+
+                        <div class="task-status">
+                            بدون درخواست
+                        </div>
+
+                    {% endif %}
+
                 </div>
+
+
+                <!-- Mission -->
+
+                <div class="task">
+
+                    <div class="task-icon">
+                        🚗
+                    </div>
+
+                    <div class="task-info">
+
+                        <div class="task-title">
+                            درخواست مأموریت
+                        </div>
+
+                        <div class="task-time">
+                            {{ pending_missions }} درخواست در انتظار بررسی
+                        </div>
+
+                    </div>
+
+                    {% if pending_missions > 0 %}
+
+                        <div class="task-status">
+                            جدید
+                        </div>
+
+                    {% else %}
+
+                        <div class="task-status">
+                            بدون درخواست
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Purchase -->
+
+                <div class="task">
+
+                    <div class="task-icon">
+                        🛒
+                    </div>
+
+                    <div class="task-info">
+
+                        <div class="task-title">
+                            درخواست خرید
+                        </div>
+
+                        <div class="task-time">
+                            {{ pending_purchases }} درخواست در انتظار بررسی
+                        </div>
+
+                    </div>
+
+                    {% if pending_purchases > 0 %}
+
+                        <div class="task-status">
+                            جدید
+                        </div>
+
+                    {% else %}
+
+                        <div class="task-status">
+                            بدون درخواست
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
 
             </div>
 
         </div>
 
-    </div>
 
-</div>
-```
+        <!-- =================================================
+             RECENT ACTIVITY
+        ================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+                    فعالیت‌های اخیر
+                </div>
+
+            </div>
+
+
+            <div class="activity">
+
+
+                <div class="activity-item">
+
+                    <div class="activity-dot"></div>
+
+                    <div>
+
+                        <div class="activity-text">
+
+                            سیستم اتوماسیون آماده استفاده است.
+
+                        </div>
+
+                        <div class="activity-time">
+
+                            وضعیت سیستم
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="activity-item">
+
+                    <div class="activity-dot"></div>
+
+                    <div>
+
+                        <div class="activity-text">
+
+                            {{ letters_count }} نامه در سیستم ثبت شده است.
+
+                        </div>
+
+                        <div class="activity-time">
+
+                            مکاتبات اداری
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="activity-item">
+
+                    <div class="activity-dot"></div>
+
+                    <div>
+
+                        <div class="activity-text">
+
+                            {{ tickets_count }} تیکت در سیستم ثبت شده است.
+
+                        </div>
+
+                        <div class="activity-time">
+
+                            پشتیبانی IT
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TODAY
+        ================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+                    برنامه امروز
+                </div>
+
+                <a
+                    href="/meetings/"
+                    class="card-link"
+                >
+                    مشاهده جلسات
+                </a>
+
+            </div>
+
+
+            <div class="activity">
+
+
+                <div class="activity-item">
+
+                    <div class="activity-dot"></div>
+
+                    <div>
+
+                        <div class="activity-text">
+
+                            {{ meetings_count }} جلسه در سیستم ثبت شده است.
+
+                        </div>
+
+                        <div class="activity-time">
+
+                            جلسات سازمان
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
 
 </div>
 
