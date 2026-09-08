@@ -30,3 +30,17 @@ def ticket_list(request):
             'tickets': tickets
         }
     )
+
+
+@login_required
+def ticket_detail(request, ticket_id):
+
+    ticket = Ticket.objects.get(id=ticket_id)
+
+    return render(
+        request,
+        'helpdesk/ticket_detail.html',
+        {
+            'ticket': ticket
+        }
+    )
