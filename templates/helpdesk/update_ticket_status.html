@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <h2 class="text-2xl font-bold">
+            🔄 تغییر وضعیت تیکت
+        </h2>
+
+        <a href="{% url 'ticket_detail' ticket.id %}"
+           class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+            ← بازگشت
+        </a>
+
+    </div>
+
+
+    <div class="bg-white border rounded-2xl shadow-lg p-8">
+
+        <div class="mb-6">
+            <p class="text-sm text-gray-500 mb-1">
+                تیکت
+            </p>
+
+            <h3 class="text-xl font-bold">
+                #{{ ticket.id }} - {{ ticket.title }}
+            </h3>
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="mb-6">
+
+                <label class="block font-medium mb-2">
+                    وضعیت جدید
+                </label>
+
+                <select name="status"
+                        required
+                        class="w-full border rounded-lg px-4 py-3">
+
+                    <option value="open"
+                        {% if ticket.status == 'open' %}selected{% endif %}>
+                        🟢 باز
+                    </option>
+
+                    <option value="in_progress"
+                        {% if ticket.status == 'in_progress' %}selected{% endif %}>
+                        🟡 در حال بررسی
+                    </option>
+
+                    <option value="closed"
+                        {% if ticket.status == 'closed' %}selected{% endif %}>
+                        ⚫ بسته شده
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                ذخیره وضعیت
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
