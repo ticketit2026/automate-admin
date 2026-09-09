@@ -58,6 +58,14 @@ class Ticket(models.Model):
                 'ایجاد تیکت'
             ),
             (
+                'edit_ticket',
+                'ویرایش تیکت'
+            ),
+            (
+                'delete_ticket',
+                'حذف تیکت'
+            ),
+            (
                 'reply_ticket',
                 'پاسخ به تیکت'
             ),
