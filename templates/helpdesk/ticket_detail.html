@@ -1,4 +1,3 @@
-```html
 {% extends 'base.html' %}
 
 {% block content %}
@@ -12,18 +11,21 @@
             🎫 جزئیات تیکت
         </h2>
 
-        <a href="{% url 'ticket_list' %}"
-           class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+        <a
+            href="{% url 'ticket_list' %}"
+            class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+        >
             ← بازگشت به تیکت‌ها
         </a>
 
     </div>
 
 
-    <!-- Ticket Card -->
+    <!-- Ticket -->
     <div class="bg-white border rounded-2xl shadow-lg p-8">
 
-        <!-- Title & Status -->
+
+        <!-- Title -->
         <div class="flex justify-between items-start mb-6">
 
             <div>
@@ -40,45 +42,35 @@
 
 
             <!-- Status -->
-            <span class="px-4 py-2 rounded-full text-sm font-medium
+            {% if ticket.status == 'open' %}
 
-                {% if ticket.status == 'open' %}
-                    bg-green-100 text-green-700
+                <span class="bg-green-100 text-green-700 px-4 py-2 rounded-full">
+                    🟢 باز
+                </span>
 
-                {% elif ticket.status == 'in_progress' %}
-                    bg-yellow-100 text-yellow-700
+            {% elif ticket.status == 'in_progress' %}
 
-                {% elif ticket.status == 'closed' %}
-                    bg-gray-100 text-gray-700
+                <span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full">
+                    🟡 در حال بررسی
+                </span>
 
-                {% else %}
-                    bg-blue-100 text-blue-700
-                {% endif %}">
+            {% elif ticket.status == 'closed' %}
 
-                {% if ticket.status == 'open' %}
-                    باز
+                <span class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full">
+                    ⚫ بسته شده
+                </span>
 
-                {% elif ticket.status == 'in_progress' %}
-                    در حال بررسی
-
-                {% elif ticket.status == 'closed' %}
-                    بسته شده
-
-                {% else %}
-                    {{ ticket.status }}
-                {% endif %}
-
-            </span>
+            {% endif %}
 
         </div>
 
 
-        <!-- Ticket Information -->
+        <!-- Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
 
             <!-- Priority -->
-            <div class="bg-gray-50 rounded-lg p-4">
+            <div class="bg-gray-50 rounded-xl p-5">
 
                 <p class="text-sm text-gray-500 mb-1">
                     اولویت
@@ -88,13 +80,10 @@
 
                     {% if ticket.priority == 'high' %}
                         🔴 بالا
-
                     {% elif ticket.priority == 'medium' %}
                         🟡 متوسط
-
                     {% else %}
                         🟢 پایین
-
                     {% endif %}
 
                 </p>
@@ -102,8 +91,8 @@
             </div>
 
 
-            <!-- Created By -->
-            <div class="bg-gray-50 rounded-lg p-4">
+            <!-- Creator -->
+            <div class="bg-gray-50 rounded-xl p-5">
 
                 <p class="text-sm text-gray-500 mb-1">
                     ثبت کننده
@@ -116,8 +105,8 @@
             </div>
 
 
-            <!-- Created Date -->
-            <div class="bg-gray-50 rounded-lg p-4">
+            <!-- Created -->
+            <div class="bg-gray-50 rounded-xl p-5">
 
                 <p class="text-sm text-gray-500 mb-1">
                     تاریخ ثبت
@@ -130,39 +119,47 @@
             </div>
 
 
-            <!-- Assigned To -->
-            <div class="bg-gray-50 rounded-lg p-4">
+            <!-- Assigned -->
+            <div class="bg-gray-50 rounded-xl p-5">
 
                 <p class="text-sm text-gray-500 mb-1">
                     👨‍💻 مسئول تیکت
                 </p>
 
-                <p class="font-semibold">
+                {% if ticket.assigned_to %}
 
-                    {% if ticket.assigned_to %}
+                    <p class="font-semibold">
+
                         {{ ticket.assigned_to.username }}
 
                         {% if ticket.assigned_to.first_name or ticket.assigned_to.last_name %}
-                            - {{ ticket.assigned_to.first_name }}
+
+                            -
+                            {{ ticket.assigned_to.first_name }}
                             {{ ticket.assigned_to.last_name }}
+
                         {% endif %}
 
-                    {% else %}
-                        هنوز به کارشناس ارجاع نشده
-                    {% endif %}
+                    </p>
 
-                </p>
+                {% else %}
+
+                    <p class="text-gray-400">
+                        هنوز ارجاع نشده
+                    </p>
+
+                {% endif %}
 
             </div>
 
         </div>
 
 
-        <!-- Description -->
-        <div>
+        <!-- Original Description -->
+        <div class="mb-10">
 
             <h3 class="text-lg font-bold mb-3">
-                📝 توضیحات مشکل
+                📝 توضیحات اولیه مشکل
             </h3>
 
             <div class="bg-gray-50 border rounded-xl p-5 leading-8 whitespace-pre-line">
@@ -172,34 +169,160 @@
         </div>
 
 
-        <!-- Action Buttons -->
+        <!-- Replies -->
+        <div class="mb-8">
+
+            <h3 class="text-xl font-bold mb-5">
+                💬 مکالمه تیکت
+            </h3>
+
+
+            {% if replies %}
+
+                <div class="space-y-5">
+
+                    {% for reply in replies %}
+
+                        {% if reply.user == ticket.created_by %}
+
+                            <!-- User Reply -->
+                            <div class="flex justify-start">
+
+                                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 max-w-3xl w-full">
+
+                                    <div class="flex justify-between items-center mb-3">
+
+                                        <div class="font-bold text-blue-700">
+                                            👤 {{ reply.user.username }}
+                                        </div>
+
+                                        <div class="text-xs text-gray-500">
+                                            {{ reply.created_at|date:"Y/m/d - H:i" }}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="text-gray-700 leading-7 whitespace-pre-line">
+                                        {{ reply.message }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% else %}
+
+                            <!-- IT Reply -->
+                            <div class="flex justify-end">
+
+                                <div class="bg-purple-50 border border-purple-100 rounded-2xl p-5 max-w-3xl w-full">
+
+                                    <div class="flex justify-between items-center mb-3">
+
+                                        <div class="font-bold text-purple-700">
+                                            👨‍💻 {{ reply.user.username }}
+                                        </div>
+
+                                        <div class="text-xs text-gray-500">
+                                            {{ reply.created_at|date:"Y/m/d - H:i" }}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="text-gray-700 leading-7 whitespace-pre-line">
+                                        {{ reply.message }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="bg-gray-50 border rounded-xl p-6 text-center">
+
+                    <p class="text-gray-500">
+                        هنوز پاسخی برای این تیکت ثبت نشده است.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Add Reply -->
+        <div class="border-t pt-8">
+
+            <h3 class="text-lg font-bold mb-4">
+                ✍️ ارسال پاسخ
+            </h3>
+
+
+            <form
+                method="post"
+                action="{% url 'add_ticket_reply' ticket.id %}"
+            >
+
+                {% csrf_token %}
+
+
+                <textarea
+                    name="message"
+                    rows="5"
+                    required
+                    placeholder="پاسخ یا توضیح خود را وارد کنید..."
+                    class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+                >
+                    💬 ارسال پاسخ
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- Buttons -->
         <div class="mt-8 flex flex-wrap gap-3">
 
 
-            <!-- Change Status -->
-            <a href="{% url 'update_ticket_status' ticket.id %}"
-               class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition">
-
+            <!-- Status -->
+            <a
+                href="{% url 'update_ticket_status' ticket.id %}"
+                class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition"
+            >
                 🔄 تغییر وضعیت
-
             </a>
 
 
-            <!-- Assign Ticket -->
-            <a href="{% url 'assign_ticket' ticket.id %}"
-               class="bg-purple-600 text-white px-5 py-3 rounded-lg hover:bg-purple-700 transition">
-
+            <!-- Assign -->
+            <a
+                href="{% url 'assign_ticket' ticket.id %}"
+                class="bg-purple-600 text-white px-5 py-3 rounded-lg hover:bg-purple-700 transition"
+            >
                 👨‍💻 ارجاع به کارشناس
-
             </a>
 
 
             <!-- Back -->
-            <a href="{% url 'ticket_list' %}"
-               class="bg-gray-200 text-gray-700 px-5 py-3 rounded-lg hover:bg-gray-300 transition">
-
+            <a
+                href="{% url 'ticket_list' %}"
+                class="bg-gray-200 text-gray-700 px-5 py-3 rounded-lg hover:bg-gray-300 transition"
+            >
                 ← بازگشت به لیست
-
             </a>
 
         </div>
@@ -209,4 +332,3 @@
 </div>
 
 {% endblock %}
-```
