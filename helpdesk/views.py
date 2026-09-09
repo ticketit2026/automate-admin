@@ -7,16 +7,19 @@ from .models import Ticket, TicketReply
 
 
 # ==================================================
-# بررسی اینکه کاربر اجازه مشاهده این تیکت را دارد
+# بررسی دسترسی مشاهده تیکت
 # ==================================================
 
 def can_view_ticket(user, ticket):
 
-    # اگر اجازه مشاهده همه تیکت‌ها را داشته باشد
-    if user.has_perm('helpdesk.view_all_tickets'):
+    # کاربری که اجازه مشاهده همه تیکت‌ها را دارد
+    # می‌تواند همه تیکت‌ها را ببیند
+    if user.has_perm(
+        'helpdesk.view_all_tickets'
+    ):
         return True
 
-    # در غیر این صورت فقط تیکت‌های خودش
+    # سایر کاربران فقط تیکت‌های خودشان را می‌بینند
     return ticket.created_by_id == user.id
 
 
@@ -120,16 +123,21 @@ def ticket_detail(request, ticket_id):
             'ticket': ticket,
             'replies': replies,
 
+            # Permission استاندارد Django
+            # برای ویرایش
             'can_edit':
                 request.user.has_perm(
-                    'helpdesk.edit_ticket'
+                    'helpdesk.change_ticket'
                 ),
 
+            # Permission استاندارد Django
+            # برای حذف
             'can_delete':
                 request.user.has_perm(
                     'helpdesk.delete_ticket'
                 ),
 
+            # Permission سفارشی
             'can_reply':
                 request.user.has_perm(
                     'helpdesk.reply_ticket'
@@ -155,9 +163,9 @@ def ticket_detail(request, ticket_id):
 @login_required
 def edit_ticket(request, ticket_id):
 
-    # بررسی Permission ویرایش
+    # Permission استاندارد Django
     if not request.user.has_perm(
-        'helpdesk.edit_ticket'
+        'helpdesk.change_ticket'
     ):
         raise PermissionDenied
 
@@ -166,7 +174,7 @@ def edit_ticket(request, ticket_id):
         id=ticket_id
     )
 
-    # بررسی دسترسی به خود تیکت
+    # بررسی اینکه کاربر اجازه مشاهده این تیکت را دارد
     if not can_view_ticket(
         request.user,
         ticket
@@ -206,7 +214,7 @@ def edit_ticket(request, ticket_id):
 @login_required
 def delete_ticket(request, ticket_id):
 
-    # بررسی Permission حذف
+    # Permission استاندارد Django
     if not request.user.has_perm(
         'helpdesk.delete_ticket'
     ):
@@ -217,7 +225,7 @@ def delete_ticket(request, ticket_id):
         id=ticket_id
     )
 
-    # بررسی دسترسی به خود تیکت
+    # بررسی دسترسی به تیکت
     if not can_view_ticket(
         request.user,
         ticket
@@ -248,7 +256,6 @@ def delete_ticket(request, ticket_id):
 @login_required
 def add_ticket_reply(request, ticket_id):
 
-    # بررسی Permission پاسخ
     if not request.user.has_perm(
         'helpdesk.reply_ticket'
     ):
@@ -259,7 +266,7 @@ def add_ticket_reply(request, ticket_id):
         id=ticket_id
     )
 
-    # بررسی دسترسی به تیکت
+    # بررسی دسترسی مشاهده تیکت
     if not can_view_ticket(
         request.user,
         ticket
@@ -278,7 +285,8 @@ def add_ticket_reply(request, ticket_id):
                 message=message.strip()
             )
 
-            # اگر بسته بود، با پاسخ دوباره باز شود
+            # اگر تیکت بسته بود،
+            # با پاسخ دوباره باز شود
             if ticket.status == 'closed':
 
                 ticket.status = 'open'
@@ -303,7 +311,6 @@ def add_ticket_reply(request, ticket_id):
 @login_required
 def update_ticket_status(request, ticket_id):
 
-    # بررسی Permission
     if not request.user.has_perm(
         'helpdesk.change_ticket_status'
     ):
@@ -314,7 +321,7 @@ def update_ticket_status(request, ticket_id):
         id=ticket_id
     )
 
-    # بررسی دسترسی به تیکت
+    # بررسی دسترسی مشاهده تیکت
     if not can_view_ticket(
         request.user,
         ticket
@@ -350,7 +357,6 @@ def update_ticket_status(request, ticket_id):
 @login_required
 def assign_ticket(request, ticket_id):
 
-    # بررسی Permission
     if not request.user.has_perm(
         'helpdesk.assign_ticket'
     ):
@@ -361,7 +367,7 @@ def assign_ticket(request, ticket_id):
         id=ticket_id
     )
 
-    # بررسی دسترسی به تیکت
+    # بررسی دسترسی مشاهده تیکت
     if not can_view_ticket(
         request.user,
         ticket
