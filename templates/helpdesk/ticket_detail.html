@@ -1,3 +1,4 @@
+```html
 {% extends 'base.html' %}
 
 {% block content %}
@@ -259,6 +260,8 @@
 
 
         <!-- Add Reply -->
+        {% if can_reply %}
+
         <div class="border-t pt-8">
 
             <h3 class="text-lg font-bold mb-4">
@@ -294,12 +297,42 @@
 
         </div>
 
+        {% endif %}
 
-        <!-- Buttons -->
+
+        <!-- Action Buttons -->
         <div class="mt-8 flex flex-wrap gap-3">
 
 
+            <!-- Edit -->
+            {% if can_edit %}
+
+            <a
+                href="{% url 'edit_ticket' ticket.id %}"
+                class="bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 transition"
+            >
+                ✏️ ویرایش
+            </a>
+
+            {% endif %}
+
+
+            <!-- Delete -->
+            {% if can_delete %}
+
+            <a
+                href="{% url 'delete_ticket' ticket.id %}"
+                class="bg-red-600 text-white px-5 py-3 rounded-lg hover:bg-red-700 transition"
+            >
+                🗑️ حذف
+            </a>
+
+            {% endif %}
+
+
             <!-- Status -->
+            {% if can_change_status %}
+
             <a
                 href="{% url 'update_ticket_status' ticket.id %}"
                 class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition"
@@ -307,14 +340,20 @@
                 🔄 تغییر وضعیت
             </a>
 
+            {% endif %}
+
 
             <!-- Assign -->
+            {% if can_assign %}
+
             <a
                 href="{% url 'assign_ticket' ticket.id %}"
                 class="bg-purple-600 text-white px-5 py-3 rounded-lg hover:bg-purple-700 transition"
             >
                 👨‍💻 ارجاع به کارشناس
             </a>
+
+            {% endif %}
 
 
             <!-- Back -->
@@ -332,3 +371,4 @@
 </div>
 
 {% endblock %}
+```
