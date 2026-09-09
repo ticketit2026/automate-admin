@@ -44,3 +44,25 @@ def ticket_detail(request, ticket_id):
             'ticket': ticket
         }
     )
+
+@login_required
+def update_ticket_status(request, ticket_id):
+
+    ticket = Ticket.objects.get(id=ticket_id)
+
+    if request.method == 'POST':
+
+        status = request.POST.get('status')
+
+        ticket.status = status
+        ticket.save()
+
+        return redirect('ticket_detail', ticket_id=ticket.id)
+
+    return render(
+        request,
+        'helpdesk/update_ticket_status.html',
+        {
+            'ticket': ticket
+        }
+    )
