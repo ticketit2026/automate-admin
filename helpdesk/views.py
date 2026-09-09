@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+
 from .models import Ticket
 
 
@@ -35,7 +37,7 @@ def ticket_list(request):
 @login_required
 def ticket_detail(request, ticket_id):
 
-    ticket = Ticket.objects.get(id=ticket_id)
+    ticket = get_object_or_404(Ticket, id=ticket_id)
 
     return render(
         request,
@@ -45,10 +47,11 @@ def ticket_detail(request, ticket_id):
         }
     )
 
+
 @login_required
 def update_ticket_status(request, ticket_id):
 
-    ticket = Ticket.objects.get(id=ticket_id)
+    ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST':
 
@@ -57,12 +60,48 @@ def update_ticket_status(request, ticket_id):
         ticket.status = status
         ticket.save()
 
-        return redirect('ticket_detail', ticket_id=ticket.id)
+        return redirect(
+            'ticket_detail',
+            ticket_id=ticket.id
+        )
 
     return render(
         request,
         'helpdesk/update_ticket_status.html',
         {
             'ticket': ticket
+        }
+    )
+
+
+@login_required
+def assign_ticket(request, ticket_id):
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    users = User.objects.all().order_by('username')
+
+    if request.method == 'POST':
+
+        user_id = request.POST.get('assigned_to')
+
+        if user_id:
+            ticket.assigned_to_id = user_id
+        else:
+            ticket.assigned_to = None
+
+        ticket.save()
+
+        return redirect(
+            'ticket_detail',
+            ticket_id=ticket.id
+        )
+
+    return render(
+        request,
+        'helpdesk/assign_ticket.html',
+        {
+            'ticket': ticket,
+            'users': users
         }
     )
