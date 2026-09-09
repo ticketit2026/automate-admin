@@ -1,0 +1,95 @@
+```html
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+
+        <h2 class="text-2xl font-bold">
+            👨‍💻 ارجاع تیکت به کارشناس
+        </h2>
+
+        <a href="{% url 'ticket_detail' ticket.id %}"
+           class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+            ← بازگشت
+        </a>
+
+    </div>
+
+
+    <!-- Ticket Info -->
+    <div class="bg-white border rounded-2xl shadow-lg p-8">
+
+        <div class="mb-6">
+
+            <p class="text-sm text-gray-500 mb-1">
+                تیکت
+            </p>
+
+            <h3 class="text-xl font-bold">
+                #{{ ticket.id }} - {{ ticket.title }}
+            </h3>
+
+        </div>
+
+
+        <!-- Assign Form -->
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="mb-6">
+
+                <label class="block font-medium mb-2">
+                    👨‍💻 انتخاب کارشناس
+                </label>
+
+                <select name="assigned_to"
+                        class="w-full border rounded-lg px-4 py-3"
+                        required>
+
+                    <option value="">
+                        -- انتخاب کارشناس --
+                    </option>
+
+                    {% for user in users %}
+
+                        <option value="{{ user.id }}"
+                            {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}
+                                selected
+                            {% endif %}>
+
+                            {{ user.username }}
+
+                            {% if user.first_name or user.last_name %}
+                                - {{ user.first_name }} {{ user.last_name }}
+                            {% endif %}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Save -->
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+
+                👤 ارجاع تیکت
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+```
