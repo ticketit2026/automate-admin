@@ -39,7 +39,7 @@
             </div>
 
 
-            <!-- Status Badge -->
+            <!-- Status -->
             <span class="px-4 py-2 rounded-full text-sm font-medium
 
                 {% if ticket.status == 'open' %}
@@ -134,7 +134,7 @@
             <div class="bg-gray-50 rounded-lg p-4">
 
                 <p class="text-sm text-gray-500 mb-1">
-                    ارجاع داده شده به
+                    👨‍💻 مسئول تیکت
                 </p>
 
                 <p class="font-semibold">
@@ -142,8 +142,13 @@
                     {% if ticket.assigned_to %}
                         {{ ticket.assigned_to.username }}
 
+                        {% if ticket.assigned_to.first_name or ticket.assigned_to.last_name %}
+                            - {{ ticket.assigned_to.first_name }}
+                            {{ ticket.assigned_to.last_name }}
+                        {% endif %}
+
                     {% else %}
-                        هنوز ارجاع نشده
+                        هنوز به کارشناس ارجاع نشده
                     {% endif %}
 
                 </p>
@@ -168,13 +173,23 @@
 
 
         <!-- Action Buttons -->
-        <div class="mt-8 flex gap-3">
+        <div class="mt-8 flex flex-wrap gap-3">
+
 
             <!-- Change Status -->
             <a href="{% url 'update_ticket_status' ticket.id %}"
                class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition">
 
                 🔄 تغییر وضعیت
+
+            </a>
+
+
+            <!-- Assign Ticket -->
+            <a href="{% url 'assign_ticket' ticket.id %}"
+               class="bg-purple-600 text-white px-5 py-3 rounded-lg hover:bg-purple-700 transition">
+
+                👨‍💻 ارجاع به کارشناس
 
             </a>
 
