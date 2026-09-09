@@ -18,6 +18,20 @@ urlpatterns = [
         name='ticket_detail'
     ),
 
+    # ویرایش تیکت
+    path(
+        '<int:ticket_id>/edit/',
+        views.edit_ticket,
+        name='edit_ticket'
+    ),
+
+    # حذف تیکت
+    path(
+        '<int:ticket_id>/delete/',
+        views.delete_ticket,
+        name='delete_ticket'
+    ),
+
     # ثبت پاسخ
     path(
         '<int:ticket_id>/reply/',
