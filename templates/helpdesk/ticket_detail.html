@@ -1,10 +1,11 @@
+```html
 {% extends 'base.html' %}
 
 {% block content %}
 
 <div class="max-w-4xl mx-auto">
 
-    <!-- عنوان صفحه -->
+    <!-- Header -->
     <div class="flex justify-between items-center mb-6">
 
         <h2 class="text-2xl font-bold">
@@ -19,13 +20,14 @@
     </div>
 
 
-    <!-- کارت تیکت -->
+    <!-- Ticket Card -->
     <div class="bg-white border rounded-2xl shadow-lg p-8">
 
-        <!-- عنوان و وضعیت -->
+        <!-- Title & Status -->
         <div class="flex justify-between items-start mb-6">
 
             <div>
+
                 <h1 class="text-2xl font-bold mb-2">
                     {{ ticket.title }}
                 </h1>
@@ -33,26 +35,35 @@
                 <p class="text-sm text-gray-500">
                     شماره تیکت: #{{ ticket.id }}
                 </p>
+
             </div>
 
 
+            <!-- Status Badge -->
             <span class="px-4 py-2 rounded-full text-sm font-medium
+
                 {% if ticket.status == 'open' %}
                     bg-green-100 text-green-700
+
                 {% elif ticket.status == 'in_progress' %}
                     bg-yellow-100 text-yellow-700
+
                 {% elif ticket.status == 'closed' %}
                     bg-gray-100 text-gray-700
+
                 {% else %}
                     bg-blue-100 text-blue-700
                 {% endif %}">
 
                 {% if ticket.status == 'open' %}
                     باز
+
                 {% elif ticket.status == 'in_progress' %}
                     در حال بررسی
+
                 {% elif ticket.status == 'closed' %}
                     بسته شده
+
                 {% else %}
                     {{ ticket.status }}
                 {% endif %}
@@ -62,27 +73,38 @@
         </div>
 
 
-        <!-- اطلاعات تیکت -->
+        <!-- Ticket Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
+
+            <!-- Priority -->
             <div class="bg-gray-50 rounded-lg p-4">
+
                 <p class="text-sm text-gray-500 mb-1">
                     اولویت
                 </p>
 
                 <p class="font-semibold">
+
                     {% if ticket.priority == 'high' %}
                         🔴 بالا
+
                     {% elif ticket.priority == 'medium' %}
                         🟡 متوسط
+
                     {% else %}
                         🟢 پایین
+
                     {% endif %}
+
                 </p>
+
             </div>
 
 
+            <!-- Created By -->
             <div class="bg-gray-50 rounded-lg p-4">
+
                 <p class="text-sm text-gray-500 mb-1">
                     ثبت کننده
                 </p>
@@ -90,10 +112,13 @@
                 <p class="font-semibold">
                     {{ ticket.created_by.username }}
                 </p>
+
             </div>
 
 
+            <!-- Created Date -->
             <div class="bg-gray-50 rounded-lg p-4">
+
                 <p class="text-sm text-gray-500 mb-1">
                     تاریخ ثبت
                 </p>
@@ -101,27 +126,34 @@
                 <p class="font-semibold">
                     {{ ticket.created_at|date:"Y/m/d - H:i" }}
                 </p>
+
             </div>
 
 
+            <!-- Assigned To -->
             <div class="bg-gray-50 rounded-lg p-4">
+
                 <p class="text-sm text-gray-500 mb-1">
                     ارجاع داده شده به
                 </p>
 
                 <p class="font-semibold">
+
                     {% if ticket.assigned_to %}
                         {{ ticket.assigned_to.username }}
+
                     {% else %}
                         هنوز ارجاع نشده
                     {% endif %}
+
                 </p>
+
             </div>
 
         </div>
 
 
-        <!-- توضیحات -->
+        <!-- Description -->
         <div>
 
             <h3 class="text-lg font-bold mb-3">
@@ -134,8 +166,32 @@
 
         </div>
 
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex gap-3">
+
+            <!-- Change Status -->
+            <a href="{% url 'update_ticket_status' ticket.id %}"
+               class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition">
+
+                🔄 تغییر وضعیت
+
+            </a>
+
+
+            <!-- Back -->
+            <a href="{% url 'ticket_list' %}"
+               class="bg-gray-200 text-gray-700 px-5 py-3 rounded-lg hover:bg-gray-300 transition">
+
+                ← بازگشت به لیست
+
+            </a>
+
+        </div>
+
     </div>
 
 </div>
 
 {% endblock %}
+```
