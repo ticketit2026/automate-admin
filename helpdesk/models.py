@@ -46,6 +46,31 @@ class Ticket(models.Model):
         auto_now=True
     )
 
+    class Meta:
+
+        permissions = [
+            (
+                'view_all_tickets',
+                'مشاهده همه تیکت‌ها'
+            ),
+            (
+                'create_ticket',
+                'ایجاد تیکت'
+            ),
+            (
+                'reply_ticket',
+                'پاسخ به تیکت'
+            ),
+            (
+                'change_ticket_status',
+                'تغییر وضعیت تیکت'
+            ),
+            (
+                'assign_ticket',
+                'تخصیص تیکت'
+            ),
+        ]
+
     def __str__(self):
         return self.title
 
@@ -74,4 +99,7 @@ class TicketReply(models.Model):
     )
 
     def __str__(self):
-        return f"پاسخ به تیکت #{self.ticket.id} توسط {self.user.username}"
+        return (
+            f"پاسخ به تیکت #{self.ticket.id} "
+            f"توسط {self.user.username}"
+        )
