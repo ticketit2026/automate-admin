@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}
+دسترسی‌های کاربر
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto">
+
+    <div class="mb-6">
+
+        <h1 class="text-2xl font-bold text-gray-800">
+            مدیریت دسترسی‌ها
+        </h1>
+
+        <p class="text-sm text-gray-500 mt-2">
+            کاربر:
+            <span class="font-semibold text-gray-700">
+                {{ user_obj.username }}
+            </span>
+        </p>
+
+    </div>
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+            <div class="px-6 py-5 border-b border-gray-200">
+
+                <h2 class="font-bold text-gray-800">
+                    دسترسی‌های سامانه
+                </h2>
+
+                <p class="text-xs text-gray-400 mt-1">
+                    دسترسی‌های مورد نیاز این کاربر را انتخاب کنید.
+                </p>
+
+            </div>
+
+
+            <div class="p-6">
+
+                {% regroup permissions by content_type.app_label as app_permissions %}
+
+
+                {% for app in app_permissions %}
+
+                <div class="mb-8">
+
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        {{ app.grouper }}
+                    </h3>
+
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                        {% for permission in app.list %}
+
+                        <label class="flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer">
+
+                            <input
+                                type="checkbox"
+                                name="permissions"
+                                value="{{ permission.id }}"
+                                {% if permission.id in selected_permissions %}
+                                    checked
+                                {% endif %}
+                                class="w-5 h-5"
+                            >
+
+                            <div>
+
+                                <div class="font-semibold text-gray-700">
+                                    {{ permission.name }}
+                                </div>
+
+                                <div class="text-xs text-gray-400 mt-1">
+                                    {{ permission.content_type.app_label }}
+                                    /
+                                    {{ permission.content_type.model }}
+                                </div>
+
+                            </div>
+
+                        </label>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="px-6 py-5 border-t border-gray-200 flex items-center gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold"
+                >
+                    ذخیره دسترسی‌ها
+                </button>
+
+                <a
+                    href="{% url 'user_management' %}"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold"
+                >
+                    بازگشت
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
