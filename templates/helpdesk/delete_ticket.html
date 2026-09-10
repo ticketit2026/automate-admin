@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-xl mx-auto">
+
+    <div class="bg-white border rounded-2xl shadow-lg p-8 text-center">
+
+        <div class="text-5xl mb-5">
+            🗑️
+        </div>
+
+
+        <h2 class="text-2xl font-bold mb-4">
+            حذف تیکت
+        </h2>
+
+
+        <p class="text-gray-600 mb-3">
+            آیا مطمئن هستید که می‌خواهید این تیکت را حذف کنید؟
+        </p>
+
+
+        <div class="bg-gray-50 border rounded-xl p-4 mb-8">
+
+            <p class="font-semibold">
+                {{ ticket.title }}
+            </p>
+
+            <p class="text-sm text-gray-500 mt-1">
+                شماره تیکت: #{{ ticket.id }}
+            </p>
+
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            <div class="flex justify-center gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+                >
+                    🗑️ بله، حذف شود
+                </button>
+
+
+                <a
+                    href="{% url 'ticket_detail' ticket.id %}"
+                    class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
+                >
+                    انصراف
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
