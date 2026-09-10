@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+
+        <h2 class="text-2xl font-bold">
+            ✏️ ویرایش تیکت
+        </h2>
+
+        <a
+            href="{% url 'ticket_detail' ticket.id %}"
+            class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+        >
+            ← بازگشت
+        </a>
+
+    </div>
+
+
+    <!-- Form -->
+    <div class="bg-white border rounded-2xl shadow-lg p-8">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            <!-- Title -->
+            <div class="mb-6">
+
+                <label class="block font-semibold mb-2">
+                    عنوان تیکت
+                </label>
+
+                <input
+                    type="text"
+                    name="title"
+                    value="{{ ticket.title }}"
+                    required
+                    class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+
+            </div>
+
+
+            <!-- Description -->
+            <div class="mb-6">
+
+                <label class="block font-semibold mb-2">
+                    توضیحات
+                </label>
+
+                <textarea
+                    name="description"
+                    rows="7"
+                    required
+                    class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >{{ ticket.description }}</textarea>
+
+            </div>
+
+
+            <!-- Priority -->
+            <div class="mb-8">
+
+                <label class="block font-semibold mb-2">
+                    اولویت
+                </label>
+
+                <select
+                    name="priority"
+                    required
+                    class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+
+                    <option
+                        value="low"
+                        {% if ticket.priority == 'low' %}selected{% endif %}
+                    >
+                        🟢 پایین
+                    </option>
+
+                    <option
+                        value="medium"
+                        {% if ticket.priority == 'medium' %}selected{% endif %}
+                    >
+                        🟡 متوسط
+                    </option>
+
+                    <option
+                        value="high"
+                        {% if ticket.priority == 'high' %}selected{% endif %}
+                    >
+                        🔴 بالا
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="flex flex-wrap gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+                >
+                    💾 ذخیره تغییرات
+                </button>
+
+
+                <a
+                    href="{% url 'ticket_detail' ticket.id %}"
+                    class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
+                >
+                    انصراف
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
