@@ -1,10 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
+from django.contrib import messages
 
 
 @login_required
 def user_list(request):
+
     users = User.objects.all().order_by('username')
 
     return render(
@@ -40,4 +42,94 @@ def user_create(request):
     return render(
         request,
         'user_management/user_create.html'
+    )
+
+
+@login_required
+def user_edit(request, user_id):
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+
+        user.is_active = request.POST.get('is_active') == 'on'
+
+        user.save()
+
+        messages.success(
+            request,
+            'اطلاعات کاربر با موفقیت ذخیره شد.'
+        )
+
+        return redirect(
+            'user_management'
+        )
+
+    return render(
+        request,
+        'user_management/user_edit.html',
+        {
+            'user_obj': user
+        }
+    )
+
+
+@login_required
+def user_permissions(request, user_id):
+
+    if not request.user.is_superuser:
+        return redirect('user_management')
+
+    user = get_object_or_404(
+        User,
+        id=user_id
+    )
+
+    permissions = Permission.objects.select_related(
+        'content_type'
+    ).order_by(
+        'content_type__app_label',
+        'content_type__model',
+        'codename'
+    )
+
+    if request.method == 'POST':
+
+        selected_permissions = request.POST.getlist(
+            'permissions'
+        )
+
+        user.user_permissions.set(
+            selected_permissions
+        )
+
+        messages.success(
+            request,
+            'دسترسی‌های کاربر با موفقیت ذخیره شد.'
+        )
+
+        return redirect(
+            'user_permissions',
+            user_id=user.id
+        )
+
+    selected_permissions = set(
+        user.user_permissions.values_list(
+            'id',
+            flat=True
+        )
+    )
+
+    return render(
+        request,
+        'user_management/user_permissions.html',
+        {
+            'user_obj': user,
+            'permissions': permissions,
+            'selected_permissions': selected_permissions,
+        }
     )
