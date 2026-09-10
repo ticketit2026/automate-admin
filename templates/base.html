@@ -1,513 +1,513 @@
-```html
 {% load static %}
 
 <!DOCTYPE html>
+
 <html lang="fa" dir="rtl">
 
 <head>
 
-    <meta charset="UTF-8">
+```
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>
-        {% block title %}
-            سامانه مدیریت و اتوماسیون داخلی
-        {% endblock %}
-    </title>
+<title>
+    {% block title %}
+        سامانه مدیریت و اتوماسیون داخلی
+    {% endblock %}
+</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
+<style>
 
-        * {
-            box-sizing: border-box;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        body {
-            margin: 0;
-            font-family: Tahoma, Arial, sans-serif;
-            background: #f5f7fb;
-        }
+    body {
+        margin: 0;
+        font-family: Tahoma, Arial, sans-serif;
+        background: #f5f7fb;
+    }
 
-        /* =========================
-           Sidebar
-        ========================= */
+    /* =========================
+       Sidebar
+    ========================= */
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+
+        width: 260px;
+        height: 100vh;
+
+        background: #ffffff;
+
+        border-left: 1px solid #e5e7eb;
+
+        display: flex;
+        flex-direction: column;
+
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        padding: 25px 20px;
+
+        border-bottom: 1px solid #e5e7eb;
+
+        text-align: center;
+    }
+
+    .sidebar-logo {
+        width: 60px;
+        height: 60px;
+
+        margin: auto;
+
+        border-radius: 18px;
+
+        background: #dbeafe;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 30px;
+    }
+
+    .sidebar-title {
+        margin-top: 12px;
+
+        font-size: 17px;
+        font-weight: bold;
+
+        color: #1f2937;
+    }
+
+    .sidebar-subtitle {
+        margin-top: 5px;
+
+        font-size: 12px;
+
+        color: #9ca3af;
+    }
+
+
+    /* =========================
+       Navigation
+    ========================= */
+
+    .sidebar-menu {
+
+        flex: 1;
+
+        padding: 18px 12px;
+
+        overflow-y: auto;
+    }
+
+    .menu-title {
+
+        font-size: 11px;
+
+        color: #9ca3af;
+
+        padding: 8px 12px;
+
+        margin-top: 8px;
+    }
+
+    .menu-item {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        padding: 12px 14px;
+
+        margin-bottom: 5px;
+
+        border-radius: 12px;
+
+        color: #4b5563;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        transition: 0.2s;
+    }
+
+    .menu-item:hover {
+
+        background: #f3f4f6;
+
+        color: #2563eb;
+    }
+
+    .menu-item.active {
+
+        background: #eff6ff;
+
+        color: #2563eb;
+
+        font-weight: bold;
+    }
+
+    .menu-icon {
+
+        width: 25px;
+
+        text-align: center;
+
+        font-size: 18px;
+    }
+
+
+    /* =========================
+       User Box
+    ========================= */
+
+    .user-box {
+
+        position: relative;
+
+        padding: 14px;
+
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .user {
+
+        width: 100%;
+
+        border: none;
+
+        background: transparent;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        padding: 10px;
+
+        border-radius: 14px;
+
+        cursor: pointer;
+
+        text-align: right;
+
+        transition: 0.2s;
+    }
+
+    .user:hover {
+
+        background: #f3f4f6;
+    }
+
+    .user-avatar {
+
+        width: 42px;
+        height: 42px;
+
+        min-width: 42px;
+
+        border-radius: 12px;
+
+        background: #dbeafe;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-size: 21px;
+    }
+
+    .user-info {
+
+        flex: 1;
+
+        min-width: 0;
+    }
+
+    .user-name {
+
+        font-size: 13px;
+
+        font-weight: bold;
+
+        color: #1f2937;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+    .user-role {
+
+        margin-top: 3px;
+
+        font-size: 11px;
+
+        color: #9ca3af;
+    }
+
+    .user-arrow {
+
+        font-size: 13px;
+
+        color: #9ca3af;
+
+        transition: 0.2s;
+    }
+
+    .user-arrow.open {
+
+        transform: rotate(180deg);
+    }
+
+
+    /* =========================
+       User Panel
+    ========================= */
+
+    .user-panel {
+
+        position: absolute;
+
+        right: 14px;
+
+        bottom: 82px;
+
+        width: 230px;
+
+        background: #ffffff;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 16px;
+
+        box-shadow:
+            0 15px 35px rgba(0, 0, 0, 0.12);
+
+        padding: 15px;
+
+        display: none;
+
+        z-index: 2000;
+    }
+
+    .user-panel.show {
+
+        display: block;
+    }
+
+    .user-panel-header {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        padding-bottom: 12px;
+
+        border-bottom: 1px solid #f0f0f0;
+
+        margin-bottom: 12px;
+    }
+
+    .user-panel-avatar {
+
+        width: 42px;
+        height: 42px;
+
+        border-radius: 12px;
+
+        background: #dbeafe;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-size: 20px;
+    }
+
+    .user-panel-title {
+
+        font-size: 14px;
+
+        font-weight: bold;
+
+        color: #1f2937;
+    }
+
+    .user-panel-subtitle {
+
+        font-size: 11px;
+
+        color: #9ca3af;
+
+        margin-top: 3px;
+    }
+
+    .user-detail {
+
+        margin-bottom: 10px;
+    }
+
+    .user-detail-label {
+
+        font-size: 10px;
+
+        color: #9ca3af;
+
+        margin-bottom: 3px;
+    }
+
+    .user-detail-value {
+
+        font-size: 12px;
+
+        color: #374151;
+
+        word-break: break-word;
+    }
+
+    .user-status {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        font-size: 11px;
+
+        color: #16a34a;
+
+        background: #f0fdf4;
+
+        padding: 4px 8px;
+
+        border-radius: 8px;
+    }
+
+    .user-status-dot {
+
+        width: 6px;
+        height: 6px;
+
+        background: #22c55e;
+
+        border-radius: 50%;
+    }
+
+    .logout-button {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 7px;
+
+        width: 100%;
+
+        padding: 10px;
+
+        margin-top: 14px;
+
+        border-radius: 10px;
+
+        background: #fef2f2;
+
+        color: #dc2626;
+
+        text-decoration: none;
+
+        font-size: 12px;
+
+        font-weight: bold;
+
+        transition: 0.2s;
+    }
+
+    .logout-button:hover {
+
+        background: #fee2e2;
+    }
+
+
+    /* =========================
+       Main Content
+    ========================= */
+
+    .main {
+
+        margin-right: 260px;
+
+        min-height: 100vh;
+
+        padding: 25px;
+    }
+
+    .content {
+
+        max-width: 1400px;
+
+        margin: auto;
+    }
+
+
+    /* =========================
+       Mobile
+    ========================= */
+
+    @media (max-width: 768px) {
 
         .sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
 
-            width: 260px;
-            height: 100vh;
-
-            background: #ffffff;
-
-            border-left: 1px solid #e5e7eb;
-
-            display: flex;
-            flex-direction: column;
-
-            z-index: 1000;
+            width: 220px;
         }
-
-        .sidebar-header {
-            padding: 25px 20px;
-
-            border-bottom: 1px solid #e5e7eb;
-
-            text-align: center;
-        }
-
-        .sidebar-logo {
-            width: 60px;
-            height: 60px;
-
-            margin: auto;
-
-            border-radius: 18px;
-
-            background: #dbeafe;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 30px;
-        }
-
-        .sidebar-title {
-            margin-top: 12px;
-
-            font-size: 17px;
-            font-weight: bold;
-
-            color: #1f2937;
-        }
-
-        .sidebar-subtitle {
-            margin-top: 5px;
-
-            font-size: 12px;
-
-            color: #9ca3af;
-        }
-
-
-        /* =========================
-           Navigation
-        ========================= */
-
-        .sidebar-menu {
-
-            flex: 1;
-
-            padding: 18px 12px;
-
-            overflow-y: auto;
-        }
-
-        .menu-title {
-
-            font-size: 11px;
-
-            color: #9ca3af;
-
-            padding: 8px 12px;
-
-            margin-top: 8px;
-        }
-
-        .menu-item {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-            padding: 12px 14px;
-
-            margin-bottom: 5px;
-
-            border-radius: 12px;
-
-            color: #4b5563;
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            transition: 0.2s;
-        }
-
-        .menu-item:hover {
-
-            background: #f3f4f6;
-
-            color: #2563eb;
-        }
-
-        .menu-item.active {
-
-            background: #eff6ff;
-
-            color: #2563eb;
-
-            font-weight: bold;
-        }
-
-        .menu-icon {
-
-            width: 25px;
-
-            text-align: center;
-
-            font-size: 18px;
-        }
-
-
-        /* =========================
-           User Box
-        ========================= */
-
-        .user-box {
-
-            position: relative;
-
-            padding: 14px;
-
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .user {
-
-            width: 100%;
-
-            border: none;
-
-            background: transparent;
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-            padding: 10px;
-
-            border-radius: 14px;
-
-            cursor: pointer;
-
-            text-align: right;
-
-            transition: 0.2s;
-        }
-
-        .user:hover {
-
-            background: #f3f4f6;
-        }
-
-        .user-avatar {
-
-            width: 42px;
-            height: 42px;
-
-            min-width: 42px;
-
-            border-radius: 12px;
-
-            background: #dbeafe;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            font-size: 21px;
-        }
-
-        .user-info {
-
-            flex: 1;
-
-            min-width: 0;
-        }
-
-        .user-name {
-
-            font-size: 13px;
-
-            font-weight: bold;
-
-            color: #1f2937;
-
-            white-space: nowrap;
-
-            overflow: hidden;
-
-            text-overflow: ellipsis;
-        }
-
-        .user-role {
-
-            margin-top: 3px;
-
-            font-size: 11px;
-
-            color: #9ca3af;
-        }
-
-        .user-arrow {
-
-            font-size: 13px;
-
-            color: #9ca3af;
-
-            transition: 0.2s;
-        }
-
-        .user-arrow.open {
-
-            transform: rotate(180deg);
-        }
-
-
-        /* =========================
-           User Panel
-        ========================= */
-
-        .user-panel {
-
-            position: absolute;
-
-            right: 14px;
-
-            bottom: 82px;
-
-            width: 230px;
-
-            background: #ffffff;
-
-            border: 1px solid #e5e7eb;
-
-            border-radius: 16px;
-
-            box-shadow:
-                0 15px 35px rgba(0, 0, 0, 0.12);
-
-            padding: 15px;
-
-            display: none;
-
-            z-index: 2000;
-        }
-
-        .user-panel.show {
-
-            display: block;
-        }
-
-        .user-panel-header {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 10px;
-
-            padding-bottom: 12px;
-
-            border-bottom: 1px solid #f0f0f0;
-
-            margin-bottom: 12px;
-        }
-
-        .user-panel-avatar {
-
-            width: 42px;
-            height: 42px;
-
-            border-radius: 12px;
-
-            background: #dbeafe;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            font-size: 20px;
-        }
-
-        .user-panel-title {
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            color: #1f2937;
-        }
-
-        .user-panel-subtitle {
-
-            font-size: 11px;
-
-            color: #9ca3af;
-
-            margin-top: 3px;
-        }
-
-        .user-detail {
-
-            margin-bottom: 10px;
-        }
-
-        .user-detail-label {
-
-            font-size: 10px;
-
-            color: #9ca3af;
-
-            margin-bottom: 3px;
-        }
-
-        .user-detail-value {
-
-            font-size: 12px;
-
-            color: #374151;
-
-            word-break: break-word;
-        }
-
-        .user-status {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 5px;
-
-            font-size: 11px;
-
-            color: #16a34a;
-
-            background: #f0fdf4;
-
-            padding: 4px 8px;
-
-            border-radius: 8px;
-        }
-
-        .user-status-dot {
-
-            width: 6px;
-            height: 6px;
-
-            background: #22c55e;
-
-            border-radius: 50%;
-        }
-
-        .logout-button {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 7px;
-
-            width: 100%;
-
-            padding: 10px;
-
-            margin-top: 14px;
-
-            border-radius: 10px;
-
-            background: #fef2f2;
-
-            color: #dc2626;
-
-            text-decoration: none;
-
-            font-size: 12px;
-
-            font-weight: bold;
-
-            transition: 0.2s;
-        }
-
-        .logout-button:hover {
-
-            background: #fee2e2;
-        }
-
-
-        /* =========================
-           Main Content
-        ========================= */
 
         .main {
 
-            margin-right: 260px;
+            margin-right: 220px;
 
-            min-height: 100vh;
-
-            padding: 25px;
+            padding: 15px;
         }
 
-        .content {
+        .user-panel {
 
-            max-width: 1400px;
-
-            margin: auto;
+            width: 210px;
         }
+    }
 
+</style>
 
-        /* =========================
-           Mobile
-        ========================= */
-
-        @media (max-width: 768px) {
-
-            .sidebar {
-
-                width: 220px;
-            }
-
-            .main {
-
-                margin-right: 220px;
-
-                padding: 15px;
-            }
-
-            .user-panel {
-
-                width: 210px;
-            }
-        }
-
-    </style>
-
-    {% block extra_css %}
-    {% endblock %}
+{% block extra_css %}
+{% endblock %}
+```
 
 </head>
 
-
 <body>
-
 
 <!-- =========================
      Sidebar
@@ -515,308 +515,181 @@
 
 <aside class="sidebar">
 
+```
+<!-- Header -->
 
-    <!-- Header -->
+<div class="sidebar-header">
 
-    <div class="sidebar-header">
+    <div class="sidebar-logo">
+        🏢
+    </div>
 
-        <div class="sidebar-logo">
-            🏢
-        </div>
+    <div class="sidebar-title">
+        سامانه اتوماسیون
+    </div>
 
-        <div class="sidebar-title">
-            سامانه اتوماسیون
-        </div>
+    <div class="sidebar-subtitle">
+        مدیریت و اتوماسیون داخلی
+    </div>
 
-        <div class="sidebar-subtitle">
-            مدیریت و اتوماسیون داخلی
-        </div>
+</div>
 
+
+<!-- Menu -->
+
+<nav class="sidebar-menu">
+
+
+    <div class="menu-title">
+        اصلی
     </div>
 
 
-    <!-- Menu -->
+    <a
+        href="{% url 'overview' %}"
+        class="menu-item"
+    >
 
-    <nav class="sidebar-menu">
+        <span class="menu-icon">
+            🏠
+        </span>
 
+        <span>
+            داشبورد
+        </span>
 
-        <div class="menu-title">
-            اصلی
-        </div>
+    </a>
 
 
-        <a
-            href="{% url 'overview' %}"
-            class="menu-item"
-        >
+    <div class="menu-title">
+        خدمات
+    </div>
 
-            <span class="menu-icon">
-                🏠
-            </span>
 
-            <span>
-                داشبورد
-            </span>
+    <a
+        href="{% url 'ticket_list' %}"
+        class="menu-item"
+    >
 
-        </a>
+        <span class="menu-icon">
+            🎫
+        </span>
 
+        <span>
+            تیکت‌های پشتیبانی
+        </span>
 
-        <div class="menu-title">
-            خدمات
-        </div>
+    </a>
 
 
-        <a
-            href="{% url 'ticket_list' %}"
-            class="menu-item"
-        >
+    <a
+        href="#"
+        class="menu-item"
+    >
 
-            <span class="menu-icon">
-                🎫
-            </span>
+        <span class="menu-icon">
+            📄
+        </span>
 
-            <span>
-                تیکت‌های پشتیبانی
-            </span>
+        <span>
+            اتوماسیون اداری
+        </span>
 
-        </a>
+    </a>
 
 
-        <a
-            href="#"
-            class="menu-item"
-        >
+    <a
+        href="#"
+        class="menu-item"
+    >
 
-            <span class="menu-icon">
-                📄
-            </span>
+        <span class="menu-icon">
+            📁
+        </span>
 
-            <span>
-                اتوماسیون اداری
-            </span>
+        <span>
+            اسناد
+        </span>
 
-        </a>
+    </a>
 
 
-        <a
-            href="#"
-            class="menu-item"
-        >
+    <a
+        href="#"
+        class="menu-item"
+    >
 
-            <span class="menu-icon">
-                📁
-            </span>
+        <span class="menu-icon">
+            📝
+        </span>
 
-            <span>
-                اسناد
-            </span>
+        <span>
+            درخواست‌ها
+        </span>
 
-        </a>
+    </a>
 
 
-        <a
-            href="#"
-            class="menu-item"
-        >
+    <a
+        href="#"
+        class="menu-item"
+    >
 
-            <span class="menu-icon">
-                📝
-            </span>
+        <span class="menu-icon">
+            📅
+        </span>
 
-            <span>
-                درخواست‌ها
-            </span>
+        <span>
+            جلسات
+        </span>
 
-        </a>
+    </a>
 
 
-        <a
-            href="#"
-            class="menu-item"
-        >
+    <!-- مدیریت کاربران -->
 
-            <span class="menu-icon">
-                📅
-            </span>
+    <a
+        href="{% url 'user_management' %}"
+        class="menu-item"
+    >
 
-            <span>
-                جلسات
-            </span>
+        <span class="menu-icon">
+            👥
+        </span>
 
-        </a>
+        <span>
+            مدیریت کاربران
+        </span>
 
+    </a>
 
-    </nav>
 
+</nav>
 
-    <!-- =========================
-         User
-    ========================= -->
 
-    <div class="user-box">
+<!-- =========================
+     User
+========================= -->
 
+<div class="user-box">
 
-        <!-- User Details Panel -->
 
-        <div
-            id="userPanel"
-            class="user-panel"
-        >
+    <!-- User Details Panel -->
 
-            <div class="user-panel-header">
+    <div
+        id="userPanel"
+        class="user-panel"
+    >
 
-                <div class="user-panel-avatar">
-                    👤
-                </div>
+        <div class="user-panel-header">
 
-                <div>
-
-                    <div class="user-panel-title">
-
-                        {% if request.user.first_name or request.user.last_name %}
-
-                            {{ request.user.first_name }}
-                            {{ request.user.last_name }}
-
-                        {% else %}
-
-                            {{ request.user.username }}
-
-                        {% endif %}
-
-                    </div>
-
-                    <div class="user-panel-subtitle">
-                        اطلاعات کاربری
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- Username -->
-
-            <div class="user-detail">
-
-                <div class="user-detail-label">
-                    نام کاربری
-                </div>
-
-                <div class="user-detail-value">
-                    {{ request.user.username }}
-                </div>
-
-            </div>
-
-
-            <!-- Full Name -->
-
-            <div class="user-detail">
-
-                <div class="user-detail-label">
-                    نام و نام خانوادگی
-                </div>
-
-                <div class="user-detail-value">
-
-                    {% if request.user.first_name or request.user.last_name %}
-
-                        {{ request.user.first_name }}
-                        {{ request.user.last_name }}
-
-                    {% else %}
-
-                        ثبت نشده
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-
-            <!-- Email -->
-
-            <div class="user-detail">
-
-                <div class="user-detail-label">
-                    ایمیل
-                </div>
-
-                <div class="user-detail-value">
-
-                    {% if request.user.email %}
-
-                        {{ request.user.email }}
-
-                    {% else %}
-
-                        ثبت نشده
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-
-            <!-- Status -->
-
-            <div class="user-detail">
-
-                <div class="user-detail-label">
-                    وضعیت حساب
-                </div>
-
-                <div class="user-status">
-
-                    <span class="user-status-dot"></span>
-
-                    فعال
-
-                </div>
-
-            </div>
-
-
-            <!-- Logout -->
-
-            <a
-                href="{% url 'logout' %}"
-                class="logout-button"
-            >
-
-                <span>
-                    🚪
-                </span>
-
-                خروج از سامانه
-
-            </a>
-
-
-        </div>
-
-
-        <!-- User Button -->
-
-        <button
-            type="button"
-            class="user"
-            id="userMenuButton"
-            aria-expanded="false"
-            onclick="toggleUserPanel()"
-        >
-
-            <div class="user-avatar">
+            <div class="user-panel-avatar">
                 👤
             </div>
 
+            <div>
 
-            <div class="user-info">
-
-                <div class="user-name">
+                <div class="user-panel-title">
 
                     {% if request.user.first_name or request.user.last_name %}
 
@@ -831,27 +704,171 @@
 
                 </div>
 
-                <div class="user-role">
-                    کاربر سامانه
+                <div class="user-panel-subtitle">
+                    اطلاعات کاربری
                 </div>
 
             </div>
 
+        </div>
 
-            <div
-                class="user-arrow"
-                id="userArrow"
-            >
-                ▲
+
+        <!-- Username -->
+
+        <div class="user-detail">
+
+            <div class="user-detail-label">
+                نام کاربری
             </div>
 
-        </button>
+            <div class="user-detail-value">
+                {{ request.user.username }}
+            </div>
+
+        </div>
+
+
+        <!-- Full Name -->
+
+        <div class="user-detail">
+
+            <div class="user-detail-label">
+                نام و نام خانوادگی
+            </div>
+
+            <div class="user-detail-value">
+
+                {% if request.user.first_name or request.user.last_name %}
+
+                    {{ request.user.first_name }}
+                    {{ request.user.last_name }}
+
+                {% else %}
+
+                    ثبت نشده
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Email -->
+
+        <div class="user-detail">
+
+            <div class="user-detail-label">
+                ایمیل
+            </div>
+
+            <div class="user-detail-value">
+
+                {% if request.user.email %}
+
+                    {{ request.user.email }}
+
+                {% else %}
+
+                    ثبت نشده
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Status -->
+
+        <div class="user-detail">
+
+            <div class="user-detail-label">
+                وضعیت حساب
+            </div>
+
+            <div class="user-status">
+
+                <span class="user-status-dot"></span>
+
+                فعال
+
+            </div>
+
+        </div>
+
+
+        <!-- Logout -->
+
+        <a
+            href="{% url 'logout' %}"
+            class="logout-button"
+        >
+
+            <span>
+                🚪
+            </span>
+
+            خروج از سامانه
+
+        </a>
+
 
     </div>
 
+
+    <!-- User Button -->
+
+    <button
+        type="button"
+        class="user"
+        id="userMenuButton"
+        aria-expanded="false"
+        onclick="toggleUserPanel()"
+    >
+
+        <div class="user-avatar">
+            👤
+        </div>
+
+
+        <div class="user-info">
+
+            <div class="user-name">
+
+                {% if request.user.first_name or request.user.last_name %}
+
+                    {{ request.user.first_name }}
+                    {{ request.user.last_name }}
+
+                {% else %}
+
+                    {{ request.user.username }}
+
+                {% endif %}
+
+            </div>
+
+            <div class="user-role">
+                کاربر سامانه
+            </div>
+
+        </div>
+
+
+        <div
+            class="user-arrow"
+            id="userArrow"
+        >
+            ▲
+        </div>
+
+    </button>
+
+</div>
+```
+
 </aside>
-
-
 
 <!-- =========================
      Main
@@ -859,16 +876,16 @@
 
 <main class="main">
 
-    <div class="content">
+```
+<div class="content">
 
-        {% block content %}
-        {% endblock %}
+    {% block content %}
+    {% endblock %}
 
-    </div>
+</div>
+```
 
 </main>
-
-
 
 <!-- =========================
      JavaScript
@@ -948,11 +965,9 @@
 
 </script>
 
-
 {% block extra_js %}
 {% endblock %}
 
 </body>
 
 </html>
-```
