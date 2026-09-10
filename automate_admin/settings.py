@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'meetings',
     'documents',
     'dashboard',
+    'user_management',
 ]
 
 MIDDLEWARE = [
