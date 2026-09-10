@@ -17,4 +17,16 @@ urlpatterns = [
         name='user_create'
     ),
 
+    path(
+        'edit/<int:user_id>/',
+        views.user_edit,
+        name='user_edit'
+    ),
+
+    path(
+        'permissions/<int:user_id>/',
+        views.user_permissions,
+        name='user_permissions'
+    ),
+
 ]
