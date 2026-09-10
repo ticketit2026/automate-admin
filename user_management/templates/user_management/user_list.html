@@ -6,8 +6,244 @@
 
 {% block content %}
 
-<h1>مدیریت کاربران</h1>
+<div class="max-w-7xl mx-auto">
 
-<p>صفحه مدیریت کاربران با موفقیت باز شد.</p>
+    <div class="flex items-center justify-between mb-6">
+
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                مدیریت کاربران
+            </h1>
+
+            <p class="text-sm text-gray-500 mt-2">
+                مدیریت حساب‌های کاربری سامانه
+            </p>
+        </div>
+
+        <a
+            href="{% url 'user_create' %}"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-semibold transition"
+        >
+            + ایجاد کاربر
+        </a>
+
+    </div>
+
+
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+        <div class="px-6 py-5 border-b border-gray-200">
+
+            <h2 class="font-bold text-gray-800">
+                کاربران سامانه
+            </h2>
+
+            <p class="text-xs text-gray-400 mt-1">
+                تعداد کاربران: {{ users|length }}
+            </p>
+
+        </div>
+
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-50">
+
+                    <tr>
+
+                        <th class="px-6 py-4 text-right">
+                            کاربر
+                        </th>
+
+                        <th class="px-6 py-4 text-right">
+                            نام و نام خانوادگی
+                        </th>
+
+                        <th class="px-6 py-4 text-right">
+                            ایمیل
+                        </th>
+
+                        <th class="px-6 py-4 text-right">
+                            وضعیت
+                        </th>
+
+                        <th class="px-6 py-4 text-right">
+                            نوع حساب
+                        </th>
+
+                        <th class="px-6 py-4 text-right">
+                            عملیات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-gray-100">
+
+                    {% for user in users %}
+
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                    👤
+                                </div>
+
+                                <div>
+
+                                    <div class="font-semibold text-gray-800">
+                                        {{ user.username }}
+                                    </div>
+
+                                    <div class="text-xs text-gray-400">
+                                        شناسه: {{ user.id }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-gray-600">
+
+                            {% if user.first_name or user.last_name %}
+
+                                {{ user.first_name }}
+                                {{ user.last_name }}
+
+                            {% else %}
+
+                                <span class="text-gray-400">
+                                    ثبت نشده
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-gray-600">
+
+                            {% if user.email %}
+
+                                {{ user.email }}
+
+                            {% else %}
+
+                                <span class="text-gray-400">
+                                    ثبت نشده
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="px-6 py-4">
+
+                            {% if user.is_active %}
+
+                                <span class="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                    ● فعال
+                                </span>
+
+                            {% else %}
+
+                                <span class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                    ● غیرفعال
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="px-6 py-4">
+
+                            {% if user.is_superuser %}
+
+                                <span class="bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                    مدیر ارشد
+                                </span>
+
+                            {% elif user.is_staff %}
+
+                                <span class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                    مدیر سیستم
+                                </span>
+
+                            {% else %}
+
+                                <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs">
+                                    کاربر عادی
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex items-center gap-2">
+
+                                <button
+                                    type="button"
+                                    class="px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold"
+                                >
+                                    ویرایش
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="px-3 py-2 bg-purple-50 text-purple-600 rounded-lg text-xs font-semibold"
+                                >
+                                    دسترسی‌ها
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6" class="px-6 py-16 text-center">
+
+                            <div class="text-5xl mb-4">
+                                👥
+                            </div>
+
+                            <div class="font-semibold text-gray-600">
+                                هنوز کاربری ثبت نشده است
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
 
 {% endblock %}
