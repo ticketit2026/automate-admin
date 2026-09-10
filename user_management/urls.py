@@ -11,4 +11,10 @@ urlpatterns = [
         name='user_management'
     ),
 
+    path(
+        'create/',
+        views.user_create,
+        name='user_create'
+    ),
+
 ]
