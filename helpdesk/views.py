@@ -1,3 +1,4 @@
+```python
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -6,40 +7,22 @@ from django.core.exceptions import PermissionDenied
 from .models import Ticket, TicketReply
 
 
-# ==================================================
-# بررسی دسترسی مشاهده تیکت
-# ==================================================
-
 def can_view_ticket(user, ticket):
 
-    # کاربری که اجازه مشاهده همه تیکت‌ها را دارد
-    # می‌تواند همه تیکت‌ها را ببیند
     if user.has_perm(
         'helpdesk.view_all_tickets'
     ):
         return True
 
-    # سایر کاربران فقط تیکت‌های خودشان را می‌بینند
     return ticket.created_by_id == user.id
 
-
-# ==================================================
-# لیست تیکت‌ها + ایجاد تیکت
-# ==================================================
 
 @login_required
 def ticket_list(request):
 
-    # ----------------------------------------------
-    # ایجاد تیکت جدید
-    # ----------------------------------------------
-
+    # ثبت تیکت
+    # همه کاربران لاگین‌شده می‌توانند تیکت ثبت کنند
     if request.method == 'POST':
-
-        if not request.user.has_perm(
-            'helpdesk.create_ticket'
-        ):
-            raise PermissionDenied
 
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -54,10 +37,10 @@ def ticket_list(request):
 
         return redirect('ticket_list')
 
-    # ----------------------------------------------
-    # نمایش تیکت‌ها
-    # ----------------------------------------------
 
+    # نمایش تیکت‌ها
+    # اگر کاربر مجوز مشاهده همه تیکت‌ها را داشته باشد
+    # تمام تیکت‌ها را می‌بیند
     if request.user.has_perm(
         'helpdesk.view_all_tickets'
     ):
@@ -68,22 +51,19 @@ def ticket_list(request):
 
     else:
 
+        # در غیر این صورت فقط تیکت‌های خودش را می‌بیند
         tickets = Ticket.objects.filter(
             created_by=request.user
         ).order_by(
             '-created_at'
         )
 
+
     return render(
         request,
         'helpdesk/ticket_list.html',
         {
             'tickets': tickets,
-
-            'can_create_ticket':
-                request.user.has_perm(
-                    'helpdesk.create_ticket'
-                ),
 
             'can_view_all_tickets':
                 request.user.has_perm(
@@ -93,10 +73,6 @@ def ticket_list(request):
     )
 
 
-# ==================================================
-# جزئیات تیکت
-# ==================================================
-
 @login_required
 def ticket_detail(request, ticket_id):
 
@@ -105,16 +81,17 @@ def ticket_detail(request, ticket_id):
         id=ticket_id
     )
 
-    # بررسی دسترسی مشاهده
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
 
+
     replies = ticket.replies.all().order_by(
         'created_at'
     )
+
 
     return render(
         request,
@@ -123,21 +100,16 @@ def ticket_detail(request, ticket_id):
             'ticket': ticket,
             'replies': replies,
 
-            # Permission استاندارد Django
-            # برای ویرایش
             'can_edit':
                 request.user.has_perm(
                     'helpdesk.change_ticket'
                 ),
 
-            # Permission استاندارد Django
-            # برای حذف
             'can_delete':
                 request.user.has_perm(
                     'helpdesk.delete_ticket'
                 ),
 
-            # Permission سفارشی
             'can_reply':
                 request.user.has_perm(
                     'helpdesk.reply_ticket'
@@ -156,30 +128,27 @@ def ticket_detail(request, ticket_id):
     )
 
 
-# ==================================================
-# ویرایش تیکت
-# ==================================================
-
 @login_required
 def edit_ticket(request, ticket_id):
 
-    # Permission استاندارد Django
     if not request.user.has_perm(
         'helpdesk.change_ticket'
     ):
         raise PermissionDenied
+
 
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id
     )
 
-    # بررسی اینکه کاربر اجازه مشاهده این تیکت را دارد
+
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
+
 
     if request.method == 'POST':
 
@@ -187,16 +156,19 @@ def edit_ticket(request, ticket_id):
         description = request.POST.get('description')
         priority = request.POST.get('priority')
 
+
         ticket.title = title
         ticket.description = description
         ticket.priority = priority
 
         ticket.save()
 
+
         return redirect(
             'ticket_detail',
             ticket_id=ticket.id
         )
+
 
     return render(
         request,
@@ -207,30 +179,27 @@ def edit_ticket(request, ticket_id):
     )
 
 
-# ==================================================
-# حذف تیکت
-# ==================================================
-
 @login_required
 def delete_ticket(request, ticket_id):
 
-    # Permission استاندارد Django
     if not request.user.has_perm(
         'helpdesk.delete_ticket'
     ):
         raise PermissionDenied
+
 
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id
     )
 
-    # بررسی دسترسی به تیکت
+
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
+
 
     if request.method == 'POST':
 
@@ -239,6 +208,7 @@ def delete_ticket(request, ticket_id):
         return redirect(
             'ticket_list'
         )
+
 
     return render(
         request,
@@ -249,10 +219,6 @@ def delete_ticket(request, ticket_id):
     )
 
 
-# ==================================================
-# ثبت پاسخ به تیکت
-# ==================================================
-
 @login_required
 def add_ticket_reply(request, ticket_id):
 
@@ -261,21 +227,24 @@ def add_ticket_reply(request, ticket_id):
     ):
         raise PermissionDenied
 
+
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id
     )
 
-    # بررسی دسترسی مشاهده تیکت
+
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
 
+
     if request.method == 'POST':
 
         message = request.POST.get('message')
+
 
         if message and message.strip():
 
@@ -285,28 +254,25 @@ def add_ticket_reply(request, ticket_id):
                 message=message.strip()
             )
 
-            # اگر تیکت بسته بود،
-            # با پاسخ دوباره باز شود
+
             if ticket.status == 'closed':
 
                 ticket.status = 'open'
 
                 ticket.save()
 
+
         return redirect(
             'ticket_detail',
             ticket_id=ticket.id
         )
+
 
     return redirect(
         'ticket_detail',
         ticket_id=ticket.id
     )
 
-
-# ==================================================
-# تغییر وضعیت تیکت
-# ==================================================
 
 @login_required
 def update_ticket_status(request, ticket_id):
@@ -316,17 +282,19 @@ def update_ticket_status(request, ticket_id):
     ):
         raise PermissionDenied
 
+
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id
     )
 
-    # بررسی دسترسی مشاهده تیکت
+
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
+
 
     if request.method == 'POST':
 
@@ -336,10 +304,12 @@ def update_ticket_status(request, ticket_id):
 
         ticket.save()
 
+
         return redirect(
             'ticket_detail',
             ticket_id=ticket.id
         )
+
 
     return render(
         request,
@@ -350,10 +320,6 @@ def update_ticket_status(request, ticket_id):
     )
 
 
-# ==================================================
-# ارجاع تیکت به کارشناس
-# ==================================================
-
 @login_required
 def assign_ticket(request, ticket_id):
 
@@ -362,27 +328,31 @@ def assign_ticket(request, ticket_id):
     ):
         raise PermissionDenied
 
+
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id
     )
 
-    # بررسی دسترسی مشاهده تیکت
+
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
 
+
     users = User.objects.all().order_by(
         'username'
     )
+
 
     if request.method == 'POST':
 
         user_id = request.POST.get(
             'assigned_to'
         )
+
 
         if user_id:
 
@@ -392,12 +362,15 @@ def assign_ticket(request, ticket_id):
 
             ticket.assigned_to = None
 
+
         ticket.save()
+
 
         return redirect(
             'ticket_detail',
             ticket_id=ticket.id
         )
+
 
     return render(
         request,
@@ -407,3 +380,4 @@ def assign_ticket(request, ticket_id):
             'users': users
         }
     )
+```
