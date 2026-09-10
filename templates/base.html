@@ -1,514 +1,507 @@
+```html
 {% load static %}
 
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>
-        {% block title %}اتوماسیون اداری{% endblock %}
+        {% block title %}
+            سامانه مدیریت و اتوماسیون داخلی
+        {% endblock %}
     </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
 
-        /* =========================
-           RESET
-        ========================= */
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            direction: rtl;
         }
 
         body {
+            margin: 0;
             font-family: Tahoma, Arial, sans-serif;
             background: #f5f7fb;
-            color: #1e293b;
-            line-height: 1.6;
         }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        button {
-            font-family: inherit;
-        }
-
 
         /* =========================
-           APP
-        ========================= */
-
-        .app {
-            min-height: 100vh;
-            display: flex;
-        }
-
-
-        /* =========================
-           SIDEBAR
+           Sidebar
         ========================= */
 
         .sidebar {
             position: fixed;
             top: 0;
             right: 0;
-            bottom: 0;
 
-            width: 270px;
+            width: 260px;
+            height: 100vh;
 
             background: #ffffff;
+
             border-left: 1px solid #e5e7eb;
 
             display: flex;
             flex-direction: column;
 
             z-index: 1000;
-
-            box-shadow: -5px 0 25px rgba(15, 23, 42, 0.04);
-
-            transition: right 0.3s ease;
         }
 
+        .sidebar-header {
+            padding: 25px 20px;
 
-        /* =========================
-           LOGO
-        ========================= */
+            border-bottom: 1px solid #e5e7eb;
 
-        .logo {
-            padding: 25px 22px;
-
-            border-bottom: 1px solid #eef1f5;
+            text-align: center;
         }
 
-        .logo-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .sidebar-logo {
+            width: 60px;
+            height: 60px;
 
-        .logo-icon {
-            width: 48px;
-            height: 48px;
+            margin: auto;
 
-            border-radius: 14px;
+            border-radius: 18px;
 
-            background: linear-gradient(
-                135deg,
-                #2563eb,
-                #4f46e5
-            );
-
-            color: white;
+            background: #dbeafe;
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            font-size: 22px;
-
-            box-shadow:
-                0 8px 20px rgba(37, 99, 235, 0.20);
+            font-size: 30px;
         }
 
-        .logo-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #1e293b;
-        }
+        .sidebar-title {
+            margin-top: 12px;
 
-        .logo-subtitle {
-            font-size: 10px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-
-        /* =========================
-           NAVIGATION
-        ========================= */
-
-        .navigation {
-            flex: 1;
-            overflow-y: auto;
-
-            padding: 22px 15px;
-        }
-
-        .menu-title {
-            font-size: 10px;
+            font-size: 17px;
             font-weight: bold;
 
-            color: #94a3b8;
-
-            margin:
-                0 10px
-                10px;
+            color: #1f2937;
         }
 
-        .menu {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-
-            gap: 12px;
-
-            padding: 12px 14px;
-
-            border-radius: 12px;
-
-            color: #64748b;
+        .sidebar-subtitle {
+            margin-top: 5px;
 
             font-size: 12px;
 
-            transition:
-                background 0.2s ease,
-                color 0.2s ease,
-                transform 0.2s ease;
-        }
-
-        .menu-item:hover {
-            background: #eff6ff;
-            color: #2563eb;
-            transform: translateX(-3px);
-        }
-
-        .menu-icon {
-            width: 25px;
-            min-width: 25px;
-
-            text-align: center;
-
-            font-size: 17px;
-        }
-
-        .menu-badge {
-            margin-right: auto;
-
-            background: #fee2e2;
-            color: #dc2626;
-
-            padding: 3px 7px;
-
-            border-radius: 20px;
-
-            font-size: 8px;
+            color: #9ca3af;
         }
 
 
         /* =========================
-           USER BOX
+           Navigation
         ========================= */
 
-        .user-box {
-            padding: 15px;
+        .sidebar-menu {
 
-            border-top: 1px solid #eef1f5;
+            flex: 1;
+
+            padding: 18px 12px;
+
+            overflow-y: auto;
         }
 
-        .user {
+        .menu-title {
+
+            font-size: 11px;
+
+            color: #9ca3af;
+
+            padding: 8px 12px;
+
+            margin-top: 8px;
+        }
+
+        .menu-item {
+
             display: flex;
+
             align-items: center;
 
             gap: 10px;
 
-            background: #f8fafc;
+            padding: 12px 14px;
+
+            margin-bottom: 5px;
+
+            border-radius: 12px;
+
+            color: #4b5563;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .menu-item:hover {
+
+            background: #f3f4f6;
+
+            color: #2563eb;
+        }
+
+        .menu-item.active {
+
+            background: #eff6ff;
+
+            color: #2563eb;
+
+            font-weight: bold;
+        }
+
+        .menu-icon {
+
+            width: 25px;
+
+            text-align: center;
+
+            font-size: 18px;
+        }
+
+
+        /* =========================
+           User Box
+        ========================= */
+
+        .user-box {
+
+            position: relative;
+
+            padding: 14px;
+
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .user {
+
+            width: 100%;
+
+            border: none;
+
+            background: transparent;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
 
             padding: 10px;
 
             border-radius: 14px;
+
+            cursor: pointer;
+
+            text-align: right;
+
+            transition: 0.2s;
+        }
+
+        .user:hover {
+
+            background: #f3f4f6;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
 
-            min-width: 40px;
+            width: 42px;
+            height: 42px;
+
+            min-width: 42px;
 
             border-radius: 12px;
 
             background: #dbeafe;
-            color: #2563eb;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
-            font-size: 16px;
+            font-size: 21px;
         }
 
         .user-info {
+
             flex: 1;
+
             min-width: 0;
         }
 
         .user-name {
-            font-size: 11px;
+
+            font-size: 13px;
+
             font-weight: bold;
 
+            color: #1f2937;
+
             white-space: nowrap;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
         }
 
         .user-role {
-            font-size: 9px;
-
-            color: #94a3b8;
 
             margin-top: 3px;
+
+            font-size: 11px;
+
+            color: #9ca3af;
         }
 
-        .logout {
-            color: #94a3b8;
-            font-size: 16px;
+        .user-arrow {
 
-            transition: color 0.2s ease;
+            font-size: 13px;
+
+            color: #9ca3af;
+
+            transition: 0.2s;
         }
 
-        .logout:hover {
-            color: #ef4444;
-        }
+        .user-arrow.open {
 
-
-        /* =========================
-           MAIN
-        ========================= */
-
-        .main {
-            width: calc(100% - 270px);
-
-            margin-right: 270px;
-
-            min-height: 100vh;
+            transform: rotate(180deg);
         }
 
 
         /* =========================
-           HEADER
+           User Panel
         ========================= */
 
-        .header {
-            height: 75px;
+        .user-panel {
+
+            position: absolute;
+
+            right: 14px;
+
+            bottom: 82px;
+
+            width: 230px;
 
             background: #ffffff;
 
-            border-bottom: 1px solid #e5e7eb;
+            border: 1px solid #e5e7eb;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.12);
+
+            padding: 15px;
+
+            display: none;
+
+            z-index: 2000;
+        }
+
+        .user-panel.show {
+
+            display: block;
+        }
+
+        .user-panel-header {
 
             display: flex;
+
             align-items: center;
-            justify-content: space-between;
 
-            padding: 0 35px;
+            gap: 10px;
 
-            position: sticky;
-            top: 0;
+            padding-bottom: 12px;
 
-            z-index: 100;
+            border-bottom: 1px solid #f0f0f0;
+
+            margin-bottom: 12px;
         }
 
-        .header-title {
-            font-size: 18px;
+        .user-panel-avatar {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background: #dbeafe;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 20px;
+        }
+
+        .user-panel-title {
+
+            font-size: 14px;
+
             font-weight: bold;
 
-            color: #1e293b;
+            color: #1f2937;
         }
 
-        .header-subtitle {
-            color: #94a3b8;
+        .user-panel-subtitle {
 
-            font-size: 10px;
+            font-size: 11px;
+
+            color: #9ca3af;
 
             margin-top: 3px;
         }
 
-        .header-actions {
-            display: flex;
+        .user-detail {
+
+            margin-bottom: 10px;
+        }
+
+        .user-detail-label {
+
+            font-size: 10px;
+
+            color: #9ca3af;
+
+            margin-bottom: 3px;
+        }
+
+        .user-detail-value {
+
+            font-size: 12px;
+
+            color: #374151;
+
+            word-break: break-word;
+        }
+
+        .user-status {
+
+            display: inline-flex;
+
             align-items: center;
 
-            gap: 8px;
+            gap: 5px;
+
+            font-size: 11px;
+
+            color: #16a34a;
+
+            background: #f0fdf4;
+
+            padding: 4px 8px;
+
+            border-radius: 8px;
         }
 
-        .header-button {
-            width: 40px;
-            height: 40px;
+        .user-status-dot {
 
-            border: none;
+            width: 6px;
+            height: 6px;
 
-            border-radius: 12px;
+            background: #22c55e;
 
-            background: #f8fafc;
-
-            color: #64748b;
-
-            cursor: pointer;
-
-            font-size: 16px;
-
-            transition:
-                background 0.2s ease,
-                color 0.2s ease;
+            border-radius: 50%;
         }
 
-        .header-button:hover {
-            background: #eff6ff;
-            color: #2563eb;
+        .logout-button {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 7px;
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 14px;
+
+            border-radius: 10px;
+
+            background: #fef2f2;
+
+            color: #dc2626;
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+        }
+
+        .logout-button:hover {
+
+            background: #fee2e2;
         }
 
 
         /* =========================
-           CONTENT
+           Main Content
         ========================= */
+
+        .main {
+
+            margin-right: 260px;
+
+            min-height: 100vh;
+
+            padding: 25px;
+        }
 
         .content {
-            padding: 35px;
+
+            max-width: 1400px;
+
+            margin: auto;
         }
 
 
         /* =========================
-           MOBILE BUTTON
+           Mobile
         ========================= */
 
-        .mobile-menu {
-            display: none;
-
-            width: 40px;
-            height: 40px;
-
-            border: none;
-
-            border-radius: 12px;
-
-            background: #eff6ff;
-            color: #2563eb;
-
-            cursor: pointer;
-
-            font-size: 18px;
-        }
-
-
-        /* =========================
-           OVERLAY
-        ========================= */
-
-        .sidebar-overlay {
-            display: none;
-
-            position: fixed;
-
-            inset: 0;
-
-            background: rgba(15, 23, 42, 0.35);
-
-            z-index: 900;
-        }
-
-
-        /* =========================
-           SCROLLBAR
-        ========================= */
-
-        .navigation::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .navigation::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .navigation::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-
-
-        /* =========================
-           RESPONSIVE
-        ========================= */
-
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
 
             .sidebar {
-                right: -270px;
-            }
 
-            .sidebar.open {
-                right: 0;
+                width: 220px;
             }
 
             .main {
-                width: 100%;
-                margin-right: 0;
-            }
 
-            .mobile-menu {
-                display: block;
-            }
+                margin-right: 220px;
 
-            .sidebar-overlay.active {
-                display: block;
-            }
-
-            .header {
-                padding: 0 20px;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-        }
-
-
-        @media (max-width: 600px) {
-
-            .header {
-                height: 65px;
-            }
-
-            .header-title {
-                font-size: 15px;
-            }
-
-            .header-subtitle {
-                display: none;
-            }
-
-            .header-actions {
-                gap: 5px;
-            }
-
-            .header-button {
-                width: 36px;
-                height: 36px;
-            }
-
-            .content {
                 padding: 15px;
             }
 
-        }
+            .user-panel {
 
+                width: 210px;
+            }
+        }
 
     </style>
 
-
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}
+    {% endblock %}
 
 </head>
 
@@ -516,342 +509,450 @@
 <body>
 
 
-<div class="app">
+<!-- =========================
+     Sidebar
+========================= -->
+
+<aside class="sidebar">
+
+
+    <!-- Header -->
+
+    <div class="sidebar-header">
+
+        <div class="sidebar-logo">
+            🏢
+        </div>
+
+        <div class="sidebar-title">
+            سامانه اتوماسیون
+        </div>
+
+        <div class="sidebar-subtitle">
+            مدیریت و اتوماسیون داخلی
+        </div>
+
+    </div>
+
+
+    <!-- Menu -->
+
+    <nav class="sidebar-menu">
+
+
+        <div class="menu-title">
+            اصلی
+        </div>
+
+
+        <a
+            href="{% url 'overview' %}"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                🏠
+            </span>
+
+            <span>
+                داشبورد
+            </span>
+
+        </a>
+
+
+        <div class="menu-title">
+            خدمات
+        </div>
+
+
+        <a
+            href="{% url 'ticket_list' %}"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                🎫
+            </span>
+
+            <span>
+                تیکت‌های پشتیبانی
+            </span>
+
+        </a>
+
+
+        <a
+            href="#"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                📄
+            </span>
+
+            <span>
+                اتوماسیون اداری
+            </span>
+
+        </a>
+
+
+        <a
+            href="#"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                📁
+            </span>
+
+            <span>
+                اسناد
+            </span>
+
+        </a>
+
+
+        <a
+            href="#"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                📝
+            </span>
+
+            <span>
+                درخواست‌ها
+            </span>
+
+        </a>
+
+
+        <a
+            href="#"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                📅
+            </span>
+
+            <span>
+                جلسات
+            </span>
+
+        </a>
+
+
+    </nav>
 
 
     <!-- =========================
-         SIDEBAR
+         User
     ========================= -->
 
-    <aside class="sidebar" id="sidebar">
+    <div class="user-box">
 
 
-        <!-- Logo -->
+        <!-- User Details Panel -->
 
-        <div class="logo">
+        <div
+            id="userPanel"
+            class="user-panel"
+        >
 
-            <div class="logo-box">
+            <div class="user-panel-header">
 
-                <div class="logo-icon">
-                    ⚙
-                </div>
-
-                <div>
-
-                    <div class="logo-title">
-                        اتوماسیون اداری
-                    </div>
-
-                    <div class="logo-subtitle">
-                        سیستم مدیریت سازمان
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Navigation -->
-
-        <div class="navigation">
-
-            <div class="menu-title">
-                منوی اصلی
-            </div>
-
-
-            <nav class="menu">
-
-
-                <a href="/dashboard/" class="menu-item">
-
-                    <span class="menu-icon">
-                        📊
-                    </span>
-
-                    <span>
-                        داشبورد مدیریت
-                    </span>
-
-                </a>
-
-
-                <a href="/helpdesk/" class="menu-item">
-
-                    <span class="menu-icon">
-                        🎧
-                    </span>
-
-                    <span>
-                        IT Help Desk
-                    </span>
-
-                    <span class="menu-badge">
-                        تیکت
-                    </span>
-
-                </a>
-
-
-                <a href="/admin-automation/" class="menu-item">
-
-                    <span class="menu-icon">
-                        ✉️
-                    </span>
-
-                    <span>
-                        نامه‌های اداری
-                    </span>
-
-                </a>
-
-
-                <a href="/workflow/" class="menu-item">
-
-                    <span class="menu-icon">
-                        🔄
-                    </span>
-
-                    <span>
-                        گردش کار
-                    </span>
-
-                </a>
-
-
-                <a href="/meetings/" class="menu-item">
-
-                    <span class="menu-icon">
-                        📅
-                    </span>
-
-                    <span>
-                        جلسات
-                    </span>
-
-                </a>
-
-
-                <a href="/documents/" class="menu-item">
-
-                    <span class="menu-icon">
-                        📁
-                    </span>
-
-                    <span>
-                        اسناد و بایگانی
-                    </span>
-
-                </a>
-
-
-                <div style="height: 25px;"></div>
-
-
-                <div class="menu-title">
-                    مدیریت سیستم
-                </div>
-
-
-                <a href="/admin/" class="menu-item">
-
-                    <span class="menu-icon">
-                        👤
-                    </span>
-
-                    <span>
-                        مدیریت کاربران
-                    </span>
-
-                </a>
-
-
-                <a href="/admin/" class="menu-item">
-
-                    <span class="menu-icon">
-                        ⚙️
-                    </span>
-
-                    <span>
-                        تنظیمات
-                    </span>
-
-                </a>
-
-
-            </nav>
-
-        </div>
-
-
-        <!-- User -->
-
-        <div class="user-box">
-
-            <div class="user">
-
-
-                <div class="user-avatar">
+                <div class="user-panel-avatar">
                     👤
                 </div>
 
+                <div>
 
-                <div class="user-info">
+                    <div class="user-panel-title">
 
-                    <div class="user-name">
-                        کاربر سیستم
+                        {% if request.user.first_name or request.user.last_name %}
+
+                            {{ request.user.first_name }}
+                            {{ request.user.last_name }}
+
+                        {% else %}
+
+                            {{ request.user.username }}
+
+                        {% endif %}
+
                     </div>
 
-                    <div class="user-role">
-                        کاربر سازمان
+                    <div class="user-panel-subtitle">
+                        اطلاعات کاربری
                     </div>
 
                 </div>
 
+            </div>
 
-                <a
-                    href="/admin/logout/"
-                    class="logout"
-                    title="خروج"
-                >
-                    ↪
-                </a>
 
+            <!-- Username -->
+
+            <div class="user-detail">
+
+                <div class="user-detail-label">
+                    نام کاربری
+                </div>
+
+                <div class="user-detail-value">
+                    {{ request.user.username }}
+                </div>
 
             </div>
+
+
+            <!-- Full Name -->
+
+            <div class="user-detail">
+
+                <div class="user-detail-label">
+                    نام و نام خانوادگی
+                </div>
+
+                <div class="user-detail-value">
+
+                    {% if request.user.first_name or request.user.last_name %}
+
+                        {{ request.user.first_name }}
+                        {{ request.user.last_name }}
+
+                    {% else %}
+
+                        ثبت نشده
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Email -->
+
+            <div class="user-detail">
+
+                <div class="user-detail-label">
+                    ایمیل
+                </div>
+
+                <div class="user-detail-value">
+
+                    {% if request.user.email %}
+
+                        {{ request.user.email }}
+
+                    {% else %}
+
+                        ثبت نشده
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Status -->
+
+            <div class="user-detail">
+
+                <div class="user-detail-label">
+                    وضعیت حساب
+                </div>
+
+                <div class="user-status">
+
+                    <span class="user-status-dot"></span>
+
+                    فعال
+
+                </div>
+
+            </div>
+
+
+            <!-- Logout -->
+
+            <a
+                href="{% url 'logout' %}"
+                class="logout-button"
+            >
+
+                <span>
+                    🚪
+                </span>
+
+                خروج از سامانه
+
+            </a>
+
 
         </div>
 
 
-    </aside>
+        <!-- User Button -->
+
+        <button
+            type="button"
+            class="user"
+            id="userMenuButton"
+            aria-expanded="false"
+            onclick="toggleUserPanel()"
+        >
+
+            <div class="user-avatar">
+                👤
+            </div>
 
 
-    <!-- Overlay -->
+            <div class="user-info">
 
-    <div
-        class="sidebar-overlay"
-        id="sidebarOverlay"
-        onclick="closeSidebar()"
-    ></div>
+                <div class="user-name">
 
+                    {% if request.user.first_name or request.user.last_name %}
 
-    <!-- =========================
-         MAIN
-    ========================= -->
+                        {{ request.user.first_name }}
+                        {{ request.user.last_name }}
 
-    <main class="main">
+                    {% else %}
 
+                        {{ request.user.username }}
 
-        <!-- Header -->
+                    {% endif %}
 
-        <header class="header">
+                </div>
 
-
-            <div style="display: flex; align-items: center; gap: 12px;">
-
-                <button
-                    class="mobile-menu"
-                    onclick="openSidebar()"
-                    aria-label="باز کردن منو"
-                >
-                    ☰
-                </button>
-
-
-                <div>
-
-                    <div class="header-title">
-
-                        {% block page_title %}
-                            داشبورد مدیریت
-                        {% endblock %}
-
-                    </div>
-
-                    <div class="header-subtitle">
-                        سیستم اتوماسیون اداری
-                    </div>
-
+                <div class="user-role">
+                    کاربر سامانه
                 </div>
 
             </div>
 
 
-            <div class="header-actions">
-
-
-                <button
-                    class="header-button"
-                    title="جستجو"
-                >
-                    🔍
-                </button>
-
-
-                <button
-                    class="header-button"
-                    title="اعلان‌ها"
-                >
-                    🔔
-                </button>
-
-
+            <div
+                class="user-arrow"
+                id="userArrow"
+            >
+                ▲
             </div>
 
+        </button>
 
-        </header>
+    </div>
 
-
-        <!-- Content -->
-
-        <section class="content">
-
-            {% block content %}
-            {% endblock %}
-
-        </section>
+</aside>
 
 
-    </main>
+
+<!-- =========================
+     Main
+========================= -->
+
+<main class="main">
+
+    <div class="content">
+
+        {% block content %}
+        {% endblock %}
+
+    </div>
+
+</main>
 
 
-</div>
 
+<!-- =========================
+     JavaScript
+========================= -->
 
 <script>
 
-    function openSidebar() {
+    function toggleUserPanel() {
 
-        const sidebar =
-            document.getElementById("sidebar");
+        const panel =
+            document.getElementById('userPanel');
 
-        const overlay =
-            document.getElementById("sidebarOverlay");
+        const button =
+            document.getElementById('userMenuButton');
 
-        sidebar.classList.add("open");
+        const arrow =
+            document.getElementById('userArrow');
 
-        overlay.classList.add("active");
+
+        panel.classList.toggle('show');
+
+
+        const isOpen =
+            panel.classList.contains('show');
+
+
+        button.setAttribute(
+            'aria-expanded',
+            isOpen
+        );
+
+
+        arrow.classList.toggle(
+            'open',
+            isOpen
+        );
+
     }
 
 
-    function closeSidebar() {
 
-        const sidebar =
-            document.getElementById("sidebar");
+    document.addEventListener(
+        'click',
+        function(event) {
 
-        const overlay =
-            document.getElementById("sidebarOverlay");
+            const userBox =
+                document.querySelector('.user-box');
 
-        sidebar.classList.remove("open");
+            const panel =
+                document.getElementById('userPanel');
 
-        overlay.classList.remove("active");
-    }
+            const button =
+                document.getElementById('userMenuButton');
+
+            const arrow =
+                document.getElementById('userArrow');
+
+
+            if (
+                userBox &&
+                !userBox.contains(event.target)
+            ) {
+
+                panel.classList.remove('show');
+
+                button.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+
+                arrow.classList.remove('open');
+
+            }
+
+        }
+    );
 
 </script>
 
 
+{% block extra_js %}
+{% endblock %}
+
 </body>
 
 </html>
+```
