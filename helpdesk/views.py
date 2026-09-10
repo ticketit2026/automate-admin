@@ -20,8 +20,11 @@ def can_view_ticket(user, ticket):
 @login_required
 def ticket_list(request):
 
+    # ==========================================
     # ثبت تیکت
     # همه کاربران لاگین‌شده می‌توانند تیکت ثبت کنند
+    # ==========================================
+
     if request.method == 'POST':
 
         title = request.POST.get('title')
@@ -38,9 +41,10 @@ def ticket_list(request):
         return redirect('ticket_list')
 
 
+    # ==========================================
     # نمایش تیکت‌ها
-    # اگر کاربر مجوز مشاهده همه تیکت‌ها را داشته باشد
-    # تمام تیکت‌ها را می‌بیند
+    # ==========================================
+
     if request.user.has_perm(
         'helpdesk.view_all_tickets'
     ):
@@ -51,13 +55,16 @@ def ticket_list(request):
 
     else:
 
-        # در غیر این صورت فقط تیکت‌های خودش را می‌بیند
         tickets = Ticket.objects.filter(
             created_by=request.user
         ).order_by(
             '-created_at'
         )
 
+
+    # ==========================================
+    # دسترسی‌ها برای Template
+    # ==========================================
 
     return render(
         request,
@@ -68,6 +75,16 @@ def ticket_list(request):
             'can_view_all_tickets':
                 request.user.has_perm(
                     'helpdesk.view_all_tickets'
+                ),
+
+            'can_change_status':
+                request.user.has_perm(
+                    'helpdesk.change_ticket_status'
+                ),
+
+            'can_assign':
+                request.user.has_perm(
+                    'helpdesk.assign_ticket'
                 ),
         }
     )
@@ -80,6 +97,9 @@ def ticket_detail(request, ticket_id):
         Ticket,
         id=ticket_id
     )
+
+
+    # بررسی دسترسی مشاهده تیکت
 
     if not can_view_ticket(
         request.user,
@@ -131,6 +151,8 @@ def ticket_detail(request, ticket_id):
 @login_required
 def edit_ticket(request, ticket_id):
 
+    # Permission ویرایش
+
     if not request.user.has_perm(
         'helpdesk.change_ticket'
     ):
@@ -142,6 +164,8 @@ def edit_ticket(request, ticket_id):
         id=ticket_id
     )
 
+
+    # بررسی اینکه کاربر اجازه مشاهده این تیکت را دارد
 
     if not can_view_ticket(
         request.user,
@@ -182,6 +206,8 @@ def edit_ticket(request, ticket_id):
 @login_required
 def delete_ticket(request, ticket_id):
 
+    # Permission حذف
+
     if not request.user.has_perm(
         'helpdesk.delete_ticket'
     ):
@@ -194,12 +220,16 @@ def delete_ticket(request, ticket_id):
     )
 
 
+    # بررسی دسترسی مشاهده تیکت
+
     if not can_view_ticket(
         request.user,
         ticket
     ):
         raise PermissionDenied
 
+
+    # حذف فقط با POST
 
     if request.method == 'POST':
 
@@ -222,6 +252,8 @@ def delete_ticket(request, ticket_id):
 @login_required
 def add_ticket_reply(request, ticket_id):
 
+    # Permission پاسخ
+
     if not request.user.has_perm(
         'helpdesk.reply_ticket'
     ):
@@ -233,6 +265,8 @@ def add_ticket_reply(request, ticket_id):
         id=ticket_id
     )
 
+
+    # بررسی دسترسی مشاهده تیکت
 
     if not can_view_ticket(
         request.user,
@@ -254,6 +288,9 @@ def add_ticket_reply(request, ticket_id):
                 message=message.strip()
             )
 
+
+            # اگر تیکت بسته بوده،
+            # با پاسخ دوباره باز شود
 
             if ticket.status == 'closed':
 
@@ -277,6 +314,8 @@ def add_ticket_reply(request, ticket_id):
 @login_required
 def update_ticket_status(request, ticket_id):
 
+    # Permission تغییر وضعیت
+
     if not request.user.has_perm(
         'helpdesk.change_ticket_status'
     ):
@@ -289,6 +328,8 @@ def update_ticket_status(request, ticket_id):
     )
 
 
+    # بررسی دسترسی مشاهده تیکت
+
     if not can_view_ticket(
         request.user,
         ticket
@@ -299,6 +340,7 @@ def update_ticket_status(request, ticket_id):
     if request.method == 'POST':
 
         status = request.POST.get('status')
+
 
         ticket.status = status
 
@@ -323,6 +365,8 @@ def update_ticket_status(request, ticket_id):
 @login_required
 def assign_ticket(request, ticket_id):
 
+    # Permission ارجاع
+
     if not request.user.has_perm(
         'helpdesk.assign_ticket'
     ):
@@ -334,6 +378,8 @@ def assign_ticket(request, ticket_id):
         id=ticket_id
     )
 
+
+    # بررسی دسترسی مشاهده تیکت
 
     if not can_view_ticket(
         request.user,
