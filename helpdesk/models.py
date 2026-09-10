@@ -51,7 +51,7 @@ class Ticket(models.Model):
         permissions = [
             (
                 'view_all_tickets',
-                'مشاهده همه تیکت‌ها'
+                'مشاهده تیکت‌ها'
             ),
             (
                 'create_ticket',
@@ -74,10 +74,6 @@ class Ticket(models.Model):
     def __str__(self):
         return self.title
 
-
-# ==========================================
-# پاسخ‌های تیکت
-# ==========================================
 
 class TicketReply(models.Model):
 
