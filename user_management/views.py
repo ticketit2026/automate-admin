@@ -1,7 +1,17 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 
 @login_required
 def user_list(request):
-    return HttpResponse("User Management OK")
+
+    users = User.objects.all().order_by('username')
+
+    return render(
+        request,
+        'user_management/user_list.html',
+        {
+            'users': []
+        }
+    )
