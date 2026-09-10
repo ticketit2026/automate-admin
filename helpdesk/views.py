@@ -425,4 +425,3 @@ def assign_ticket(request, ticket_id):
             'users': users
         }
     )
-```
