@@ -24,6 +24,12 @@ urlpatterns = [
     ),
 
     path(
+        'password/<int:user_id>/',
+        views.user_password,
+        name='user_password'
+    ),
+
+    path(
         'permissions/<int:user_id>/',
         views.user_permissions,
         name='user_permissions'
