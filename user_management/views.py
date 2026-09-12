@@ -21,6 +21,10 @@ def user_list(request):
 @login_required
 def user_create(request):
 
+    # فقط ادمین اصلی (Superuser) اجازه ایجاد کاربر دارد
+    if not request.user.is_superuser:
+        return redirect('user_management')
+
     if request.method == 'POST':
 
         username = request.POST.get('username')
@@ -29,12 +33,17 @@ def user_create(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
-        user = User.objects.create_user(
+        User.objects.create_user(
             username=username,
             password=password,
             first_name=first_name,
             last_name=last_name,
             email=email
+        )
+
+        messages.success(
+            request,
+            'کاربر با موفقیت ایجاد شد.'
         )
 
         return redirect('user_management')
@@ -48,7 +57,10 @@ def user_create(request):
 @login_required
 def user_edit(request, user_id):
 
-    user = get_object_or_404(User, id=user_id)
+    user = get_object_or_404(
+        User,
+        id=user_id
+    )
 
     if request.method == 'POST':
 
@@ -65,9 +77,7 @@ def user_edit(request, user_id):
             'اطلاعات کاربر با موفقیت ذخیره شد.'
         )
 
-        return redirect(
-            'user_management'
-        )
+        return redirect('user_management')
 
     return render(
         request,
@@ -81,6 +91,7 @@ def user_edit(request, user_id):
 @login_required
 def user_permissions(request, user_id):
 
+    # فقط ادمین اصلی اجازه مدیریت دسترسی‌ها را دارد
     if not request.user.is_superuser:
         return redirect('user_management')
 
