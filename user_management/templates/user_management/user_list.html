@@ -8,9 +8,12 @@
 
 <div class="max-w-7xl mx-auto">
 
+    <!-- Header -->
+
     <div class="flex items-center justify-between mb-6">
 
         <div>
+
             <h1 class="text-2xl font-bold text-gray-800">
                 مدیریت کاربران
             </h1>
@@ -18,7 +21,11 @@
             <p class="text-sm text-gray-500 mt-2">
                 مدیریت حساب‌های کاربری سامانه
             </p>
+
         </div>
+
+
+        {% if request.user.is_superuser %}
 
         <a
             href="{% url 'user_create' %}"
@@ -27,8 +34,12 @@
             + ایجاد کاربر
         </a>
 
+        {% endif %}
+
     </div>
 
+
+    <!-- Users Table -->
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
@@ -84,15 +95,21 @@
 
                 <tbody class="divide-y divide-gray-100">
 
+
                     {% for user in users %}
 
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 transition">
+
+
+                        <!-- Username -->
 
                         <td class="px-6 py-4">
 
                             <div class="flex items-center gap-3">
 
-                                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center"
+                                >
                                     👤
                                 </div>
 
@@ -113,6 +130,8 @@
                         </td>
 
 
+                        <!-- Full Name -->
+
                         <td class="px-6 py-4 text-gray-600">
 
                             {% if user.first_name or user.last_name %}
@@ -131,6 +150,8 @@
                         </td>
 
 
+                        <!-- Email -->
+
                         <td class="px-6 py-4 text-gray-600">
 
                             {% if user.email %}
@@ -148,17 +169,23 @@
                         </td>
 
 
+                        <!-- Status -->
+
                         <td class="px-6 py-4">
 
                             {% if user.is_active %}
 
-                                <span class="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                <span
+                                    class="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                >
                                     ● فعال
                                 </span>
 
                             {% else %}
 
-                                <span class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                <span
+                                    class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                >
                                     ● غیرفعال
                                 </span>
 
@@ -167,23 +194,31 @@
                         </td>
 
 
+                        <!-- Account Type -->
+
                         <td class="px-6 py-4">
 
                             {% if user.is_superuser %}
 
-                                <span class="bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                <span
+                                    class="bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                >
                                     مدیر ارشد
                                 </span>
 
                             {% elif user.is_staff %}
 
-                                <span class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                <span
+                                    class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                >
                                     مدیر سیستم
                                 </span>
 
                             {% else %}
 
-                                <span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs">
+                                <span
+                                    class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs"
+                                >
                                     کاربر عادی
                                 </span>
 
@@ -192,42 +227,51 @@
                         </td>
 
 
+                        <!-- Operations -->
+
                         <td class="px-6 py-4">
 
                             <div class="flex items-center gap-2">
 
-                                <button
-                                    type="button"
-                                    class="px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold"
+                                <!-- فقط یک دکمه ویرایش -->
+
+                                <a
+                                    href="{% url 'user_edit' user.id %}"
+                                    class="px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition"
                                 >
                                     ویرایش
-                                </button>
+                                </a>
 
-                               <a
-    href="{% url 'user_edit' user.id %}"
-    class="px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold"
->
-    ویرایش
-</a>
 
-<a
-    href="{% url 'user_permissions' user.id %}"
-    class="px-3 py-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-xs font-semibold"
->
-    دسترسی‌ها
-</a>
+                                <!-- دسترسی‌ها فقط برای ادمین -->
+
+                                {% if request.user.is_superuser %}
+
+                                <a
+                                    href="{% url 'user_permissions' user.id %}"
+                                    class="px-3 py-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-xs font-semibold transition"
+                                >
+                                    دسترسی‌ها
+                                </a>
+
+                                {% endif %}
 
                             </div>
 
                         </td>
 
+
                     </tr>
+
 
                     {% empty %}
 
                     <tr>
 
-                        <td colspan="6" class="px-6 py-16 text-center">
+                        <td
+                            colspan="6"
+                            class="px-6 py-16 text-center"
+                        >
 
                             <div class="text-5xl mb-4">
                                 👥
@@ -242,6 +286,7 @@
                     </tr>
 
                     {% endfor %}
+
 
                 </tbody>
 
