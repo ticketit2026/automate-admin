@@ -41,7 +41,7 @@
     </div>
 
 
-    <!-- پیام‌های سیستم -->
+    <!-- پیام‌ها -->
 
     {% if messages %}
 
@@ -61,8 +61,6 @@
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
 
-        <!-- عنوان جدول -->
-
         <div class="px-6 py-5 border-b border-gray-200">
 
             <h2 class="font-bold text-gray-800">
@@ -76,14 +74,10 @@
         </div>
 
 
-        <!-- جدول -->
-
         <div class="overflow-x-auto">
 
             <table class="w-full text-sm">
 
-
-                <!-- Header -->
 
                 <thead class="bg-gray-50">
 
@@ -118,28 +112,23 @@
                 </thead>
 
 
-                <!-- Users -->
-
                 <tbody class="divide-y divide-gray-100">
 
 
                     {% for user in users %}
 
-
                     <tr class="hover:bg-gray-50 transition">
 
 
-                        <!-- Username -->
+                        <!-- کاربر -->
 
                         <td class="px-6 py-4">
 
                             <div class="flex items-center gap-3">
 
-
                                 <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
                                     👤
                                 </div>
-
 
                                 <div>
 
@@ -153,13 +142,12 @@
 
                                 </div>
 
-
                             </div>
 
                         </td>
 
 
-                        <!-- Full Name -->
+                        <!-- نام -->
 
                         <td class="px-6 py-4 text-gray-600">
 
@@ -179,7 +167,7 @@
                         </td>
 
 
-                        <!-- Email -->
+                        <!-- ایمیل -->
 
                         <td class="px-6 py-4 text-gray-600">
 
@@ -198,7 +186,7 @@
                         </td>
 
 
-                        <!-- Status -->
+                        <!-- وضعیت -->
 
                         <td class="px-6 py-4">
 
@@ -227,10 +215,9 @@
                         </td>
 
 
-                        <!-- Account Type -->
+                        <!-- نوع حساب -->
 
                         <td class="px-6 py-4">
-
 
                             {% if user.is_superuser %}
 
@@ -238,13 +225,11 @@
                                     مدیر ارشد
                                 </span>
 
-
                             {% elif user.is_staff %}
 
                                 <span class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
                                     مدیر سیستم
                                 </span>
-
 
                             {% else %}
 
@@ -254,27 +239,35 @@
 
                             {% endif %}
 
-
                         </td>
 
 
-                        <!-- Operations -->
+                        <!-- عملیات -->
 
                         <td class="px-6 py-4">
 
-                            <div class="flex items-center gap-2">
+                            {% if request.user.is_superuser %}
+
+                            <div class="flex items-center gap-2 flex-wrap">
 
 
-                                {% if request.user.is_superuser %}
-
-
-                                <!-- فقط یک دکمه ویرایش -->
+                                <!-- ویرایش -->
 
                                 <a
                                     href="{% url 'user_edit' user.id %}"
                                     class="px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition"
                                 >
                                     ویرایش
+                                </a>
+
+
+                                <!-- تغییر رمز -->
+
+                                <a
+                                    href="{% url 'user_password' user.id %}"
+                                    class="px-3 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-xs font-semibold transition"
+                                >
+                                    تغییر رمز
                                 </a>
 
 
@@ -288,18 +281,15 @@
                                 </a>
 
 
-                                {% else %}
-
-
-                                <span class="text-xs text-gray-400">
-                                    بدون دسترسی مدیریتی
-                                </span>
-
-
-                                {% endif %}
-
-
                             </div>
+
+                            {% else %}
+
+                            <span class="text-xs text-gray-400">
+                                بدون دسترسی مدیریتی
+                            </span>
+
+                            {% endif %}
 
                         </td>
 
@@ -308,9 +298,6 @@
 
 
                     {% empty %}
-
-
-                    <!-- بدون کاربر -->
 
                     <tr>
 
@@ -330,7 +317,6 @@
                         </td>
 
                     </tr>
-
 
                     {% endfor %}
 
