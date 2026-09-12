@@ -3,6 +3,19 @@ from django.contrib.auth.models import User
 
 
 class InternalLetter(models.Model):
+
+    DOCUMENT_TYPE_CHOICES = [
+        ('in', 'نامه وارده'),
+        ('out', 'نامه صادره'),
+        ('internal', 'نامه داخلی'),
+    ]
+
+    STATUS_CHOICES = [
+        ('draft', 'پیش‌نویس'),
+        ('sent', 'ارسال شده'),
+        ('received', 'دریافت شده'),
+    ]
+
     title = models.CharField(
         max_length=200,
         verbose_name='عنوان نامه'
@@ -14,11 +27,7 @@ class InternalLetter(models.Model):
 
     document_type = models.CharField(
         max_length=20,
-        choices=[
-            ('in', 'وارد'),
-            ('out', 'صادره'),
-            ('internal', 'داخلی')
-        ],
+        choices=DOCUMENT_TYPE_CHOICES,
         verbose_name='نوع نامه'
     )
 
@@ -30,12 +39,17 @@ class InternalLetter(models.Model):
     status = models.CharField(
         max_length=20,
         default='draft',
-        choices=[
-            ('draft', 'پیش‌نویس'),
-            ('sent', 'ارسال شده'),
-            ('received', 'دریافت شده'),
-        ],
+        choices=STATUS_CHOICES,
         verbose_name='وضعیت'
+    )
+
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_letters',
+        verbose_name='ارجاع به'
     )
 
     file = models.FileField(
@@ -63,9 +77,20 @@ class InternalLetter(models.Model):
     )
 
     class Meta:
-        verbose_name = 'نامه داخلی'
-        verbose_name_plural = 'نامه‌های داخلی'
+
+        verbose_name = 'نامه اداری'
+        verbose_name_plural = 'نامه‌های اداری'
+
         ordering = ['-created_at']
+
+        permissions = [
+            ('view_all_letters', 'مشاهده همه نامه‌ها'),
+            ('create_letter', 'ایجاد نامه'),
+            ('edit_letter', 'ویرایش نامه'),
+            ('delete_letter', 'حذف نامه'),
+            ('send_letter', 'ارسال نامه'),
+            ('assign_letter', 'ارجاع نامه'),
+        ]
 
     def __str__(self):
         return self.title
