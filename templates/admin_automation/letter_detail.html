@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}
+جزئیات نامه
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto">
+
+    <div class="flex items-center justify-between mb-6">
+
+        <div>
+
+            <h1 class="text-2xl font-bold text-gray-800">
+                {{ letter.title }}
+            </h1>
+
+            <p class="text-sm text-gray-500 mt-2">
+                جزئیات نامه اداری
+            </p>
+
+        </div>
+
+
+        <div class="flex gap-2">
+
+            <a
+                href="{% url 'letter_edit' letter.id %}"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl text-sm font-semibold"
+            >
+                ویرایش
+            </a>
+
+            <a
+                href="{% url 'letter_list' %}"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-3 rounded-xl text-sm font-semibold"
+            >
+                بازگشت
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+            <div>
+
+                <div class="text-xs text-gray-400 mb-2">
+                    نوع نامه
+                </div>
+
+                <div class="font-semibold text-gray-700">
+
+                    {{ letter.get_document_type_display }}
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="text-xs text-gray-400 mb-2">
+                    وضعیت
+                </div>
+
+                <div class="font-semibold text-gray-700">
+
+                    {{ letter.get_status_display }}
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="text-xs text-gray-400 mb-2">
+                    گیرنده
+                </div>
+
+                <div class="font-semibold text-gray-700">
+                    {{ letter.sent_to }}
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="text-xs text-gray-400 mb-2">
+                    ایجادکننده
+                </div>
+
+                <div class="font-semibold text-gray-700">
+                    {{ letter.created_by.username }}
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="text-xs text-gray-400 mb-2">
+                    ارجاع به
+                </div>
+
+                <div class="font-semibold text-gray-700">
+
+                    {% if letter.assigned_to %}
+
+                        {{ letter.assigned_to.username }}
+
+                    {% else %}
+
+                        <span class="text-gray-400">
+                            بدون ارجاع
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="text-xs text-gray-400 mb-2">
+                    تاریخ ایجاد
+                </div>
+
+                <div class="font-semibold text-gray-700">
+                    {{ letter.created_at|date:"Y/m/d H:i" }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="border-t border-gray-200 p-6">
+
+            <div class="text-sm font-bold text-gray-700 mb-3">
+                متن نامه
+            </div>
+
+            <div class="bg-gray-50 rounded-xl p-5 leading-8 text-gray-700 whitespace-pre-line">
+                {{ letter.content }}
+            </div>
+
+        </div>
+
+
+        {% if letter.file %}
+
+        <div class="border-t border-gray-200 p-6">
+
+            <div class="text-sm font-bold text-gray-700 mb-3">
+                فایل پیوست
+            </div>
+
+            <a
+                href="{{ letter.file.url }}"
+                target="_blank"
+                class="inline-flex bg-blue-50 text-blue-600 px-5 py-3 rounded-xl font-semibold"
+            >
+                📎 مشاهده / دریافت فایل
+            </a>
+
+        </div>
+
+        {% endif %}
+
+
+        {% if letter.status == 'draft' %}
+
+        <div class="border-t border-gray-200 p-6">
+
+            <form
+                method="post"
+                action="{% url 'letter_send' letter.id %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold"
+                >
+                    📤 ارسال نامه
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="border-t border-gray-200 p-6">
+
+            <form
+                method="post"
+                action="{% url 'letter_delete' letter.id %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    onclick="return confirm('آیا از حذف این نامه مطمئن هستید؟');"
+                    class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-3 rounded-xl font-semibold"
+                >
+                    🗑️ حذف نامه
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
