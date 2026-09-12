@@ -21,7 +21,7 @@ def user_list(request):
 @login_required
 def user_create(request):
 
-    # فقط ادمین اصلی (Superuser) اجازه ایجاد کاربر دارد
+    # فقط ادمین اصلی اجازه ایجاد کاربر دارد
     if not request.user.is_superuser:
         return redirect('user_management')
 
@@ -56,6 +56,10 @@ def user_create(request):
 
 @login_required
 def user_edit(request, user_id):
+
+    # فقط ادمین اصلی اجازه ویرایش کاربر دارد
+    if not request.user.is_superuser:
+        return redirect('user_management')
 
     user = get_object_or_404(
         User,
