@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}
+ویرایش نامه
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+
+    <div class="mb-6">
+
+        <h1 class="text-2xl font-bold text-gray-800">
+            ویرایش نامه
+        </h1>
+
+        <p class="text-sm text-gray-500 mt-2">
+            {{ letter.title }}
+        </p>
+
+    </div>
+
+
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+
+        <form
+            method="post"
+            enctype="multipart/form-data"
+        >
+
+            {% csrf_token %}
+
+
+            <div class="mb-5">
+
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    عنوان نامه
+                </label>
+
+                <input
+                    type="text"
+                    name="title"
+                    value="{{ letter.title }}"
+                    required
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                >
+
+            </div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+
+
+                <div>
+
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        نوع نامه
+                    </label>
+
+                    <select
+                        name="document_type"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                    >
+
+                        <option
+                            value="in"
+                            {% if letter.document_type == 'in' %}selected{% endif %}
+                        >
+                            وارده
+                        </option>
+
+                        <option
+                            value="out"
+                            {% if letter.document_type == 'out' %}selected{% endif %}
+                        >
+                            صادره
+                        </option>
+
+                        <option
+                            value="internal"
+                            {% if letter.document_type == 'internal' %}selected{% endif %}
+                        >
+                            داخلی
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        وضعیت
+                    </label>
+
+                    <select
+                        name="status"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                    >
+
+                        <option
+                            value="draft"
+                            {% if letter.status == 'draft' %}selected{% endif %}
+                        >
+                            پیش‌نویس
+                        </option>
+
+                        <option
+                            value="sent"
+                            {% if letter.status == 'sent' %}selected{% endif %}
+                        >
+                            ارسال شده
+                        </option>
+
+                        <option
+                            value="received"
+                            {% if letter.status == 'received' %}selected{% endif %}
+                        >
+                            دریافت شده
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="mb-5">
+
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    گیرنده
+                </label>
+
+                <input
+                    type="text"
+                    name="sent_to"
+                    value="{{ letter.sent_to }}"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                >
+
+            </div>
+
+
+            <div class="mb-5">
+
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    ارجاع به
+                </label>
+
+                <select
+                    name="assigned_to"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                >
+
+                    <option value="">
+                        بدون ارجاع
+                    </option>
+
+                    {% for user in users %}
+
+                    <option
+                        value="{{ user.id }}"
+                        {% if letter.assigned_to_id == user.id %}selected{% endif %}
+                    >
+
+                        {{ user.username }}
+
+                        {% if user.first_name or user.last_name %}
+                            -
+                            {{ user.first_name }}
+                            {{ user.last_name }}
+                        {% endif %}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="mb-5">
+
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    متن نامه
+                </label>
+
+                <textarea
+                    name="content"
+                    rows="10"
+                    required
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                >{{ letter.content }}</textarea>
+
+            </div>
+
+
+            <div class="mb-6">
+
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    فایل جدید
+                </label>
+
+                <input
+                    type="file"
+                    name="file"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                >
+
+                {% if letter.file %}
+
+                <p class="text-xs text-gray-500 mt-2">
+                    فایل فعلی:
+                    {{ letter.file.name }}
+                </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="flex gap-3">
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold"
+                >
+                    ذخیره تغییرات
+                </button>
+
+                <a
+                    href="{% url 'letter_detail' letter.id %}"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold"
+                >
+                    انصراف
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
