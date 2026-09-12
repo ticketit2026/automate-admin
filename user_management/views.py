@@ -21,7 +21,7 @@ def user_list(request):
 @login_required
 def user_create(request):
 
-    # فقط ادمین اصلی اجازه ایجاد کاربر دارد
+    # فقط ادمین اصلی
     if not request.user.is_superuser:
         return redirect('user_management')
 
@@ -32,6 +32,15 @@ def user_create(request):
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         password = request.POST.get('password')
+
+        if User.objects.filter(username=username).exists():
+
+            messages.error(
+                request,
+                'این نام کاربری قبلاً ثبت شده است.'
+            )
+
+            return redirect('user_create')
 
         User.objects.create_user(
             username=username,
@@ -57,7 +66,7 @@ def user_create(request):
 @login_required
 def user_edit(request, user_id):
 
-    # فقط ادمین اصلی اجازه ویرایش کاربر دارد
+    # فقط ادمین اصلی
     if not request.user.is_superuser:
         return redirect('user_management')
 
@@ -72,7 +81,9 @@ def user_edit(request, user_id):
         user.last_name = request.POST.get('last_name')
         user.email = request.POST.get('email')
 
-        user.is_active = request.POST.get('is_active') == 'on'
+        user.is_active = (
+            request.POST.get('is_active') == 'on'
+        )
 
         user.save()
 
@@ -81,7 +92,9 @@ def user_edit(request, user_id):
             'اطلاعات کاربر با موفقیت ذخیره شد.'
         )
 
-        return redirect('user_management')
+        return redirect(
+            'user_management'
+        )
 
     return render(
         request,
@@ -93,9 +106,73 @@ def user_edit(request, user_id):
 
 
 @login_required
+def user_password(request, user_id):
+
+    # فقط ادمین اصلی
+    if not request.user.is_superuser:
+        return redirect('user_management')
+
+    user = get_object_or_404(
+        User,
+        id=user_id
+    )
+
+    if request.method == 'POST':
+
+        password = request.POST.get('password')
+        password_confirm = request.POST.get(
+            'password_confirm'
+        )
+
+        if not password:
+
+            messages.error(
+                request,
+                'رمز عبور را وارد کنید.'
+            )
+
+            return redirect(
+                'user_password',
+                user_id=user.id
+            )
+
+        if password != password_confirm:
+
+            messages.error(
+                request,
+                'رمزهای عبور یکسان نیستند.'
+            )
+
+            return redirect(
+                'user_password',
+                user_id=user.id
+            )
+
+        user.set_password(password)
+        user.save()
+
+        messages.success(
+            request,
+            'رمز عبور کاربر با موفقیت تغییر کرد.'
+        )
+
+        return redirect(
+            'user_management'
+        )
+
+    return render(
+        request,
+        'user_management/user_password.html',
+        {
+            'user_obj': user
+        }
+    )
+
+
+@login_required
 def user_permissions(request, user_id):
 
-    # فقط ادمین اصلی اجازه مدیریت دسترسی‌ها را دارد
+    # فقط ادمین اصلی
     if not request.user.is_superuser:
         return redirect('user_management')
 
