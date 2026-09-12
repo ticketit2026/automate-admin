@@ -800,18 +800,27 @@
 
         <!-- Logout -->
 
-        <a
-            href="{% url 'logout' %}"
-            class="logout-button"
-        >
+        <form
+    method="post"
+    action="{% url 'logout' %}"
+>
 
-            <span>
-                🚪
-            </span>
+    {% csrf_token %}
 
-            خروج از سامانه
+    <button
+        type="submit"
+        class="logout-button"
+    >
 
-        </a>
+        <span>
+            🚪
+        </span>
+
+        خروج از سامانه
+
+    </button>
+
+</form>
 
 
     </div>
