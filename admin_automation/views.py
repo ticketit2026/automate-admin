@@ -74,7 +74,7 @@ return render(
         'selected_status': status,
     }
 )
-```
+
 
 @login_required
 def letter_create(request):
