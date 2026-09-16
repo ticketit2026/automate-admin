@@ -79,7 +79,6 @@ return render(
 @login_required
 def letter_create(request):
 
-```
 # ایجاد نامه برای همه کاربران مجاز است.
 # دیگر بررسی create_letter انجام نمی‌شود.
 
@@ -205,12 +204,10 @@ return render(
         'users': users
     }
 )
-```
 
 @login_required
 def letter_detail(request, letter_id):
 
-```
 letter = get_object_or_404(
     InternalLetter.objects.select_related(
         'created_by',
@@ -298,12 +295,11 @@ return render(
         'can_reject': can_reject,
     }
 )
-```
 
 @login_required
 def letter_edit(request, letter_id):
 
-```
+
 if not request.user.is_superuser and not request.user.has_perm(
     'admin_automation.edit_letter'
 ):
@@ -407,12 +403,12 @@ return render(
         'users': users
     }
 )
-```
+
 
 @login_required
 def letter_delete(request, letter_id):
 
-```
+
 if not request.user.is_superuser and not request.user.has_perm(
     'admin_automation.delete_letter'
 ):
@@ -447,12 +443,12 @@ return render(
         'letter': letter
     }
 )
-```
+
 
 @login_required
 def letter_assign(request, letter_id):
 
-```
+
 letter = get_object_or_404(
     InternalLetter,
     id=letter_id
@@ -537,12 +533,11 @@ return redirect(
     'letter_detail',
     letter_id=letter.id
 )
-```
 
 @login_required
 def letter_approve(request, letter_id):
 
-```
+
 letter = get_object_or_404(
     InternalLetter,
     id=letter_id
@@ -590,12 +585,12 @@ return redirect(
     'letter_detail',
     letter_id=letter.id
 )
-```
+
 
 @login_required
 def letter_reject(request, letter_id):
 
-```
+
 letter = get_object_or_404(
     InternalLetter,
     id=letter_id
