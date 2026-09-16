@@ -1,127 +1,142 @@
-{% extends 'base.html' %}
+```html
+{% extends "base.html" %}
 
 {% block title %}
-جزئیات نامه
+جزئیات نامه | اتوماسیون اداری
 {% endblock %}
 
 {% block content %}
 
 <div class="max-w-5xl mx-auto">
 
-    <div class="flex items-center justify-between mb-6">
+    <!-- ============================= -->
+    <!-- عنوان صفحه -->
+    <!-- ============================= -->
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
         <div>
 
-            <h1 class="text-2xl font-bold text-gray-800">
-                {{ letter.title }}
-            </h1>
+            <div class="text-sm text-gray-500 mb-2">
+                اتوماسیون اداری
+            </div>
 
-            <p class="text-sm text-gray-500 mt-2">
-                جزئیات نامه اداری
-            </p>
+            <h1 class="text-2xl font-bold text-gray-800">
+                جزئیات نامه
+            </h1>
 
         </div>
 
-
-        <div class="flex gap-2">
-
-            <a
-                href="{% url 'letter_edit' letter.id %}"
-                class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl text-sm font-semibold"
-            >
-                ویرایش
-            </a>
+        <div class="flex gap-3 flex-wrap">
 
             <a
                 href="{% url 'letter_list' %}"
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-3 rounded-xl text-sm font-semibold"
+                class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-3 rounded-xl font-semibold transition"
             >
-                بازگشت
+                ←
+                بازگشت به نامه‌ها
             </a>
+
+            {% if perms.admin_automation.edit_letter or request.user.is_superuser %}
+
+                <a
+                    href="{% url 'letter_edit' letter.id %}"
+                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold transition"
+                >
+                    ✏️
+                    ویرایش
+                </a>
+
+            {% endif %}
 
         </div>
 
     </div>
 
 
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <!-- ============================= -->
+    <!-- پیام‌ها -->
+    <!-- ============================= -->
 
+    {% if messages %}
 
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="space-y-3 mb-6">
 
+            {% for message in messages %}
 
-            <div>
-
-                <div class="text-xs text-gray-400 mb-2">
-                    نوع نامه
+                <div
+                    class="
+                        px-5 py-4 rounded-xl border
+                        {% if message.tags == 'error' %}
+                            bg-red-50 border-red-200 text-red-700
+                        {% elif message.tags == 'success' %}
+                            bg-green-50 border-green-200 text-green-700
+                        {% else %}
+                            bg-blue-50 border-blue-200 text-blue-700
+                        {% endif %}
+                    "
+                >
+                    {{ message }}
                 </div>
 
-                <div class="font-semibold text-gray-700">
+            {% endfor %}
 
-                    {{ letter.get_document_type_display }}
+        </div>
+
+    {% endif %}
+
+
+    <!-- ============================= -->
+    <!-- اطلاعات اصلی نامه -->
+    <!-- ============================= -->
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+
+        <!-- هدر -->
+
+        <div class="bg-gradient-to-l from-blue-600 to-indigo-600 px-6 py-6 text-white">
+
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+
+                <div>
+
+                    <div class="text-blue-100 text-sm mb-2">
+                        عنوان نامه
+                    </div>
+
+                    <h2 class="text-2xl font-bold">
+                        {{ letter.title }}
+                    </h2>
 
                 </div>
 
-            </div>
 
+                <!-- وضعیت -->
 
-            <div>
+                <div>
 
-                <div class="text-xs text-gray-400 mb-2">
-                    وضعیت
-                </div>
+                    {% if letter.status == 'draft' %}
 
-                <div class="font-semibold text-gray-700">
+                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 text-white text-sm font-semibold">
+                            📝 پیش‌نویس
+                        </span>
 
-                    {{ letter.get_status_display }}
+                    {% elif letter.status == 'pending' %}
 
-                </div>
+                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-yellow-400 text-yellow-900 text-sm font-semibold">
+                            ⏳ در انتظار بررسی
+                        </span>
 
-            </div>
+                    {% elif letter.status == 'approved' %}
 
+                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-green-400 text-green-900 text-sm font-semibold">
+                            ✓ تأیید شده
+                        </span>
 
-            <div>
+                    {% elif letter.status == 'rejected' %}
 
-                <div class="text-xs text-gray-400 mb-2">
-                    گیرنده
-                </div>
-
-                <div class="font-semibold text-gray-700">
-                    {{ letter.sent_to }}
-                </div>
-
-            </div>
-
-
-            <div>
-
-                <div class="text-xs text-gray-400 mb-2">
-                    ایجادکننده
-                </div>
-
-                <div class="font-semibold text-gray-700">
-                    {{ letter.created_by.username }}
-                </div>
-
-            </div>
-
-
-            <div>
-
-                <div class="text-xs text-gray-400 mb-2">
-                    ارجاع به
-                </div>
-
-                <div class="font-semibold text-gray-700">
-
-                    {% if letter.assigned_to %}
-
-                        {{ letter.assigned_to.username }}
-
-                    {% else %}
-
-                        <span class="text-gray-400">
-                            بدون ارجاع
+                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-red-400 text-red-900 text-sm font-semibold">
+                            ✕ رد شده
                         </span>
 
                     {% endif %}
@@ -130,104 +145,211 @@
 
             </div>
 
+        </div>
 
-            <div>
 
-                <div class="text-xs text-gray-400 mb-2">
-                    تاریخ ایجاد
+        <!-- اطلاعات -->
+
+        <div class="p-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- نوع نامه -->
+
+                <div>
+
+                    <div class="text-sm text-gray-500 mb-1">
+                        نوع نامه
+                    </div>
+
+                    <div class="font-semibold text-gray-800">
+
+                        {% if letter.document_type == 'in' %}
+                            نامه وارده
+
+                        {% elif letter.document_type == 'out' %}
+                            نامه صادره
+
+                        {% elif letter.document_type == 'internal' %}
+                            نامه داخلی
+
+                        {% else %}
+                            {{ letter.document_type }}
+                        {% endif %}
+
+                    </div>
+
                 </div>
 
-                <div class="font-semibold text-gray-700">
-                    {{ letter.created_at|date:"Y/m/d H:i" }}
+
+                <!-- گیرنده -->
+
+                <div>
+
+                    <div class="text-sm text-gray-500 mb-1">
+                        گیرنده
+                    </div>
+
+                    <div class="font-semibold text-gray-800">
+
+                        {{ letter.sent_to|default:"-" }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- ایجادکننده -->
+
+                <div>
+
+                    <div class="text-sm text-gray-500 mb-1">
+                        ایجادکننده
+                    </div>
+
+                    <div class="font-semibold text-gray-800">
+
+                        {{ letter.created_by.get_full_name|default:letter.created_by.username }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- تاریخ ایجاد -->
+
+                <div>
+
+                    <div class="text-sm text-gray-500 mb-1">
+                        تاریخ ایجاد
+                    </div>
+
+                    <div class="font-semibold text-gray-800">
+
+                        {{ letter.created_at|date:"Y/m/d - H:i" }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- آخرین ویرایش -->
+
+                <div>
+
+                    <div class="text-sm text-gray-500 mb-1">
+                        آخرین ویرایش
+                    </div>
+
+                    <div class="font-semibold text-gray-800">
+
+                        {{ letter.updated_at|date:"Y/m/d - H:i" }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- ارجاع فعلی -->
+
+                <div>
+
+                    <div class="text-sm text-gray-500 mb-1">
+                        ارجاع فعلی
+                    </div>
+
+                    {% if letter.assigned_to %}
+
+                        <div class="inline-flex items-center gap-2">
+
+                            <span class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
+                                👤
+                            </span>
+
+                            <span class="font-semibold text-gray-800">
+
+                                {{ letter.assigned_to.get_full_name|default:letter.assigned_to.username }}
+
+                            </span>
+
+                        </div>
+
+                    {% else %}
+
+                        <span class="text-gray-400">
+                            هنوز ارجاع نشده
+                        </span>
+
+                    {% endif %}
+
                 </div>
 
             </div>
-
-        </div>
-
-
-        <div class="border-t border-gray-200 p-6">
-
-            <div class="text-sm font-bold text-gray-700 mb-3">
-                متن نامه
-            </div>
-
-            <div class="bg-gray-50 rounded-xl p-5 leading-8 text-gray-700 whitespace-pre-line">
-                {{ letter.content }}
-            </div>
-
-        </div>
-
-
-        {% if letter.file %}
-
-        <div class="border-t border-gray-200 p-6">
-
-            <div class="text-sm font-bold text-gray-700 mb-3">
-                فایل پیوست
-            </div>
-
-            <a
-                href="{{ letter.file.url }}"
-                target="_blank"
-                class="inline-flex bg-blue-50 text-blue-600 px-5 py-3 rounded-xl font-semibold"
-            >
-                📎 مشاهده / دریافت فایل
-            </a>
-
-        </div>
-
-        {% endif %}
-
-
-        {% if letter.status == 'draft' %}
-
-        <div class="border-t border-gray-200 p-6">
-
-            <form
-                method="post"
-                action="{% url 'letter_send' letter.id %}"
-            >
-
-                {% csrf_token %}
-
-                <button
-                    type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold"
-                >
-                    📤 ارسال نامه
-                </button>
-
-            </form>
-
-        </div>
-
-        {% endif %}
-
-
-        <div class="border-t border-gray-200 p-6">
-
-            <form
-                method="post"
-                action="{% url 'letter_delete' letter.id %}"
-            >
-
-                {% csrf_token %}
-
-                <button
-                    type="submit"
-                    onclick="return confirm('آیا از حذف این نامه مطمئن هستید؟');"
-                    class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-3 rounded-xl font-semibold"
-                >
-                    🗑️ حذف نامه
-                </button>
-
-            </form>
 
         </div>
 
     </div>
 
-</div>
 
-{% endblock %}
+    <!-- ============================= -->
+    <!-- متن نامه -->
+    <!-- ============================= -->
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+
+        <div class="px-6 py-5 border-b border-gray-200">
+
+            <h3 class="text-lg font-bold text-gray-800">
+                متن نامه
+            </h3>
+
+        </div>
+
+        <div class="p-6">
+
+            <div class="bg-gray-50 rounded-xl p-6 leading-8 text-gray-700 whitespace-pre-line">
+
+                {{ letter.content }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- فایل پیوست -->
+    <!-- ============================= -->
+
+    {% if letter.file %}
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+
+            <div class="px-6 py-5 border-b border-gray-200">
+
+                <h3 class="text-lg font-bold text-gray-800">
+                    فایل پیوست
+                </h3>
+
+            </div>
+
+            <div class="p-6">
+
+                <a
+                    href="{{ letter.file.url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-3 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-5 py-3 rounded-xl font-semibold transition"
+                >
+
+                    📎
+
+                    <span>
+                        مشاهده فایل پیوست
+                    </span>
+
+                </a>
+
+            </div>
+```
