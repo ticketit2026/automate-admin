@@ -9,7 +9,6 @@ from .models import InternalLetter
 @login_required
 def letter_list(request):
 
-```
 letters = InternalLetter.objects.select_related(
     'created_by',
     'assigned_to'
