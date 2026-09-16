@@ -4,4 +4,6 @@ can_assign = (
     request.user.has_perm(
         'admin_automation.assign_letter'
     )
+    or
+    letter.assigned_to_id == request.user.id
 )
