@@ -12,8 +12,9 @@ class InternalLetter(models.Model):
 
     STATUS_CHOICES = [
         ('draft', 'پیش‌نویس'),
-        ('sent', 'ارسال شده'),
-        ('received', 'دریافت شده'),
+        ('pending', 'در انتظار بررسی'),
+        ('approved', 'تأیید شده'),
+        ('rejected', 'رد شده'),
     ]
 
     title = models.CharField(
@@ -38,8 +39,8 @@ class InternalLetter(models.Model):
 
     status = models.CharField(
         max_length=20,
-        default='draft',
         choices=STATUS_CHOICES,
+        default='draft',
         verbose_name='وضعیت'
     )
 
@@ -84,12 +85,34 @@ class InternalLetter(models.Model):
         ordering = ['-created_at']
 
         permissions = [
-            ('view_all_letters', 'مشاهده همه نامه‌ها'),
-            ('create_letter', 'ایجاد نامه'),
-            ('edit_letter', 'ویرایش نامه'),
-            ('delete_letter', 'حذف نامه'),
-            ('send_letter', 'ارسال نامه'),
-            ('assign_letter', 'ارجاع نامه'),
+            (
+                'view_all_letters',
+                'مشاهده همه نامه‌ها'
+            ),
+            (
+                'create_letter',
+                'ایجاد نامه'
+            ),
+            (
+                'edit_letter',
+                'ویرایش نامه'
+            ),
+            (
+                'delete_letter',
+                'حذف نامه'
+            ),
+            (
+                'assign_letter',
+                'ارجاع نامه'
+            ),
+            (
+                'approve_letter',
+                'تأیید نامه'
+            ),
+            (
+                'reject_letter',
+                'رد نامه'
+            ),
         ]
 
     def __str__(self):
