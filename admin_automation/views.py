@@ -336,7 +336,6 @@ return render(
         'letter': letter
     }
 )
-```
 
 @login_required
 def letter_assign(request, letter_id):
@@ -405,9 +404,7 @@ letter.save()
 
 messages.success(
     request,
-    f'نامه به '
-    f'{assigned_to.get_full_name() or assigned_to.username}'
-    f' ارجاع شد.'
+    f'نامه به {assigned_to.get_full_name() or assigned_to.username} ارجاع شد.'
 )
 
 return redirect(
