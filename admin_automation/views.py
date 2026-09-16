@@ -13,7 +13,6 @@ letters = InternalLetter.objects.select_related(
 'assigned_to'
 )
 
-```
 if not request.user.is_superuser and not request.user.has_perm(
     'admin_automation.view_all_letters'
 ):
@@ -55,7 +54,6 @@ return render(
         'selected_status': status,
     }
 )
-```
 
 @login_required
 def letter_create(request):
@@ -65,7 +63,6 @@ is_active=True
 id=request.user.id
 ).order_by('username')
 
-```
 if request.method == 'POST':
     title = request.POST.get('title', '').strip()
     content = request.POST.get('content', '').strip()
@@ -132,7 +129,6 @@ return render(
         'users': users
     }
 )
-```
 
 @login_required
 def letter_detail(request, letter_id):
@@ -144,7 +140,6 @@ InternalLetter.objects.select_related(
 id=letter_id
 )
 
-```
 if not request.user.is_superuser:
     has_access = (
         letter.created_by_id == request.user.id
@@ -211,4 +206,3 @@ return render(
         'can_reject': can_reject,
     }
 )
-```
