@@ -336,6 +336,7 @@ return render(
         'letter': letter
     }
 )
+```
 
 @login_required
 def letter_assign(request, letter_id):
