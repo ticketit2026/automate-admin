@@ -1,8 +1,13 @@
 {% extends 'base.html' %}
+{% load jalali %}
 
 {% block content %}
 
-<div style="max-width: 1000px; margin: 30px auto;">
+<div style="
+    max-width: 1000px;
+    margin: 30px auto;
+    direction: rtl;
+">
 
     <!-- دکمه‌های بالا -->
     <div style="
@@ -50,7 +55,10 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     ">
 
-        <h2 style="margin-top: 0;">
+        <h2 style="
+            margin-top: 0;
+            margin-bottom: 20px;
+        ">
             {{ letter.title }}
         </h2>
 
@@ -60,39 +68,53 @@
             margin: 20px 0;
             padding: 15px;
             border-radius: 10px;
-            background:
+
             {% if letter.status == 'approved' %}
-                #d1e7dd
+                background: #d1e7dd;
             {% elif letter.status == 'rejected' %}
-                #f8d7da
+                background: #f8d7da;
             {% elif letter.status == 'pending' %}
-                #fff3cd
+                background: #fff3cd;
             {% else %}
-                #e2e3e5
-            {% endif %};
+                background: #e2e3e5;
+            {% endif %}
         ">
 
             <strong>وضعیت:</strong>
 
             {% if letter.status == 'approved' %}
-                <span style="color: #198754; font-weight: bold;">
+
+                <span style="
+                    color: #198754;
+                    font-weight: bold;
+                ">
                     تأیید شده ✓
                 </span>
 
             {% elif letter.status == 'rejected' %}
-                <span style="color: #dc3545; font-weight: bold;">
+
+                <span style="
+                    color: #dc3545;
+                    font-weight: bold;
+                ">
                     رد شده ✕
                 </span>
 
             {% elif letter.status == 'pending' %}
-                <span style="color: #856404; font-weight: bold;">
+
+                <span style="
+                    color: #856404;
+                    font-weight: bold;
+                ">
                     در انتظار بررسی
                 </span>
 
             {% else %}
+
                 <span>
                     پیش‌نویس
                 </span>
+
             {% endif %}
 
         </div>
@@ -122,12 +144,12 @@
 
             <div>
                 <strong>تاریخ ایجاد:</strong>
-                {{ letter.created_at|date:"Y/m/d - H:i" }}
+                {{ letter.created_at|jalali_date }}
             </div>
 
             <div>
                 <strong>آخرین ویرایش:</strong>
-                {{ letter.updated_at|date:"Y/m/d - H:i" }}
+                {{ letter.updated_at|jalali_date }}
             </div>
 
         </div>
@@ -166,17 +188,22 @@
             </div>
 
             <div style="margin-top: 8px;">
+
                 ایجادکننده:
+
                 <strong>
                     {{ letter.created_by.get_full_name|default:letter.created_by.username }}
                 </strong>
+
             </div>
 
             <div style="
                 margin-top: 5px;
                 color: #6c757d;
             ">
-                🕐 {{ letter.created_at|date:"Y/m/d - H:i" }}
+
+                🕐 {{ letter.created_at|jalali_date }}
+
             </div>
 
         </div>
@@ -193,23 +220,35 @@
                 border-radius: 8px;
             ">
 
-                <div style="font-weight: bold;">
+                <div style="
+                    font-weight: bold;
+                    color: #0d6efd;
+                ">
                     ➡️ ارجاع نامه
                 </div>
 
+
                 <div style="margin-top: 8px;">
-                    <strong>ارجاع به:</strong>
+
+                    <strong>
+                        ارجاع به:
+                    </strong>
 
                     {{ letter.assigned_to.get_full_name|default:letter.assigned_to.username }}
+
                 </div>
 
 
                 {% if letter.assigned_by %}
 
                     <div style="margin-top: 5px;">
-                        <strong>ارجاع توسط:</strong>
+
+                        <strong>
+                            ارجاع توسط:
+                        </strong>
 
                         {{ letter.assigned_by.get_full_name|default:letter.assigned_by.username }}
+
                     </div>
 
                 {% endif %}
@@ -221,7 +260,9 @@
                         margin-top: 5px;
                         color: #6c757d;
                     ">
-                        🕐 {{ letter.assigned_at|date:"Y/m/d - H:i" }}
+
+                        🕐 {{ letter.assigned_at|jalali_date }}
+
                     </div>
 
                 {% endif %}
@@ -249,10 +290,15 @@
                     ✅ تأیید نامه
                 </div>
 
+
                 <div style="margin-top: 8px;">
-                    <strong>تأیید توسط:</strong>
+
+                    <strong>
+                        تأیید توسط:
+                    </strong>
 
                     {{ letter.approved_by.get_full_name|default:letter.approved_by.username }}
+
                 </div>
 
 
@@ -262,7 +308,9 @@
                         margin-top: 5px;
                         color: #6c757d;
                     ">
-                        🕐 {{ letter.approved_at|date:"Y/m/d - H:i" }}
+
+                        🕐 {{ letter.approved_at|jalali_date }}
+
                     </div>
 
                 {% endif %}
@@ -290,10 +338,15 @@
                     ❌ رد نامه
                 </div>
 
+
                 <div style="margin-top: 8px;">
-                    <strong>رد توسط:</strong>
+
+                    <strong>
+                        رد توسط:
+                    </strong>
 
                     {{ letter.rejected_by.get_full_name|default:letter.rejected_by.username }}
+
                 </div>
 
 
@@ -303,11 +356,28 @@
                         margin-top: 5px;
                         color: #6c757d;
                     ">
-                        🕐 {{ letter.rejected_at|date:"Y/m/d - H:i" }}
+
+                        🕐 {{ letter.rejected_at|jalali_date }}
+
                     </div>
 
                 {% endif %}
 
+            </div>
+
+        {% endif %}
+
+
+        <!-- اگر هنوز ارجاع نشده -->
+        {% if not letter.assigned_to %}
+
+            <div style="
+                padding: 15px;
+                border-radius: 8px;
+                background: #f8f9fa;
+                color: #6c757d;
+            ">
+                هنوز نامه ارجاع نشده است.
             </div>
 
         {% endif %}
@@ -324,7 +394,10 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     ">
 
-        <h3 style="margin-top: 0;">
+        <h3 style="
+            margin-top: 0;
+            margin-bottom: 20px;
+        ">
             📄 متن نامه
         </h3>
 
@@ -349,9 +422,13 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         ">
 
-            <h3 style="margin-top: 0;">
+            <h3 style="
+                margin-top: 0;
+                margin-bottom: 20px;
+            ">
                 📎 فایل پیوست
             </h3>
+
 
             <a href="{{ letter.file.url }}"
                target="_blank"
@@ -363,7 +440,9 @@
                     background: #6f42c1;
                     color: white;
                ">
+
                 مشاهده / دانلود فایل
+
             </a>
 
         </div>
@@ -371,7 +450,7 @@
     {% endif %}
 
 
-    <!-- ارجاع -->
+    <!-- ارجاع نامه -->
     {% if can_assign %}
 
         <div style="
@@ -382,14 +461,19 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         ">
 
-            <h3 style="margin-top: 0;">
+            <h3 style="
+                margin-top: 0;
+                margin-bottom: 20px;
+            ">
                 ➡️ ارجاع نامه
             </h3>
+
 
             <form method="post"
                   action="{% url 'letter_assign' letter.id %}">
 
                 {% csrf_token %}
+
 
                 <div style="
                     display: flex;
@@ -411,10 +495,13 @@
                             انتخاب کاربر مقصد
                         </option>
 
+
                         {% for person in users %}
 
                             <option value="{{ person.id }}">
+
                                 {{ person.get_full_name|default:person.username }}
+
                             </option>
 
                         {% endfor %}
@@ -431,7 +518,9 @@
                                 color: white;
                                 cursor: pointer;
                             ">
+
                         ارجاع
+
                     </button>
 
                 </div>
@@ -454,15 +543,20 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         ">
 
-            <h3 style="margin-top: 0;">
+            <h3 style="
+                margin-top: 0;
+                margin-bottom: 20px;
+            ">
                 بررسی نامه
             </h3>
+
 
             <div style="
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
             ">
+
 
                 {% if can_approve %}
 
@@ -471,6 +565,7 @@
                           style="margin: 0;">
 
                         {% csrf_token %}
+
 
                         <button type="submit"
                                 style="
@@ -481,7 +576,9 @@
                                     color: white;
                                     cursor: pointer;
                                 ">
+
                             ✅ تأیید نامه
+
                         </button>
 
                     </form>
@@ -497,6 +594,7 @@
 
                         {% csrf_token %}
 
+
                         <button type="submit"
                                 style="
                                     padding: 11px 25px;
@@ -506,7 +604,9 @@
                                     color: white;
                                     cursor: pointer;
                                 ">
+
                             ❌ رد نامه
+
                         </button>
 
                     </form>
@@ -520,7 +620,7 @@
     {% endif %}
 
 
-    <!-- حذف -->
+    <!-- حذف نامه -->
     {% if perms.admin_automation.delete_letter or user.is_superuser %}
 
         <div style="
@@ -536,6 +636,7 @@
 
                 {% csrf_token %}
 
+
                 <button type="submit"
                         onclick="return confirm('آیا از حذف این نامه مطمئن هستید؟');"
                         style="
@@ -546,7 +647,9 @@
                             color: white;
                             cursor: pointer;
                         ">
+
                     🗑 حذف نامه
+
                 </button>
 
             </form>
