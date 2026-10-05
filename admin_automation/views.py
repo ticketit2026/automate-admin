@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .models import InternalLetter
 
@@ -11,7 +12,10 @@ from .models import InternalLetter
 def letter_list(request):
     letters = InternalLetter.objects.select_related(
         'created_by',
-        'assigned_to'
+        'assigned_to',
+        'assigned_by',
+        'approved_by',
+        'rejected_by'
     )
 
     if not request.user.is_superuser and not request.user.has_perm(
@@ -95,6 +99,8 @@ def letter_create(request):
             document_type=document_type,
             sent_to=sent_to,
             assigned_to=assigned_to,
+            assigned_by=request.user if assigned_to else None,
+            assigned_at=timezone.now() if assigned_to else None,
             created_by=request.user,
             status='pending' if assigned_to else 'draft',
         )
@@ -133,7 +139,10 @@ def letter_detail(request, letter_id):
     letter = get_object_or_404(
         InternalLetter.objects.select_related(
             'created_by',
-            'assigned_to'
+            'assigned_to',
+            'assigned_by',
+            'approved_by',
+            'rejected_by'
         ),
         id=letter_id
     )
@@ -369,7 +378,17 @@ def letter_assign(request, letter_id):
     )
 
     letter.assigned_to = assigned_to
+    letter.assigned_by = request.user
+    letter.assigned_at = timezone.now()
     letter.status = 'pending'
+
+    # اگر نامه قبلاً رد یا تأیید شده بود و دوباره ارجاع شد،
+    # نتیجه قبلی پاک می‌شود.
+    letter.approved_by = None
+    letter.approved_at = None
+    letter.rejected_by = None
+    letter.rejected_at = None
+
     letter.save()
 
     messages.success(
@@ -422,6 +441,12 @@ def letter_approve(request, letter_id):
         )
 
     letter.status = 'approved'
+    letter.approved_by = request.user
+    letter.approved_at = timezone.now()
+
+    letter.rejected_by = None
+    letter.rejected_at = None
+
     letter.save()
 
     messages.success(
@@ -474,6 +499,12 @@ def letter_reject(request, letter_id):
         )
 
     letter.status = 'rejected'
+    letter.rejected_by = request.user
+    letter.rejected_at = timezone.now()
+
+    letter.approved_by = None
+    letter.approved_at = None
+
     letter.save()
 
     messages.success(
