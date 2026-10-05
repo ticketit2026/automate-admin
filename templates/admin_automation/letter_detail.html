@@ -1,289 +1,133 @@
-html
-{% extends "base.html" %}
-
-{% block title %}
-جزئیات نامه | اتوماسیون اداری
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
 
-<div class="max-w-5xl mx-auto">
+<div style="max-width: 1000px; margin: 30px auto;">
 
-    <!-- ============================= -->
-    <!-- عنوان صفحه -->
-    <!-- ============================= -->
+    <!-- دکمه‌های بالا -->
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 10px;
+        flex-wrap: wrap;
+    ">
 
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <a href="{% url 'letter_list' %}"
+           style="
+                text-decoration: none;
+                padding: 10px 18px;
+                border-radius: 8px;
+                background: #6c757d;
+                color: white;
+           ">
+            ← بازگشت به لیست
+        </a>
 
-        <div>
-
-            <div class="text-sm text-gray-500 mb-2">
-                اتوماسیون اداری
-            </div>
-
-            <h1 class="text-2xl font-bold text-gray-800">
-                جزئیات نامه
-            </h1>
-
-        </div>
-
-        <div class="flex gap-3 flex-wrap">
-
-            <a
-                href="{% url 'letter_list' %}"
-                class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-3 rounded-xl font-semibold transition"
-            >
-                ←
-                بازگشت به نامه‌ها
+        {% if perms.admin_automation.edit_letter or user.is_superuser %}
+            <a href="{% url 'letter_edit' letter.id %}"
+               style="
+                    text-decoration: none;
+                    padding: 10px 18px;
+                    border-radius: 8px;
+                    background: #0d6efd;
+                    color: white;
+               ">
+                ✏️ ویرایش نامه
             </a>
+        {% endif %}
 
-            {% if perms.admin_automation.edit_letter or request.user.is_superuser %}
+    </div>
 
-                <a
-                    href="{% url 'letter_edit' letter.id %}"
-                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold transition"
-                >
-                    ✏️
-                    ویرایش
-                </a>
 
+    <!-- اطلاعات اصلی نامه -->
+    <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    ">
+
+        <h2 style="margin-top: 0;">
+            {{ letter.title }}
+        </h2>
+
+
+        <!-- وضعیت -->
+        <div style="
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background:
+            {% if letter.status == 'approved' %}
+                #d1e7dd
+            {% elif letter.status == 'rejected' %}
+                #f8d7da
+            {% elif letter.status == 'pending' %}
+                #fff3cd
+            {% else %}
+                #e2e3e5
+            {% endif %};
+        ">
+
+            <strong>وضعیت:</strong>
+
+            {% if letter.status == 'approved' %}
+                <span style="color: #198754; font-weight: bold;">
+                    تأیید شده ✓
+                </span>
+
+            {% elif letter.status == 'rejected' %}
+                <span style="color: #dc3545; font-weight: bold;">
+                    رد شده ✕
+                </span>
+
+            {% elif letter.status == 'pending' %}
+                <span style="color: #856404; font-weight: bold;">
+                    در انتظار بررسی
+                </span>
+
+            {% else %}
+                <span>
+                    پیش‌نویس
+                </span>
             {% endif %}
 
         </div>
 
-    </div>
 
+        <!-- مشخصات نامه -->
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        ">
 
-    <!-- ============================= -->
-    <!-- پیام‌ها -->
-    <!-- ============================= -->
-
-    {% if messages %}
-
-        <div class="space-y-3 mb-6">
-
-            {% for message in messages %}
-
-                <div
-                    class="
-                        px-5 py-4 rounded-xl border
-                        {% if message.tags == 'error' %}
-                            bg-red-50 border-red-200 text-red-700
-                        {% elif message.tags == 'success' %}
-                            bg-green-50 border-green-200 text-green-700
-                        {% else %}
-                            bg-blue-50 border-blue-200 text-blue-700
-                        {% endif %}
-                    "
-                >
-                    {{ message }}
-                </div>
-
-            {% endfor %}
-
-        </div>
-
-    {% endif %}
-
-
-    <!-- ============================= -->
-    <!-- اطلاعات اصلی نامه -->
-    <!-- ============================= -->
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-
-        <!-- هدر -->
-
-        <div class="bg-gradient-to-l from-blue-600 to-indigo-600 px-6 py-6 text-white">
-
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-
-                <div>
-
-                    <div class="text-blue-100 text-sm mb-2">
-                        عنوان نامه
-                    </div>
-
-                    <h2 class="text-2xl font-bold">
-                        {{ letter.title }}
-                    </h2>
-
-                </div>
-
-
-                <!-- وضعیت -->
-
-                <div>
-
-                    {% if letter.status == 'draft' %}
-
-                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 text-white text-sm font-semibold">
-                            📝 پیش‌نویس
-                        </span>
-
-                    {% elif letter.status == 'pending' %}
-
-                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-yellow-400 text-yellow-900 text-sm font-semibold">
-                            ⏳ در انتظار بررسی
-                        </span>
-
-                    {% elif letter.status == 'approved' %}
-
-                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-green-400 text-green-900 text-sm font-semibold">
-                            ✓ تأیید شده
-                        </span>
-
-                    {% elif letter.status == 'rejected' %}
-
-                        <span class="inline-flex items-center px-4 py-2 rounded-full bg-red-400 text-red-900 text-sm font-semibold">
-                            ✕ رد شده
-                        </span>
-
-                    {% endif %}
-
-                </div>
-
+            <div>
+                <strong>نوع نامه:</strong>
+                {{ letter.get_document_type_display }}
             </div>
 
-        </div>
+            <div>
+                <strong>گیرنده:</strong>
+                {{ letter.sent_to }}
+            </div>
 
+            <div>
+                <strong>ایجادکننده:</strong>
+                {{ letter.created_by.get_full_name|default:letter.created_by.username }}
+            </div>
 
-        <!-- اطلاعات -->
+            <div>
+                <strong>تاریخ ایجاد:</strong>
+                {{ letter.created_at|date:"Y/m/d - H:i" }}
+            </div>
 
-        <div class="p-6">
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <!-- نوع نامه -->
-
-                <div>
-
-                    <div class="text-sm text-gray-500 mb-1">
-                        نوع نامه
-                    </div>
-
-                    <div class="font-semibold text-gray-800">
-
-                        {% if letter.document_type == 'in' %}
-                            نامه وارده
-
-                        {% elif letter.document_type == 'out' %}
-                            نامه صادره
-
-                        {% elif letter.document_type == 'internal' %}
-                            نامه داخلی
-
-                        {% else %}
-                            {{ letter.document_type }}
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-                <!-- گیرنده -->
-
-                <div>
-
-                    <div class="text-sm text-gray-500 mb-1">
-                        گیرنده
-                    </div>
-
-                    <div class="font-semibold text-gray-800">
-
-                        {{ letter.sent_to|default:"-" }}
-
-                    </div>
-
-                </div>
-
-
-                <!-- ایجادکننده -->
-
-                <div>
-
-                    <div class="text-sm text-gray-500 mb-1">
-                        ایجادکننده
-                    </div>
-
-                    <div class="font-semibold text-gray-800">
-
-                        {{ letter.created_by.get_full_name|default:letter.created_by.username }}
-
-                    </div>
-
-                </div>
-
-
-                <!-- تاریخ ایجاد -->
-
-                <div>
-
-                    <div class="text-sm text-gray-500 mb-1">
-                        تاریخ ایجاد
-                    </div>
-
-                    <div class="font-semibold text-gray-800">
-
-                        {{ letter.created_at|date:"Y/m/d - H:i" }}
-
-                    </div>
-
-                </div>
-
-
-                <!-- آخرین ویرایش -->
-
-                <div>
-
-                    <div class="text-sm text-gray-500 mb-1">
-                        آخرین ویرایش
-                    </div>
-
-                    <div class="font-semibold text-gray-800">
-
-                        {{ letter.updated_at|date:"Y/m/d - H:i" }}
-
-                    </div>
-
-                </div>
-
-
-                <!-- ارجاع فعلی -->
-
-                <div>
-
-                    <div class="text-sm text-gray-500 mb-1">
-                        ارجاع فعلی
-                    </div>
-
-                    {% if letter.assigned_to %}
-
-                        <div class="inline-flex items-center gap-2">
-
-                            <span class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
-                                👤
-                            </span>
-
-                            <span class="font-semibold text-gray-800">
-
-                                {{ letter.assigned_to.get_full_name|default:letter.assigned_to.username }}
-
-                            </span>
-
-                        </div>
-
-                    {% else %}
-
-                        <span class="text-gray-400">
-                            هنوز ارجاع نشده
-                        </span>
-
-                    {% endif %}
-
-                </div>
-
+            <div>
+                <strong>آخرین ویرایش:</strong>
+                {{ letter.updated_at|date:"Y/m/d - H:i" }}
             </div>
 
         </div>
@@ -291,311 +135,421 @@ html
     </div>
 
 
-    <!-- ============================= -->
+    <!-- گردش و تاریخچه نامه -->
+    <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    ">
+
+        <h3 style="
+            margin-top: 0;
+            margin-bottom: 25px;
+        ">
+            🔄 گردش و تاریخچه نامه
+        </h3>
+
+
+        <!-- ایجاد نامه -->
+        <div style="
+            border-right: 4px solid #6c757d;
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        ">
+
+            <div style="font-weight: bold;">
+                📝 ایجاد نامه
+            </div>
+
+            <div style="margin-top: 8px;">
+                ایجادکننده:
+                <strong>
+                    {{ letter.created_by.get_full_name|default:letter.created_by.username }}
+                </strong>
+            </div>
+
+            <div style="
+                margin-top: 5px;
+                color: #6c757d;
+            ">
+                🕐 {{ letter.created_at|date:"Y/m/d - H:i" }}
+            </div>
+
+        </div>
+
+
+        <!-- ارجاع -->
+        {% if letter.assigned_to %}
+
+            <div style="
+                border-right: 4px solid #0d6efd;
+                padding: 12px 18px;
+                margin-bottom: 18px;
+                background: #f0f6ff;
+                border-radius: 8px;
+            ">
+
+                <div style="font-weight: bold;">
+                    ➡️ ارجاع نامه
+                </div>
+
+                <div style="margin-top: 8px;">
+                    <strong>ارجاع به:</strong>
+
+                    {{ letter.assigned_to.get_full_name|default:letter.assigned_to.username }}
+                </div>
+
+
+                {% if letter.assigned_by %}
+
+                    <div style="margin-top: 5px;">
+                        <strong>ارجاع توسط:</strong>
+
+                        {{ letter.assigned_by.get_full_name|default:letter.assigned_by.username }}
+                    </div>
+
+                {% endif %}
+
+
+                {% if letter.assigned_at %}
+
+                    <div style="
+                        margin-top: 5px;
+                        color: #6c757d;
+                    ">
+                        🕐 {{ letter.assigned_at|date:"Y/m/d - H:i" }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- تأیید -->
+        {% if letter.approved_by %}
+
+            <div style="
+                border-right: 4px solid #198754;
+                padding: 12px 18px;
+                margin-bottom: 18px;
+                background: #f0fff5;
+                border-radius: 8px;
+            ">
+
+                <div style="
+                    font-weight: bold;
+                    color: #198754;
+                ">
+                    ✅ تأیید نامه
+                </div>
+
+                <div style="margin-top: 8px;">
+                    <strong>تأیید توسط:</strong>
+
+                    {{ letter.approved_by.get_full_name|default:letter.approved_by.username }}
+                </div>
+
+
+                {% if letter.approved_at %}
+
+                    <div style="
+                        margin-top: 5px;
+                        color: #6c757d;
+                    ">
+                        🕐 {{ letter.approved_at|date:"Y/m/d - H:i" }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- رد -->
+        {% if letter.rejected_by %}
+
+            <div style="
+                border-right: 4px solid #dc3545;
+                padding: 12px 18px;
+                margin-bottom: 18px;
+                background: #fff5f5;
+                border-radius: 8px;
+            ">
+
+                <div style="
+                    font-weight: bold;
+                    color: #dc3545;
+                ">
+                    ❌ رد نامه
+                </div>
+
+                <div style="margin-top: 8px;">
+                    <strong>رد توسط:</strong>
+
+                    {{ letter.rejected_by.get_full_name|default:letter.rejected_by.username }}
+                </div>
+
+
+                {% if letter.rejected_at %}
+
+                    <div style="
+                        margin-top: 5px;
+                        color: #6c757d;
+                    ">
+                        🕐 {{ letter.rejected_at|date:"Y/m/d - H:i" }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
     <!-- متن نامه -->
-    <!-- ============================= -->
+    <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    ">
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+        <h3 style="margin-top: 0;">
+            📄 متن نامه
+        </h3>
 
-        <div class="px-6 py-5 border-b border-gray-200">
-
-            <h3 class="text-lg font-bold text-gray-800">
-                متن نامه
-            </h3>
-
-        </div>
-
-        <div class="p-6">
-
-            <div class="bg-gray-50 rounded-xl p-6 leading-8 text-gray-700 whitespace-pre-line">
-
-                {{ letter.content }}
-
-            </div>
-
+        <div style="
+            line-height: 2;
+            white-space: pre-wrap;
+        ">
+            {{ letter.content }}
         </div>
 
     </div>
 
 
-    <!-- ============================= -->
     <!-- فایل پیوست -->
-    <!-- ============================= -->
-
     {% if letter.file %}
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        ">
 
-            <div class="px-6 py-5 border-b border-gray-200">
+            <h3 style="margin-top: 0;">
+                📎 فایل پیوست
+            </h3>
 
-                <h3 class="text-lg font-bold text-gray-800">
-                    فایل پیوست
-                </h3>
-
-            </div>
-
-            <div class="p-6">
-
-                <a
-                    href="{{ letter.file.url }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-3 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-5 py-3 rounded-xl font-semibold transition"
-                >
-
-                    📎
-
-                    <span>
-                        مشاهده فایل پیوست
-                    </span>
-
-                </a>
-
-            </div>
+            <a href="{{ letter.file.url }}"
+               target="_blank"
+               style="
+                    display: inline-block;
+                    text-decoration: none;
+                    padding: 10px 18px;
+                    border-radius: 8px;
+                    background: #6f42c1;
+                    color: white;
+               ">
+                مشاهده / دانلود فایل
+            </a>
 
         </div>
 
     {% endif %}
 
 
-    <!-- ============================= -->
-    <!-- ارجاع نامه -->
-    <!-- ============================= -->
-
+    <!-- ارجاع -->
     {% if can_assign %}
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        ">
 
-            <div class="px-6 py-5 border-b border-gray-200">
+            <h3 style="margin-top: 0;">
+                ➡️ ارجاع نامه
+            </h3>
 
-                <div class="flex items-center gap-3">
+            <form method="post"
+                  action="{% url 'letter_assign' letter.id %}">
 
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-                        ↗
-                    </div>
+                {% csrf_token %}
 
-                    <div>
+                <div style="
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                ">
 
-                        <h3 class="text-lg font-bold text-gray-800">
-                            ارجاع نامه
-                        </h3>
+                    <select name="assigned_to"
+                            required
+                            style="
+                                flex: 1;
+                                min-width: 220px;
+                                padding: 10px;
+                                border-radius: 8px;
+                                border: 1px solid #ced4da;
+                            ">
 
-                        <p class="text-sm text-gray-500 mt-1">
-                            می‌توانید این نامه را به شخص دیگری ارجاع دهید.
-                        </p>
+                        <option value="">
+                            انتخاب کاربر مقصد
+                        </option>
 
-                    </div>
+                        {% for person in users %}
+
+                            <option value="{{ person.id }}">
+                                {{ person.get_full_name|default:person.username }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    <button type="submit"
+                            style="
+                                padding: 10px 20px;
+                                border: none;
+                                border-radius: 8px;
+                                background: #0d6efd;
+                                color: white;
+                                cursor: pointer;
+                            ">
+                        ارجاع
+                    </button>
 
                 </div>
 
-            </div>
-
-
-            <div class="p-6">
-
-                <form
-                    method="post"
-                    action="{% url 'letter_assign' letter.id %}"
-                >
-
-                    {% csrf_token %}
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-
-                        <div class="md:col-span-3">
-
-                            <label
-                                for="assigned_to"
-                                class="block text-sm font-semibold text-gray-700 mb-2"
-                            >
-                                ارجاع به
-                            </label>
-
-                            <select
-                                id="assigned_to"
-                                name="assigned_to"
-                                required
-                                class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-
-                                <option value="">
-                                    انتخاب شخص
-                                </option>
-
-                                {% for user in users %}
-
-                                    <option value="{{ user.id }}">
-
-                                        {{ user.get_full_name|default:user.username }}
-
-                                        {% if user.get_full_name %}
-                                            ({{ user.username }})
-                                        {% endif %}
-
-                                    </option>
-
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-
-
-                        <div>
-
-                            <button
-                                type="submit"
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold transition"
-                            >
-                                ↗ ارجاع نامه
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </div>
+            </form>
 
         </div>
 
     {% endif %}
 
 
-    <!-- ============================= -->
-    <!-- عملیات تأیید و رد -->
-    <!-- ============================= -->
-
+    <!-- تأیید / رد -->
     {% if is_assigned_user and letter.status == 'pending' %}
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        ">
 
-            <div class="px-6 py-5 border-b border-gray-200">
+            <h3 style="margin-top: 0;">
+                بررسی نامه
+            </h3>
 
-                <h3 class="text-lg font-bold text-gray-800">
-                    عملیات نامه
-                </h3>
+            <div style="
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            ">
 
-                <p class="text-sm text-gray-500 mt-1">
-                    این نامه در حال حاضر به شما ارجاع شده است.
-                </p>
+                {% if can_approve %}
 
-            </div>
-
-
-            <div class="p-6">
-
-                <div class="flex flex-col sm:flex-row gap-4">
-
-                    <!-- ============================= -->
-                    <!-- تأیید -->
-                    <!-- ============================= -->
-
-                    {% if can_approve %}
-
-                        <form
-                            method="post"
-                            action="{% url 'letter_approve' letter.id %}"
-                            class="flex-1"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                onclick="return confirm('آیا از تأیید این نامه اطمینان دارید؟');"
-                                class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl font-bold transition"
-                            >
-                                ✓ تأیید نامه
-                            </button>
-
-                        </form>
-
-                    {% endif %}
-
-
-                    <!-- ============================= -->
-                    <!-- رد -->
-                    <!-- ============================= -->
-
-                    {% if can_reject %}
-
-                        <form
-                            method="post"
-                            action="{% url 'letter_reject' letter.id %}"
-                            class="flex-1"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                onclick="return confirm('آیا از رد این نامه اطمینان دارید؟');"
-                                class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-xl font-bold transition"
-                            >
-                                ✕ رد نامه
-                            </button>
-
-                        </form>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-        </div>
-
-    {% endif %}
-
-
-    <!-- ============================= -->
-    <!-- عملیات مدیریت -->
-    <!-- ============================= -->
-
-    {% if perms.admin_automation.delete_letter or request.user.is_superuser %}
-
-        <div class="bg-white rounded-2xl shadow-sm border border-red-100 mb-8">
-
-            <div class="p-6">
-
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
-                    <div>
-
-                        <h3 class="font-bold text-gray-800">
-                            عملیات مدیریت
-                        </h3>
-
-                        <p class="text-sm text-gray-500 mt-1">
-                            حذف نامه یک عملیات غیرقابل بازگشت است.
-                        </p>
-
-                    </div>
-
-
-                    <form
-                        method="post"
-                        action="{% url 'letter_delete' letter.id %}"
-                    >
+                    <form method="post"
+                          action="{% url 'letter_approve' letter.id %}"
+                          style="margin: 0;">
 
                         {% csrf_token %}
 
-                        <button
-                            type="submit"
-                            onclick="return confirm('آیا مطمئن هستید که می‌خواهید این نامه را حذف کنید؟');"
-                            class="inline-flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-5 py-3 rounded-xl font-semibold transition"
-                        >
-                            🗑️
-                            حذف نامه
+                        <button type="submit"
+                                style="
+                                    padding: 11px 25px;
+                                    border: none;
+                                    border-radius: 8px;
+                                    background: #198754;
+                                    color: white;
+                                    cursor: pointer;
+                                ">
+                            ✅ تأیید نامه
                         </button>
 
                     </form>
 
-                </div>
+                {% endif %}
+
+
+                {% if can_reject %}
+
+                    <form method="post"
+                          action="{% url 'letter_reject' letter.id %}"
+                          style="margin: 0;">
+
+                        {% csrf_token %}
+
+                        <button type="submit"
+                                style="
+                                    padding: 11px 25px;
+                                    border: none;
+                                    border-radius: 8px;
+                                    background: #dc3545;
+                                    color: white;
+                                    cursor: pointer;
+                                ">
+                            ❌ رد نامه
+                        </button>
+
+                    </form>
+
+                {% endif %}
 
             </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- حذف -->
+    {% if perms.admin_automation.delete_letter or user.is_superuser %}
+
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        ">
+
+            <form method="post"
+                  action="{% url 'letter_delete' letter.id %}">
+
+                {% csrf_token %}
+
+                <button type="submit"
+                        onclick="return confirm('آیا از حذف این نامه مطمئن هستید؟');"
+                        style="
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 8px;
+                            background: #dc3545;
+                            color: white;
+                            cursor: pointer;
+                        ">
+                    🗑 حذف نامه
+                </button>
+
+            </form>
 
         </div>
 
