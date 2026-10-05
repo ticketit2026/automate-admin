@@ -22,6 +22,17 @@ class InternalLetter(models.Model):
         verbose_name='عنوان نامه'
     )
 
+    # شماره نامه
+    # nullable گذاشته شده تا نامه‌های قدیمی بدون شماره
+    # هنگام migration دچار مشکل نشوند.
+    letter_number = models.CharField(
+        max_length=50,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name='شماره نامه'
+    )
+
     content = models.TextField(
         verbose_name='متن نامه'
     )
@@ -161,4 +172,7 @@ class InternalLetter(models.Model):
         ]
 
     def __str__(self):
+        if self.letter_number:
+            return f'{self.letter_number} - {self.title}'
+
         return self.title
