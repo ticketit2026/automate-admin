@@ -53,6 +53,51 @@ class InternalLetter(models.Model):
         verbose_name='ارجاع به'
     )
 
+    assigned_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_letters_by_me',
+        verbose_name='ارجاع توسط'
+    )
+
+    assigned_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ ارجاع'
+    )
+
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_letters',
+        verbose_name='تأیید توسط'
+    )
+
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ تأیید'
+    )
+
+    rejected_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rejected_letters',
+        verbose_name='رد توسط'
+    )
+
+    rejected_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ رد'
+    )
+
     file = models.FileField(
         upload_to='letters/',
         null=True,
