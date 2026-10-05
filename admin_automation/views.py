@@ -1,6 +1,7 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -8,8 +9,17 @@ from django.utils import timezone
 from .models import InternalLetter
 
 
+def get_letter_users(request):
+    return User.objects.filter(
+        is_active=True
+    ).exclude(
+        id=request.user.id
+    )
+
+
 @login_required
 def letter_list(request):
+
     letters = InternalLetter.objects.select_related(
         'created_by',
         'assigned_to',
@@ -26,22 +36,38 @@ def letter_list(request):
             Q(assigned_to=request.user)
         )
 
-    search = request.GET.get('search', '').strip()
-    document_type = request.GET.get('document_type', '').strip()
-    status = request.GET.get('status', '').strip()
+    search = request.GET.get(
+        'search',
+        ''
+    ).strip()
+
+    document_type = request.GET.get(
+        'document_type',
+        ''
+    ).strip()
+
+    status = request.GET.get(
+        'status',
+        ''
+    ).strip()
 
     if search:
         letters = letters.filter(
+            Q(letter_number__icontains=search) |
             Q(title__icontains=search) |
             Q(content__icontains=search) |
             Q(sent_to__icontains=search)
         )
 
     if document_type:
-        letters = letters.filter(document_type=document_type)
+        letters = letters.filter(
+            document_type=document_type
+        )
 
     if status:
-        letters = letters.filter(status=status)
+        letters = letters.filter(
+            status=status
+        )
 
     context = {
         'letters': letters,
@@ -59,14 +85,43 @@ def letter_list(request):
 
 @login_required
 def letter_create(request):
-    if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        content = request.POST.get('content', '').strip()
-        document_type = request.POST.get('document_type', '').strip()
-        sent_to = request.POST.get('sent_to', '').strip()
-        assigned_to_id = request.POST.get('assigned_to', '').strip()
 
-        if not title or not content or not document_type or not sent_to:
+    if request.method == 'POST':
+
+        letter_number = request.POST.get(
+            'letter_number',
+            ''
+        ).strip()
+
+        title = request.POST.get(
+            'title',
+            ''
+        ).strip()
+
+        content = request.POST.get(
+            'content',
+            ''
+        ).strip()
+
+        document_type = request.POST.get(
+            'document_type',
+            ''
+        ).strip()
+
+        sent_to = request.POST.get(
+            'sent_to',
+            ''
+        ).strip()
+
+        assigned_to_id = request.POST.get(
+            'assigned_to',
+            ''
+        ).strip()
+
+        users = get_letter_users(request)
+
+        if not letter_number or not title or not content or not document_type or not sent_to:
+
             messages.error(
                 request,
                 'لطفاً تمام فیلدهای الزامی را تکمیل کنید.'
@@ -76,37 +131,66 @@ def letter_create(request):
                 request,
                 'admin_automation/letter_create.html',
                 {
-                    'users': User.objects.filter(
-                        is_active=True
-                    ).exclude(
-                        id=request.user.id
-                    )
+                    'users': users,
+                    'letter_number': letter_number,
+                    'title': title,
+                    'content': content,
+                    'document_type': document_type,
+                    'sent_to': sent_to,
+                    'assigned_to_id': assigned_to_id,
                 }
             )
 
         assigned_to = None
 
         if assigned_to_id:
+
             assigned_to = get_object_or_404(
                 User,
                 id=assigned_to_id,
                 is_active=True
             )
 
-        letter = InternalLetter.objects.create(
-            title=title,
-            content=content,
-            document_type=document_type,
-            sent_to=sent_to,
-            assigned_to=assigned_to,
-            assigned_by=request.user if assigned_to else None,
-            assigned_at=timezone.now() if assigned_to else None,
-            created_by=request.user,
-            status='pending' if assigned_to else 'draft',
-        )
+        try:
+
+            letter = InternalLetter.objects.create(
+                letter_number=letter_number,
+                title=title,
+                content=content,
+                document_type=document_type,
+                sent_to=sent_to,
+                assigned_to=assigned_to,
+                assigned_by=request.user if assigned_to else None,
+                assigned_at=timezone.now() if assigned_to else None,
+                created_by=request.user,
+                status='pending' if assigned_to else 'draft',
+            )
+
+        except IntegrityError:
+
+            messages.error(
+                request,
+                'این شماره نامه قبلاً ثبت شده است. لطفاً شماره دیگری وارد کنید.'
+            )
+
+            return render(
+                request,
+                'admin_automation/letter_create.html',
+                {
+                    'users': users,
+                    'letter_number': letter_number,
+                    'title': title,
+                    'content': content,
+                    'document_type': document_type,
+                    'sent_to': sent_to,
+                    'assigned_to_id': assigned_to_id,
+                }
+            )
 
         if 'file' in request.FILES:
+
             letter.file = request.FILES['file']
+
             letter.save()
 
         messages.success(
@@ -119,23 +203,26 @@ def letter_create(request):
             letter_id=letter.id
         )
 
-    users = User.objects.filter(
-        is_active=True
-    ).exclude(
-        id=request.user.id
-    )
+    users = get_letter_users(request)
 
     return render(
         request,
         'admin_automation/letter_create.html',
         {
-            'users': users
+            'users': users,
+            'letter_number': '',
+            'title': '',
+            'content': '',
+            'document_type': '',
+            'sent_to': '',
+            'assigned_to_id': '',
         }
     )
 
 
 @login_required
 def letter_detail(request, letter_id):
+
     letter = get_object_or_404(
         InternalLetter.objects.select_related(
             'created_by',
@@ -157,10 +244,12 @@ def letter_detail(request, letter_id):
     )
 
     if not can_view:
+
         messages.error(
             request,
             'شما دسترسی مشاهده این نامه را ندارید.'
         )
+
         return redirect('letter_list')
 
     can_assign = (
@@ -185,11 +274,7 @@ def letter_detail(request, letter_id):
         or is_assigned_user
     )
 
-    users = User.objects.filter(
-        is_active=True
-    ).exclude(
-        id=request.user.id
-    )
+    users = get_letter_users(request)
 
     context = {
         'letter': letter,
@@ -209,6 +294,7 @@ def letter_detail(request, letter_id):
 
 @login_required
 def letter_edit(request, letter_id):
+
     letter = get_object_or_404(
         InternalLetter,
         id=letter_id
@@ -221,6 +307,7 @@ def letter_edit(request, letter_id):
         )
         or letter.created_by == request.user
     ):
+
         messages.error(
             request,
             'شما دسترسی ویرایش این نامه را ندارید.'
@@ -232,30 +319,79 @@ def letter_edit(request, letter_id):
         )
 
     if request.method == 'POST':
-        letter.title = request.POST.get(
+
+        letter_number = request.POST.get(
+            'letter_number',
+            ''
+        ).strip()
+
+        title = request.POST.get(
             'title',
             ''
         ).strip()
 
-        letter.content = request.POST.get(
+        content = request.POST.get(
             'content',
             ''
         ).strip()
 
-        letter.document_type = request.POST.get(
+        document_type = request.POST.get(
             'document_type',
             ''
         ).strip()
 
-        letter.sent_to = request.POST.get(
+        sent_to = request.POST.get(
             'sent_to',
             ''
         ).strip()
 
+        if not letter_number or not title or not content or not document_type or not sent_to:
+
+            messages.error(
+                request,
+                'لطفاً تمام فیلدهای الزامی را تکمیل کنید.'
+            )
+
+            return render(
+                request,
+                'admin_automation/letter_create.html',
+                {
+                    'letter': letter,
+                    'users': get_letter_users(request),
+                    'edit_mode': True,
+                }
+            )
+
+        letter.letter_number = letter_number
+        letter.title = title
+        letter.content = content
+        letter.document_type = document_type
+        letter.sent_to = sent_to
+
         if 'file' in request.FILES:
+
             letter.file = request.FILES['file']
 
-        letter.save()
+        try:
+
+            letter.save()
+
+        except IntegrityError:
+
+            messages.error(
+                request,
+                'این شماره نامه قبلاً برای نامه دیگری ثبت شده است.'
+            )
+
+            return render(
+                request,
+                'admin_automation/letter_create.html',
+                {
+                    'letter': letter,
+                    'users': get_letter_users(request),
+                    'edit_mode': True,
+                }
+            )
 
         messages.success(
             request,
@@ -267,11 +403,7 @@ def letter_edit(request, letter_id):
             letter_id=letter.id
         )
 
-    users = User.objects.filter(
-        is_active=True
-    ).exclude(
-        id=request.user.id
-    )
+    users = get_letter_users(request)
 
     return render(
         request,
@@ -286,6 +418,7 @@ def letter_edit(request, letter_id):
 
 @login_required
 def letter_delete(request, letter_id):
+
     letter = get_object_or_404(
         InternalLetter,
         id=letter_id
@@ -297,6 +430,7 @@ def letter_delete(request, letter_id):
             'admin_automation.delete_letter'
         )
     ):
+
         messages.error(
             request,
             'شما دسترسی حذف این نامه را ندارید.'
@@ -308,6 +442,7 @@ def letter_delete(request, letter_id):
         )
 
     if request.method == 'POST':
+
         letter.delete()
 
         messages.success(
@@ -325,6 +460,7 @@ def letter_delete(request, letter_id):
 
 @login_required
 def letter_assign(request, letter_id):
+
     letter = get_object_or_404(
         InternalLetter,
         id=letter_id
@@ -339,6 +475,7 @@ def letter_assign(request, letter_id):
     )
 
     if not can_assign:
+
         messages.error(
             request,
             'شما دسترسی ارجاع این نامه را ندارید.'
@@ -350,6 +487,7 @@ def letter_assign(request, letter_id):
         )
 
     if request.method != 'POST':
+
         return redirect(
             'letter_detail',
             letter_id=letter.id
@@ -361,6 +499,7 @@ def letter_assign(request, letter_id):
     ).strip()
 
     if not assigned_to_id:
+
         messages.error(
             request,
             'لطفاً کاربر مقصد را انتخاب کنید.'
@@ -382,10 +521,9 @@ def letter_assign(request, letter_id):
     letter.assigned_at = timezone.now()
     letter.status = 'pending'
 
-    # اگر نامه قبلاً رد یا تأیید شده بود و دوباره ارجاع شد،
-    # نتیجه قبلی پاک می‌شود.
     letter.approved_by = None
     letter.approved_at = None
+
     letter.rejected_by = None
     letter.rejected_at = None
 
@@ -404,12 +542,14 @@ def letter_assign(request, letter_id):
 
 @login_required
 def letter_approve(request, letter_id):
+
     letter = get_object_or_404(
         InternalLetter,
         id=letter_id
     )
 
     if request.method != 'POST':
+
         return redirect(
             'letter_detail',
             letter_id=letter.id
@@ -419,6 +559,7 @@ def letter_approve(request, letter_id):
         request.user.is_superuser
         or letter.assigned_to == request.user
     ):
+
         messages.error(
             request,
             'شما مسئول بررسی این نامه نیستید.'
@@ -430,6 +571,7 @@ def letter_approve(request, letter_id):
         )
 
     if letter.status != 'pending':
+
         messages.warning(
             request,
             'این نامه در وضعیت قابل تأیید نیست.'
@@ -441,6 +583,7 @@ def letter_approve(request, letter_id):
         )
 
     letter.status = 'approved'
+
     letter.approved_by = request.user
     letter.approved_at = timezone.now()
 
@@ -462,12 +605,14 @@ def letter_approve(request, letter_id):
 
 @login_required
 def letter_reject(request, letter_id):
+
     letter = get_object_or_404(
         InternalLetter,
         id=letter_id
     )
 
     if request.method != 'POST':
+
         return redirect(
             'letter_detail',
             letter_id=letter.id
@@ -477,6 +622,7 @@ def letter_reject(request, letter_id):
         request.user.is_superuser
         or letter.assigned_to == request.user
     ):
+
         messages.error(
             request,
             'شما مسئول بررسی این نامه نیستید.'
@@ -488,6 +634,7 @@ def letter_reject(request, letter_id):
         )
 
     if letter.status != 'pending':
+
         messages.warning(
             request,
             'این نامه در وضعیت قابل رد نیست.'
@@ -499,6 +646,7 @@ def letter_reject(request, letter_id):
         )
 
     letter.status = 'rejected'
+
     letter.rejected_by = request.user
     letter.rejected_at = timezone.now()
 
