@@ -3,23 +3,24 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Permission
 from django.contrib import messages
+from django.db import transaction
 
 
 @login_required
 def user_list(request):
-    """نمایش فهرست کاربران"""
+    """نمایش فهرست کاربران."""
     users = User.objects.all().order_by('username')
 
     return render(
         request,
         'user_management/user_list.html',
-        {'users': users}
+        {'users': users},
     )
 
 
 @login_required
 def user_create(request):
-    """ایجاد کاربر جدید"""
+    """ایجاد کاربر جدید."""
     if not request.user.is_superuser:
         messages.error(request, 'اجازه ایجاد کاربر را ندارید.')
         return redirect('user_management')
@@ -59,7 +60,7 @@ def user_create(request):
 
 @login_required
 def user_edit(request, user_id):
-    """ویرایش اطلاعات کاربر"""
+    """ویرایش اطلاعات کاربر."""
     if not request.user.is_superuser:
         messages.error(request, 'اجازه ویرایش کاربران را ندارید.')
         return redirect('user_management')
@@ -71,7 +72,6 @@ def user_edit(request, user_id):
         user.last_name = (request.POST.get('last_name') or '').strip()
         user.email = (request.POST.get('email') or '').strip()
         user.is_active = request.POST.get('is_active') == 'on'
-
         user.save()
 
         messages.success(request, 'اطلاعات کاربر با موفقیت ذخیره شد.')
@@ -80,13 +80,13 @@ def user_edit(request, user_id):
     return render(
         request,
         'user_management/user_edit.html',
-        {'user_obj': user}
+        {'user_obj': user},
     )
 
 
 @login_required
 def user_password(request, user_id):
-    """تغییر رمز عبور کاربر"""
+    """تغییر رمز عبور کاربر."""
     if not request.user.is_superuser:
         messages.error(request, 'اجازه تغییر رمز عبور را ندارید.')
         return redirect('user_management')
@@ -114,26 +114,29 @@ def user_password(request, user_id):
     return render(
         request,
         'user_management/user_password.html',
-        {'user_obj': user}
+        {'user_obj': user},
     )
 
 
 @login_required
 def user_permissions(request, user_id):
-    """مدیریت دسترسی‌های مستقیم کاربر با گزینه‌های مجاز و غیرمجاز"""
+    """
+    مدیریت مجوزهای مستقیم کاربر.
+    مقدار allow مجوز را اضافه می‌کند و deny آن را حذف می‌کند.
+    """
+
     if not request.user.is_superuser:
         messages.error(request, 'اجازه مدیریت دسترسی‌ها را ندارید.')
         return redirect('user_management')
 
     user = get_object_or_404(User, id=user_id)
 
-    # مجوزهای استاندارد نامه اداری مخفی می‌شوند؛
-    # مجوزهای اختصاصی فارسی همچنان نمایش داده خواهند شد.
+    # این مجوزهای استاندارد با مجوزهای سفارشی برنامه هم‌پوشانی دارند.
+    # view_internalletter عمداً مخفی نیست؛ برای مشاهده نامه لازم است.
     hidden_codenames = [
         'add_internalletter',
         'change_internalletter',
         'delete_internalletter',
-        'view_internalletter',
     ]
 
     permissions = list(
@@ -152,25 +155,48 @@ def user_permissions(request, user_id):
     )
 
     if request.method == 'POST':
+        allowed_ids = []
+        denied_ids = []
+
+        # فقط گزینه‌هایی تغییر می‌کنند که فرم برایشان مقدار فرستاده است.
         for permission in permissions:
-            choice = request.POST.get(
-                f'permission_{permission.id}'
-            )
+            field_name = f'permission_{permission.id}'
+            choice = request.POST.get(field_name)
 
             if choice == 'allow':
-                user.user_permissions.add(permission)
-
+                allowed_ids.append(permission.id)
             elif choice == 'deny':
-                user.user_permissions.remove(permission)
+                denied_ids.append(permission.id)
+
+        try:
+            with transaction.atomic():
+                if allowed_ids:
+                    user.user_permissions.add(*allowed_ids)
+
+                if denied_ids:
+                    user.user_permissions.remove(*denied_ids)
+
+        except Exception:
+            messages.error(
+                request,
+                'ذخیره دسترسی‌ها با خطا مواجه شد. دوباره تلاش کنید.',
+            )
+            return redirect(
+                'user_permissions',
+                user_id=user.id,
+            )
+
+        # بررسی تعداد مجوزهای مستقیم بعد از ذخیره
+        saved_count = user.user_permissions.count()
 
         messages.success(
             request,
-            'دسترسی‌های کاربر با موفقیت ذخیره شد.'
+            f'دسترسی‌ها ذخیره شدند. تعداد مجوزهای مستقیم کاربر: {saved_count}',
         )
 
         return redirect(
             'user_permissions',
-            user_id=user.id
+            user_id=user.id,
         )
 
     selected_permissions = set(
@@ -184,5 +210,5 @@ def user_permissions(request, user_id):
             'user_obj': user,
             'permissions': permissions,
             'selected_permissions': selected_permissions,
-        }
+        },
     )
