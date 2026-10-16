@@ -1,108 +1,127 @@
+
 {% extends 'base.html' %}
 
-{% block title %}
-دسترسی‌های کاربر
-{% endblock %}
+{% block title %}دسترسی‌های کاربر{% endblock %}
 
 {% block content %}
-
-<div class="max-w-5xl mx-auto">
+<div class="max-w-5xl mx-auto px-4 py-6" dir="rtl">
 
     <div class="mb-6">
-
         <h1 class="text-2xl font-bold text-gray-800">
             مدیریت دسترسی‌ها
         </h1>
-
         <p class="text-sm text-gray-500 mt-2">
             کاربر:
             <span class="font-semibold text-gray-700">
                 {{ user_obj.username }}
             </span>
         </p>
-
+        <p class="text-sm text-gray-500 mt-2">
+            برای هر دسترسی، وضعیت مجاز یا غیرمجاز را انتخاب کن.
+        </p>
     </div>
 
+    {% if messages %}
+    <div class="space-y-2 mb-5">
+        {% for message in messages %}
+        <div class="rounded-xl border p-3
+            {% if 'error' in message.tags %}
+                bg-red-50 border-red-200 text-red-700
+            {% else %}
+                bg-green-50 border-green-200 text-green-700
+            {% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <form method="post">
-
         {% csrf_token %}
-
 
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
             <div class="px-6 py-5 border-b border-gray-200">
-
                 <h2 class="font-bold text-gray-800">
                     دسترسی‌های سامانه
                 </h2>
-
-                <p class="text-xs text-gray-400 mt-1">
-                    دسترسی‌های مورد نیاز این کاربر را انتخاب کنید.
+                <p class="text-xs text-gray-500 mt-2">
+                    انتخاب «مجاز» به کاربر اجازه استفاده از قابلیت مربوطه را می‌دهد،
+                    مشروط به اینکه کد برنامه نیز این دسترسی را بررسی کند.
                 </p>
-
             </div>
 
-
             <div class="p-6">
-
                 {% regroup permissions by content_type.app_label as app_permissions %}
 
-
                 {% for app in app_permissions %}
-
-                <div class="mb-8">
+                <section class="mb-8 last:mb-0">
 
                     <h3 class="text-lg font-bold text-gray-800 mb-4">
                         {{ app.grouper }}
                     </h3>
 
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-
+                    <div class="space-y-3">
                         {% for permission in app.list %}
+                        <div class="rounded-xl border border-gray-200 p-4">
 
-                        <label class="flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-                            <input
-                                type="checkbox"
-                                name="permissions"
-                                value="{{ permission.id }}"
-                                {% if permission.id in selected_permissions %}
-                                    checked
-                                {% endif %}
-                                class="w-5 h-5"
-                            >
-
-                            <div>
-
-                                <div class="font-semibold text-gray-700">
-                                    {{ permission.name }}
+                                <div>
+                                    <div class="font-semibold text-gray-800">
+                                        {{ permission.name }}
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1">
+                                        {{ permission.content_type.app_label }}
+                                        /
+                                        {{ permission.content_type.model }}
+                                        /
+                                        {{ permission.codename }}
+                                    </div>
                                 </div>
 
-                                <div class="text-xs text-gray-400 mt-1">
-                                    {{ permission.content_type.app_label }}
-                                    /
-                                    {{ permission.content_type.model }}
-                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
 
+                                    <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-green-200 bg-green-50 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="permission_{{ permission.id }}"
+                                            value="allow"
+                                            {% if permission.id in selected_permissions %}checked{% endif %}
+                                            class="accent-green-600"
+                                        >
+                                        <span class="text-sm font-semibold text-green-700">
+                                            مجاز
+                                        </span>
+                                    </label>
+
+                                    <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-red-200 bg-red-50 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="permission_{{ permission.id }}"
+                                            value="deny"
+                                            {% if permission.id not in selected_permissions %}checked{% endif %}
+                                            class="accent-red-600"
+                                        >
+                                        <span class="text-sm font-semibold text-red-700">
+                                            غیرمجاز
+                                        </span>
+                                    </label>
+
+                                </div>
                             </div>
-
-                        </label>
-
+                        </div>
                         {% endfor %}
-
                     </div>
-
-                </div>
-
+                </section>
+                {% empty %}
+                <p class="text-gray-500 text-center py-8">
+                    دسترسی‌ای برای نمایش وجود ندارد.
+                </p>
                 {% endfor %}
-
             </div>
 
-
-            <div class="px-6 py-5 border-t border-gray-200 flex items-center gap-3">
-
+            <div class="px-6 py-5 border-t border-gray-200 flex flex-wrap items-center gap-3">
                 <button
                     type="submit"
                     class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold"
@@ -116,13 +135,9 @@
                 >
                     بازگشت
                 </a>
-
             </div>
 
         </div>
-
     </form>
-
 </div>
-
 {% endblock %}
