@@ -1,427 +1,365 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
 
 from .models import Ticket, TicketReply
 
 
-def can_view_ticket(user, ticket):
+VALID_STATUSES = {"open", "in_progress", "closed"}
+VALID_PRIORITIES = {"low", "medium", "high"}
 
-    if user.has_perm(
-        'helpdesk.view_all_tickets'
-    ):
+
+# --------------------------------------------------
+# بررسی دسترسی
+# --------------------------------------------------
+
+def can_view_ticket(user, ticket):
+    if not user.is_authenticated:
+        return False
+
+    if user.is_superuser or user.has_perm("helpdesk.view_all_tickets"):
         return True
 
-    return ticket.created_by_id == user.id
+    return (
+        ticket.created_by_id == user.id
+        or ticket.assigned_to_id == user.id
+    )
 
+
+def get_authorized_ticket(user, ticket_id):
+    ticket = get_object_or_404(
+        Ticket.objects.select_related("created_by", "assigned_to"),
+        pk=ticket_id,
+    )
+
+    if not can_view_ticket(user, ticket):
+        raise PermissionDenied("اجازه مشاهده این تیکت را ندارید.")
+
+    return ticket
+
+
+def has_ticket_permission(user, codename):
+    return user.is_superuser or user.has_perm(
+        f"helpdesk.{codename}"
+    )
+
+
+# --------------------------------------------------
+# فهرست، جستجو، فیلتر و ثبت تیکت
+# --------------------------------------------------
 
 @login_required
 def ticket_list(request):
 
-    # ==========================================
-    # ثبت تیکت
-    # همه کاربران لاگین‌شده می‌توانند تیکت ثبت کنند
-    # ==========================================
+    if request.method == "POST":
+        if not has_ticket_permission(request.user, "create_ticket"):
+            messages.error(request, "اجازه ثبت تیکت را ندارید.")
+            return redirect("ticket_list")
 
-    if request.method == 'POST':
+        title = request.POST.get("title", "").strip()
+        description = request.POST.get("description", "").strip()
+        priority = request.POST.get("priority", "medium").strip()
 
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        priority = request.POST.get('priority')
+        if not title or not description:
+            messages.error(request, "عنوان و شرح مشکل را وارد کنید.")
+            return redirect("ticket_list")
+
+        if len(title) > 200:
+            messages.error(request, "عنوان تیکت نباید بیشتر از ۲۰۰ نویسه باشد.")
+            return redirect("ticket_list")
+
+        if priority not in VALID_PRIORITIES:
+            messages.error(request, "اولویت انتخاب‌شده معتبر نیست.")
+            return redirect("ticket_list")
 
         Ticket.objects.create(
             title=title,
             description=description,
             priority=priority,
-            created_by=request.user
+            created_by=request.user,
         )
 
-        return redirect('ticket_list')
+        messages.success(request, "تیکت با موفقیت ثبت شد.")
+        return redirect("ticket_list")
 
-
-    # ==========================================
-    # نمایش تیکت‌ها
-    # ==========================================
-
-    if request.user.has_perm(
-        'helpdesk.view_all_tickets'
-    ):
-
-        tickets = Ticket.objects.all().order_by(
-            '-created_at'
-        )
-
+    # کاربر دارای مجوز، همه تیکت‌ها را می‌بیند.
+    # سایر کاربران فقط تیکت‌های ایجادشده یا ارجاع‌شده به خودشان را می‌بینند.
+    if has_ticket_permission(request.user, "view_all_tickets"):
+        tickets = Ticket.objects.all()
     else:
-
         tickets = Ticket.objects.filter(
-            created_by=request.user
-        ).order_by(
-            '-created_at'
+            Q(created_by=request.user)
+            | Q(assigned_to=request.user)
         )
 
+    # جستجو در شماره، عنوان، شرح، ثبت‌کننده و مسئول تیکت
+    search_query = request.GET.get("q", "").strip()
 
-    # ==========================================
-    # دسترسی‌ها برای Template
-    # ==========================================
+    if search_query:
+        search_filter = (
+            Q(title__icontains=search_query)
+            | Q(description__icontains=search_query)
+            | Q(created_by__username__icontains=search_query)
+            | Q(created_by__first_name__icontains=search_query)
+            | Q(created_by__last_name__icontains=search_query)
+            | Q(assigned_to__username__icontains=search_query)
+            | Q(assigned_to__first_name__icontains=search_query)
+            | Q(assigned_to__last_name__icontains=search_query)
+        )
+
+        if search_query.isdigit():
+            search_filter |= Q(pk=int(search_query))
+
+        tickets = tickets.filter(search_filter)
+
+    # فیلتر وضعیت
+    selected_status = request.GET.get("status", "").strip()
+
+    if selected_status in VALID_STATUSES:
+        tickets = tickets.filter(status=selected_status)
+    else:
+        selected_status = ""
+
+    # فیلتر اولویت
+    selected_priority = request.GET.get("priority", "").strip()
+
+    if selected_priority in VALID_PRIORITIES:
+        tickets = tickets.filter(priority=selected_priority)
+    else:
+        selected_priority = ""
+
+    tickets = tickets.select_related(
+        "created_by",
+        "assigned_to",
+    ).order_by("-created_at")
+
+    paginator = Paginator(tickets, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     return render(
         request,
-        'helpdesk/ticket_list.html',
+        "helpdesk/ticket_list.html",
         {
-            'tickets': tickets,
-
-            'can_view_all_tickets':
-                request.user.has_perm(
-                    'helpdesk.view_all_tickets'
-                ),
-
-            'can_change_status':
-                request.user.has_perm(
-                    'helpdesk.change_ticket_status'
-                ),
-
-            'can_assign':
-                request.user.has_perm(
-                    'helpdesk.assign_ticket'
-                ),
-        }
+            "tickets": page_obj,
+            "page_obj": page_obj,
+            "search_query": search_query,
+            "selected_status": selected_status,
+            "selected_priority": selected_priority,
+            "can_create_ticket": has_ticket_permission(
+                request.user, "create_ticket"
+            ),
+            "can_view_all_tickets": has_ticket_permission(
+                request.user, "view_all_tickets"
+            ),
+            "can_change_status": has_ticket_permission(
+                request.user, "change_ticket_status"
+            ),
+            "can_assign": has_ticket_permission(
+                request.user, "assign_ticket"
+            ),
+        },
     )
 
+
+# --------------------------------------------------
+# جزئیات تیکت
+# --------------------------------------------------
 
 @login_required
 def ticket_detail(request, ticket_id):
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id
-    )
-
-
-    # بررسی دسترسی مشاهده تیکت
-
-    if not can_view_ticket(
-        request.user,
-        ticket
-    ):
-        raise PermissionDenied
-
-
-    replies = ticket.replies.all().order_by(
-        'created_at'
-    )
-
+    replies = ticket.replies.select_related("user").order_by("created_at")
 
     return render(
         request,
-        'helpdesk/ticket_detail.html',
+        "helpdesk/ticket_detail.html",
         {
-            'ticket': ticket,
-            'replies': replies,
-
-            'can_edit':
-                request.user.has_perm(
-                    'helpdesk.change_ticket'
-                ),
-
-            'can_delete':
-                request.user.has_perm(
-                    'helpdesk.delete_ticket'
-                ),
-
-            'can_reply':
-                request.user.has_perm(
-                    'helpdesk.reply_ticket'
-                ),
-
-            'can_change_status':
-                request.user.has_perm(
-                    'helpdesk.change_ticket_status'
-                ),
-
-            'can_assign':
-                request.user.has_perm(
-                    'helpdesk.assign_ticket'
-                ),
-        }
+            "ticket": ticket,
+            "replies": replies,
+            "can_edit": has_ticket_permission(
+                request.user, "change_ticket"
+            ),
+            "can_delete": has_ticket_permission(
+                request.user, "delete_ticket"
+            ),
+            "can_reply": has_ticket_permission(
+                request.user, "reply_ticket"
+            ),
+            "can_change_status": has_ticket_permission(
+                request.user, "change_ticket_status"
+            ),
+            "can_assign": has_ticket_permission(
+                request.user, "assign_ticket"
+            ),
+        },
     )
 
+
+# --------------------------------------------------
+# ویرایش تیکت
+# --------------------------------------------------
 
 @login_required
 def edit_ticket(request, ticket_id):
+    if not has_ticket_permission(request.user, "change_ticket"):
+        raise PermissionDenied("اجازه ویرایش تیکت را ندارید.")
 
-    # Permission ویرایش
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    if not request.user.has_perm(
-        'helpdesk.change_ticket'
-    ):
-        raise PermissionDenied
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        description = request.POST.get("description", "").strip()
+        priority = request.POST.get("priority", "").strip()
 
+        if not title or not description:
+            messages.error(request, "عنوان و شرح مشکل الزامی است.")
+        elif len(title) > 200:
+            messages.error(request, "عنوان نباید بیشتر از ۲۰۰ نویسه باشد.")
+        elif priority not in VALID_PRIORITIES:
+            messages.error(request, "اولویت انتخاب‌شده معتبر نیست.")
+        else:
+            ticket.title = title
+            ticket.description = description
+            ticket.priority = priority
+            ticket.save()
 
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id
-    )
-
-
-    # بررسی اینکه کاربر اجازه مشاهده این تیکت را دارد
-
-    if not can_view_ticket(
-        request.user,
-        ticket
-    ):
-        raise PermissionDenied
-
-
-    if request.method == 'POST':
-
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        priority = request.POST.get('priority')
-
-
-        ticket.title = title
-        ticket.description = description
-        ticket.priority = priority
-
-        ticket.save()
-
-
-        return redirect(
-            'ticket_detail',
-            ticket_id=ticket.id
-        )
-
+            messages.success(request, "تیکت با موفقیت ویرایش شد.")
+            return redirect("ticket_detail", ticket_id=ticket.id)
 
     return render(
         request,
-        'helpdesk/edit_ticket.html',
-        {
-            'ticket': ticket
-        }
+        "helpdesk/edit_ticket.html",
+        {"ticket": ticket},
     )
 
+
+# --------------------------------------------------
+# حذف تیکت
+# --------------------------------------------------
 
 @login_required
 def delete_ticket(request, ticket_id):
+    if not has_ticket_permission(request.user, "delete_ticket"):
+        raise PermissionDenied("اجازه حذف تیکت را ندارید.")
 
-    # Permission حذف
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    if not request.user.has_perm(
-        'helpdesk.delete_ticket'
-    ):
-        raise PermissionDenied
-
-
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id
-    )
-
-
-    # بررسی دسترسی مشاهده تیکت
-
-    if not can_view_ticket(
-        request.user,
-        ticket
-    ):
-        raise PermissionDenied
-
-
-    # حذف فقط با POST
-
-    if request.method == 'POST':
-
+    if request.method == "POST":
         ticket.delete()
-
-        return redirect(
-            'ticket_list'
-        )
-
+        messages.success(request, "تیکت حذف شد.")
+        return redirect("ticket_list")
 
     return render(
         request,
-        'helpdesk/delete_ticket.html',
-        {
-            'ticket': ticket
-        }
+        "helpdesk/delete_ticket.html",
+        {"ticket": ticket},
     )
 
+
+# --------------------------------------------------
+# ثبت پاسخ
+# --------------------------------------------------
 
 @login_required
+@require_POST
 def add_ticket_reply(request, ticket_id):
+    if not has_ticket_permission(request.user, "reply_ticket"):
+        raise PermissionDenied("اجازه پاسخ به تیکت را ندارید.")
 
-    # Permission پاسخ
+    ticket = get_authorized_ticket(request.user, ticket_id)
+    message = request.POST.get("message", "").strip()
 
-    if not request.user.has_perm(
-        'helpdesk.reply_ticket'
-    ):
-        raise PermissionDenied
+    if not message:
+        messages.error(request, "متن پاسخ را وارد کنید.")
+        return redirect("ticket_detail", ticket_id=ticket.id)
 
-
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id
+    TicketReply.objects.create(
+        ticket=ticket,
+        user=request.user,
+        message=message,
     )
 
+    if ticket.status == "closed":
+        ticket.status = "open"
+        ticket.save(update_fields=["status", "updated_at"])
 
-    # بررسی دسترسی مشاهده تیکت
-
-    if not can_view_ticket(
-        request.user,
-        ticket
-    ):
-        raise PermissionDenied
+    messages.success(request, "پاسخ با موفقیت ثبت شد.")
+    return redirect("ticket_detail", ticket_id=ticket.id)
 
 
-    if request.method == 'POST':
-
-        message = request.POST.get('message')
-
-
-        if message and message.strip():
-
-            TicketReply.objects.create(
-                ticket=ticket,
-                user=request.user,
-                message=message.strip()
-            )
-
-
-            # اگر تیکت بسته بوده،
-            # با پاسخ دوباره باز شود
-
-            if ticket.status == 'closed':
-
-                ticket.status = 'open'
-
-                ticket.save()
-
-
-        return redirect(
-            'ticket_detail',
-            ticket_id=ticket.id
-        )
-
-
-    return redirect(
-        'ticket_detail',
-        ticket_id=ticket.id
-    )
-
+# --------------------------------------------------
+# تغییر وضعیت
+# --------------------------------------------------
 
 @login_required
 def update_ticket_status(request, ticket_id):
+    if not has_ticket_permission(request.user, "change_ticket_status"):
+        raise PermissionDenied("اجازه تغییر وضعیت تیکت را ندارید.")
 
-    # Permission تغییر وضعیت
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    if not request.user.has_perm(
-        'helpdesk.change_ticket_status'
-    ):
-        raise PermissionDenied
+    if request.method == "POST":
+        status = request.POST.get("status", "").strip()
 
+        if status not in VALID_STATUSES:
+            messages.error(request, "وضعیت انتخاب‌شده معتبر نیست.")
+        else:
+            ticket.status = status
+            ticket.save(update_fields=["status", "updated_at"])
+            messages.success(request, "وضعیت تیکت تغییر کرد.")
 
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id
-    )
-
-
-    # بررسی دسترسی مشاهده تیکت
-
-    if not can_view_ticket(
-        request.user,
-        ticket
-    ):
-        raise PermissionDenied
-
-
-    if request.method == 'POST':
-
-        status = request.POST.get('status')
-
-
-        ticket.status = status
-
-        ticket.save()
-
-
-        return redirect(
-            'ticket_detail',
-            ticket_id=ticket.id
-        )
-
+        return redirect("ticket_detail", ticket_id=ticket.id)
 
     return render(
         request,
-        'helpdesk/update_ticket_status.html',
-        {
-            'ticket': ticket
-        }
+        "helpdesk/update_ticket_status.html",
+        {"ticket": ticket},
     )
 
+
+# --------------------------------------------------
+# ارجاع تیکت به کارشناس
+# --------------------------------------------------
 
 @login_required
 def assign_ticket(request, ticket_id):
+    if not has_ticket_permission(request.user, "assign_ticket"):
+        raise PermissionDenied("اجازه ارجاع تیکت را ندارید.")
 
-    # Permission ارجاع
-
-    if not request.user.has_perm(
-        'helpdesk.assign_ticket'
-    ):
-        raise PermissionDenied
-
-
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id
+    ticket = get_authorized_ticket(request.user, ticket_id)
+    users = User.objects.filter(is_active=True).order_by(
+        "first_name", "last_name", "username"
     )
 
+    if request.method == "POST":
+        user_id = request.POST.get("assigned_to", "").strip()
 
-    # بررسی دسترسی مشاهده تیکت
-
-    if not can_view_ticket(
-        request.user,
-        ticket
-    ):
-        raise PermissionDenied
-
-
-    users = User.objects.all().order_by(
-        'username'
-    )
-
-
-    if request.method == 'POST':
-
-        user_id = request.POST.get(
-            'assigned_to'
-        )
-
-
-        if user_id:
-
-            ticket.assigned_to_id = user_id
-
-        else:
-
+        if not user_id:
             ticket.assigned_to = None
+        else:
+            try:
+                assigned_user = users.get(pk=int(user_id))
+                ticket.assigned_to = assigned_user
+            except (User.DoesNotExist, ValueError):
+                messages.error(request, "کاربر انتخاب‌شده معتبر نیست.")
+                return redirect("assign_ticket", ticket_id=ticket.id)
 
-
-        ticket.save()
-
-
-        return redirect(
-            'ticket_detail',
-            ticket_id=ticket.id
-        )
-
+        ticket.save(update_fields=["assigned_to", "updated_at"])
+        messages.success(request, "مسئول رسیدگی به تیکت تغییر کرد.")
+        return redirect("ticket_detail", ticket_id=ticket.id)
 
     return render(
         request,
-        'helpdesk/assign_ticket.html',
+        "helpdesk/assign_ticket.html",
         {
-            'ticket': ticket,
-            'users': users
-        }
+            "ticket": ticket,
+            "users": users,
+        },
     )
