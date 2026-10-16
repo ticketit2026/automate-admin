@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}پیوست‌های تکمیلی نامه{% endblock %}
+
+{% block content %}
+<div dir="rtl" style="max-width:900px;margin:25px auto;padding:16px;">
+
+    <!-- مشخصات نامه -->
+    <section style="background:white;border:1px solid #ddd;border-radius:12px;padding:22px;margin-bottom:20px;">
+        <h2 style="margin-top:0;">پیوست‌های تکمیلی نامه</h2>
+
+        <p>
+            <strong>عنوان نامه:</strong>
+            {{ letter.title }}
+        </p>
+
+        {% if letter.letter_number %}
+        <p>
+            <strong>شماره نامه:</strong>
+            {{ letter.letter_number }}
+        </p>
+        {% endif %}
+
+        <p style="color:#666;font-size:14px;line-height:1.9;">
+            فایل اسکن‌شده، امضاشده یا مهرشده در این بخش جداگانه ذخیره می‌شود.
+            فایل اصلی نامه تغییر نخواهد کرد.
+        </p>
+    </section>
+
+    <!-- فرم بارگذاری -->
+    <section style="background:white;border:1px solid #ddd;border-radius:12px;padding:22px;margin-bottom:20px;">
+        <h3 style="margin-top:0;">بارگذاری فایل جدید</h3>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div style="margin-bottom:18px;">
+                <label for="attachment" style="display:block;margin-bottom:8px;">
+                    انتخاب PDF یا تصویر اسکن‌شده
+                </label>
+
+                <input
+                    type="file"
+                    id="attachment"
+                    name="attachment"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                    required
+                    style="width:100%;"
+                >
+
+                <small style="display:block;margin-top:7px;color:#666;">
+                    فرمت‌های مجاز: PDF، JPG، JPEG، PNG و WEBP
+                    | حداکثر حجم: ۳۰ مگابایت
+                </small>
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label for="description" style="display:block;margin-bottom:8px;">
+                    توضیحات فایل
+                </label>
+
+                <input
+                    type="text"
+                    id="description"
+                    name="description"
+                    maxlength="250"
+                    placeholder="مثلاً نسخه امضاشده توسط مدیرعامل"
+                    style="width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:6px;"
+                >
+            </div>
+
+            <button
+                type="submit"
+                style="background:#1769aa;color:white;border:0;border-radius:7px;padding:11px 20px;cursor:pointer;"
+            >
+                بارگذاری و ذخیره
+            </button>
+
+            <a
+                href="{% url 'letter_detail' letter.id %}"
+                style="margin-right:12px;text-decoration:none;"
+            >
+                بازگشت به نامه
+            </a>
+        </form>
+    </section>
+
+    <!-- پیام‌های سامانه -->
+    {% if messages %}
+    <section style="margin-bottom:20px;">
+        {% for message in messages %}
+        <div style="padding:12px;margin-bottom:8px;border:1px solid #ddd;border-radius:7px;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- فهرست پیوست‌ها -->
+    <section style="background:white;border:1px solid #ddd;border-radius:12px;padding:22px;">
+        <h3 style="margin-top:0;">
+            فایل‌های بارگذاری‌شده ({{ attachments|length }})
+        </h3>
+
+        {% for attachment in attachments %}
+        <div style="border-bottom:1px solid #eee;padding:16px 0;">
+
+            <strong>
+                {{ attachment.description|default:"پیوست بدون توضیحات" }}
+            </strong>
+
+            <div style="margin-top:8px;color:#666;font-size:13px;">
+                نوع فایل:
+                {{ attachment.file.name|slice:"-5:" }}
+            </div>
+
+            <div style="margin-top:6px;color:#666;font-size:13px;">
+                بارگذاری‌کننده:
+                {{ attachment.uploaded_by|default:"کاربر نامشخص" }}
+            </div>
+
+            <div style="margin-top:6px;color:#666;font-size:13px;">
+                تاریخ بارگذاری:
+                {{ attachment.uploaded_at|date:"Y/m/d H:i" }}
+            </div>
+
+            <div style="margin-top:12px;">
+                <a
+                    href="{% url 'letter_attachment_download' attachment.id %}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    مشاهده فایل
+                </a>
+
+                <span style="margin:0 8px;">|</span>
+
+                <a
+                    href="{% url 'letter_attachment_download' attachment.id %}?download=1"
+                >
+                    دانلود فایل
+                </a>
+            </div>
+        </div>
+
+        {% empty %}
+        <p style="color:#777;">
+            هنوز فایل اسکن‌شده یا امضاشده‌ای برای این نامه بارگذاری نشده است.
+        </p>
+        {% endfor %}
+    </section>
+
+</div>
+{% endblock %}
+```
