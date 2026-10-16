@@ -1,90 +1,62 @@
+
 from django.urls import path
 
 from . import views
+from .annotation_views import letter_annotate
 
 
 urlpatterns = [
-
-    # =====================================================
-    # لیست نامه‌ها
-    # =====================================================
-
     path(
-        '',
+        "",
         views.letter_list,
-        name='letter_list'
+        name="letter_list",
     ),
 
-    # =====================================================
-    # ایجاد نامه
-    # =====================================================
-
     path(
-        'create/',
+        "create/",
         views.letter_create,
-        name='letter_create'
+        name="letter_create",
     ),
 
-    # =====================================================
-    # جزئیات نامه
-    # =====================================================
-
     path(
-        '<int:letter_id>/',
+        "<int:letter_id>/",
         views.letter_detail,
-        name='letter_detail'
+        name="letter_detail",
     ),
 
-    # =====================================================
-    # ویرایش نامه
-    # =====================================================
-
     path(
-        '<int:letter_id>/edit/',
+        "<int:letter_id>/edit/",
         views.letter_edit,
-        name='letter_edit'
+        name="letter_edit",
     ),
 
-    # =====================================================
-    # حذف نامه
-    # =====================================================
-
     path(
-        '<int:letter_id>/delete/',
+        "<int:letter_id>/delete/",
         views.letter_delete,
-        name='letter_delete'
+        name="letter_delete",
     ),
 
-    # =====================================================
-    # ارجاع زنجیره‌ای
-    #
-    # A → B → C → D
-    # =====================================================
-
     path(
-        '<int:letter_id>/assign/',
+        "<int:letter_id>/assign/",
         views.letter_assign,
-        name='letter_assign'
+        name="letter_assign",
     ),
 
-    # =====================================================
-    # تأیید نامه
-    # =====================================================
-
     path(
-        '<int:letter_id>/approve/',
+        "<int:letter_id>/approve/",
         views.letter_approve,
-        name='letter_approve'
+        name="letter_approve",
     ),
-
-    # =====================================================
-    # رد نامه
-    # =====================================================
 
     path(
-        '<int:letter_id>/reject/',
+        "<int:letter_id>/reject/",
         views.letter_reject,
-        name='letter_reject'
+        name="letter_reject",
     ),
 
+    path(
+        "<int:letter_id>/annotate/",
+        letter_annotate,
+        name="letter_annotate",
+    ),
 ]
