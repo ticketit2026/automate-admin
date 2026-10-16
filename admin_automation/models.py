@@ -23,8 +23,6 @@ class InternalLetter(models.Model):
     )
 
     # شماره نامه
-    # nullable گذاشته شده تا نامه‌های قدیمی بدون شماره
-    # هنگام migration دچار مشکل نشوند.
     letter_number = models.CharField(
         max_length=50,
         unique=True,
@@ -109,11 +107,12 @@ class InternalLetter(models.Model):
         verbose_name='تاریخ رد'
     )
 
+    # فایل اصلی نامه؛ با افزودن پیوست امضاشده تغییر نمی‌کند.
     file = models.FileField(
         upload_to='letters/',
         null=True,
         blank=True,
-        verbose_name='فایل پیوست'
+        verbose_name='فایل اصلی نامه'
     )
 
     created_by = models.ForeignKey(
@@ -134,45 +133,68 @@ class InternalLetter(models.Model):
     )
 
     class Meta:
-
         verbose_name = 'نامه اداری'
         verbose_name_plural = 'نامه‌های اداری'
-
         ordering = ['-created_at']
 
         permissions = [
-            (
-                'view_all_letters',
-                'مشاهده همه نامه‌ها'
-            ),
-            (
-                'create_letter',
-                'ایجاد نامه'
-            ),
-            (
-                'edit_letter',
-                'ویرایش نامه'
-            ),
-            (
-                'delete_letter',
-                'حذف نامه'
-            ),
-            (
-                'assign_letter',
-                'ارجاع نامه'
-            ),
-            (
-                'approve_letter',
-                'تأیید نامه'
-            ),
-            (
-                'reject_letter',
-                'رد نامه'
-            ),
+            ('view_all_letters', 'مشاهده همه نامه‌ها'),
+            ('create_letter', 'ایجاد نامه'),
+            ('edit_letter', 'ویرایش نامه'),
+            ('delete_letter', 'حذف نامه'),
+            ('assign_letter', 'ارجاع نامه'),
+            ('approve_letter', 'تأیید نامه'),
+            ('reject_letter', 'رد نامه'),
         ]
 
     def __str__(self):
         if self.letter_number:
             return f'{self.letter_number} - {self.title}'
-
         return self.title
+
+
+class LetterAttachment(models.Model):
+    """
+    فایل‌های تکمیلی هر نامه؛ مانند نسخه اسکن‌شده،
+    امضاشده یا مهرشده. فایل اصلی نامه حفظ می‌شود.
+    """
+
+    letter = models.ForeignKey(
+        InternalLetter,
+        on_delete=models.CASCADE,
+        related_name='attachments',
+        verbose_name='نامه'
+    )
+
+    file = models.FileField(
+        upload_to='letters/signed_attachments/',
+        verbose_name='فایل اسکن‌شده یا امضاشده'
+    )
+
+    description = models.CharField(
+        max_length=250,
+        blank=True,
+        verbose_name='توضیحات فایل'
+    )
+
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='uploaded_letter_attachments',
+        verbose_name='بارگذاری‌کننده'
+    )
+
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='تاریخ بارگذاری'
+    )
+
+    class Meta:
+        verbose_name = 'پیوست تکمیلی نامه'
+        verbose_name_plural = 'پیوست‌های تکمیلی نامه'
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f'{self.letter.title} - {self.description or self.file.name}'
