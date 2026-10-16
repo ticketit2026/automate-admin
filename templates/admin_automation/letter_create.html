@@ -1,232 +1,379 @@
 {% extends 'base.html' %}
 
 {% block title %}
-ثبت نامه
+    {% if edit_mode %}
+        ویرایش نامه
+    {% else %}
+        ایجاد نامه
+    {% endif %}
 {% endblock %}
+
 
 {% block content %}
 
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto">
 
-    <div class="mb-6">
+    <!-- Header -->
 
-        <h1 class="text-2xl font-bold text-gray-800">
-            ثبت نامه جدید
-        </h1>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
 
-        <p class="text-sm text-gray-500 mt-2">
-            اطلاعات نامه را وارد کنید.
-        </p>
+        <div class="flex items-center justify-between">
+
+            <div>
+
+                <h1 class="text-xl font-bold text-gray-800">
+
+                    {% if edit_mode %}
+                        ویرایش نامه
+                    {% else %}
+                        ایجاد نامه جدید
+                    {% endif %}
+
+                </h1>
+
+                <p class="text-sm text-gray-400 mt-2">
+
+                    {% if edit_mode %}
+                        اطلاعات نامه را ویرایش کنید.
+                    {% else %}
+                        اطلاعات نامه را وارد کنید.
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+            <div class="text-4xl">
+                📄
+            </div>
+
+        </div>
 
     </div>
 
 
-    {% if messages %}
+    <!-- Form -->
 
-        {% for message in messages %}
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+    >
 
-        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl text-sm">
-            {{ message }}
+        {% csrf_token %}
+
+
+        <!-- شماره نامه + عنوان -->
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+
+
+            <!-- شماره نامه -->
+
+            <div>
+
+                <label
+                    for="letter_number"
+                    class="block text-sm font-bold text-gray-700 mb-2"
+                >
+                    شماره نامه
+                    <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="letter_number"
+                    name="letter_number"
+                    value="{% if letter %}{{ letter.letter_number|default:'' }}{% else %}{{ letter_number|default:'' }}{% endif %}"
+                    placeholder="مثلاً 1405/1258"
+                    maxlength="50"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+
+                <p class="text-xs text-gray-400 mt-2">
+                    شماره نامه باید یکتا باشد.
+                </p>
+
+            </div>
+
+
+            <!-- عنوان -->
+
+            <div>
+
+                <label
+                    for="title"
+                    class="block text-sm font-bold text-gray-700 mb-2"
+                >
+                    عنوان نامه
+                    <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="{% if letter %}{{ letter.title }}{% else %}{{ title|default:'' }}{% endif %}"
+                    placeholder="عنوان نامه را وارد کنید"
+                    maxlength="200"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+
+            </div>
+
+
         </div>
 
-        {% endfor %}
 
-    {% endif %}
+        <!-- نوع نامه + گیرنده -->
 
-
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-
-        <form
-            method="post"
-            enctype="multipart/form-data"
-        >
-
-            {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
 
 
-            <div class="mb-5">
+            <!-- نوع نامه -->
 
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    عنوان نامه
-                </label>
+            <div>
 
-                <input
-                    type="text"
-                    name="title"
-                    required
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
-                    placeholder="عنوان نامه"
+                <label
+                    for="document_type"
+                    class="block text-sm font-bold text-gray-700 mb-2"
                 >
-
-            </div>
-
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-
-
-                <div>
-
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        نوع نامه
-                    </label>
-
-                    <select
-                        name="document_type"
-                        required
-                        class="w-full border border-gray-200 rounded-xl px-4 py-3"
-                    >
-
-                        <option value="in">
-                            نامه وارده
-                        </option>
-
-                        <option value="out">
-                            نامه صادره
-                        </option>
-
-                        <option value="internal">
-                            نامه داخلی
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div>
-
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        وضعیت
-                    </label>
-
-                    <select
-                        name="status"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-3"
-                    >
-
-                        <option value="draft">
-                            پیش‌نویس
-                        </option>
-
-                        <option value="sent">
-                            ارسال شده
-                        </option>
-
-                        <option value="received">
-                            دریافت شده
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
-
-
-            <div class="mb-5">
-
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    گیرنده
-                </label>
-
-                <input
-                    type="text"
-                    name="sent_to"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
-                    placeholder="نام شخص یا واحد گیرنده"
-                >
-
-            </div>
-
-
-            <div class="mb-5">
-
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    ارجاع به کاربر
+                    نوع نامه
+                    <span class="text-red-500">*</span>
                 </label>
 
                 <select
-                    name="assigned_to"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                    id="document_type"
+                    name="document_type"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
 
                     <option value="">
-                        بدون ارجاع
+                        انتخاب نوع نامه
                     </option>
 
-                    {% for user in users %}
-
-                    <option value="{{ user.id }}">
-                        {{ user.username }}
-
-                        {% if user.first_name or user.last_name %}
-                            -
-                            {{ user.first_name }}
-                            {{ user.last_name }}
+                    <option
+                        value="in"
+                        {% if letter and letter.document_type == 'in' or not letter and document_type == 'in' %}
+                            selected
                         {% endif %}
-
+                    >
+                        نامه وارده
                     </option>
 
-                    {% endfor %}
+                    <option
+                        value="out"
+                        {% if letter and letter.document_type == 'out' or not letter and document_type == 'out' %}
+                            selected
+                        {% endif %}
+                    >
+                        نامه صادره
+                    </option>
+
+                    <option
+                        value="internal"
+                        {% if letter and letter.document_type == 'internal' or not letter and document_type == 'internal' %}
+                            selected
+                        {% endif %}
+                    >
+                        نامه داخلی
+                    </option>
 
                 </select>
 
             </div>
 
 
-            <div class="mb-5">
+            <!-- گیرنده -->
 
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    متن نامه
-                </label>
+            <div>
 
-                <textarea
-                    name="content"
-                    rows="10"
-                    required
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
-                    placeholder="متن نامه را وارد کنید..."
-                ></textarea>
-
-            </div>
-
-
-            <div class="mb-6">
-
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    فایل پیوست
+                <label
+                    for="sent_to"
+                    class="block text-sm font-bold text-gray-700 mb-2"
+                >
+                    گیرنده
+                    <span class="text-red-500">*</span>
                 </label>
 
                 <input
-                    type="file"
-                    name="file"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3"
+                    type="text"
+                    id="sent_to"
+                    name="sent_to"
+                    value="{% if letter %}{{ letter.sent_to }}{% else %}{{ sent_to|default:'' }}{% endif %}"
+                    placeholder="نام شخص، واحد یا شرکت"
+                    maxlength="200"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
 
             </div>
 
 
-            <div class="flex gap-3">
+        </div>
 
-                <button
-                    type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold"
-                >
-                    ثبت نامه
-                </button>
+
+        <!-- متن نامه -->
+
+        <div class="mb-5">
+
+            <label
+                for="content"
+                class="block text-sm font-bold text-gray-700 mb-2"
+            >
+                متن نامه
+                <span class="text-red-500">*</span>
+            </label>
+
+            <textarea
+                id="content"
+                name="content"
+                rows="10"
+                required
+                placeholder="متن نامه را وارد کنید..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >{% if letter %}{{ letter.content }}{% else %}{{ content|default:'' }}{% endif %}</textarea>
+
+        </div>
+
+
+        <!-- ارجاع -->
+
+        <div class="mb-5">
+
+            <label
+                for="assigned_to"
+                class="block text-sm font-bold text-gray-700 mb-2"
+            >
+                ارجاع به
+            </label>
+
+            <select
+                id="assigned_to"
+                name="assigned_to"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+
+                <option value="">
+                    بدون ارجاع
+                </option>
+
+                {% for user in users %}
+
+                    <option
+                        value="{{ user.id }}"
+                        {% if assigned_to_id|stringformat:"s" == user.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ user.get_full_name|default:user.username }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <p class="text-xs text-gray-400 mt-2">
+                در صورت انتخاب کاربر، نامه پس از ثبت برای او ارسال می‌شود.
+            </p>
+
+        </div>
+
+
+        <!-- فایل -->
+
+        <div class="mb-7">
+
+            <label
+                for="file"
+                class="block text-sm font-bold text-gray-700 mb-2"
+            >
+                فایل پیوست
+            </label>
+
+            {% if letter and letter.file %}
+
+                <div class="mb-3 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+
+                    <div class="text-sm text-gray-700">
+
+                        فایل فعلی:
+
+                        <span class="font-bold">
+                            {{ letter.file.name }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+            <input
+                type="file"
+                id="file"
+                name="file"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+
+            <p class="text-xs text-gray-400 mt-2">
+                در صورت نیاز فایل نامه را انتخاب کنید.
+            </p>
+
+        </div>
+
+
+        <!-- Buttons -->
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-start">
+
+
+            <!-- Save -->
+
+            <button
+                type="submit"
+                class="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition"
+            >
+
+                {% if edit_mode %}
+                    💾 ذخیره تغییرات
+                {% else %}
+                    💾 ثبت نامه
+                {% endif %}
+
+            </button>
+
+
+            <!-- Cancel -->
+
+            {% if letter %}
 
                 <a
-                    href="{% url 'letter_list' %}"
-                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold"
+                    href="{% url 'letter_detail' letter_id=letter.id %}"
+                    class="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-center hover:bg-gray-200 transition"
                 >
                     انصراف
                 </a>
 
-            </div>
+            {% else %}
 
-        </form>
+                <a
+                    href="{% url 'letter_list' %}"
+                    class="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-center hover:bg-gray-200 transition"
+                >
+                    انصراف
+                </a>
 
-    </div>
+            {% endif %}
+
+
+        </div>
+
+
+    </form>
 
 </div>
 

@@ -12,13 +12,25 @@ class InternalLetter(models.Model):
 
     STATUS_CHOICES = [
         ('draft', 'پیش‌نویس'),
-        ('sent', 'ارسال شده'),
-        ('received', 'دریافت شده'),
+        ('pending', 'در انتظار بررسی'),
+        ('approved', 'تأیید شده'),
+        ('rejected', 'رد شده'),
     ]
 
     title = models.CharField(
         max_length=200,
         verbose_name='عنوان نامه'
+    )
+
+    # شماره نامه
+    # nullable گذاشته شده تا نامه‌های قدیمی بدون شماره
+    # هنگام migration دچار مشکل نشوند.
+    letter_number = models.CharField(
+        max_length=50,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name='شماره نامه'
     )
 
     content = models.TextField(
@@ -38,8 +50,8 @@ class InternalLetter(models.Model):
 
     status = models.CharField(
         max_length=20,
-        default='draft',
         choices=STATUS_CHOICES,
+        default='draft',
         verbose_name='وضعیت'
     )
 
@@ -50,6 +62,51 @@ class InternalLetter(models.Model):
         blank=True,
         related_name='assigned_letters',
         verbose_name='ارجاع به'
+    )
+
+    assigned_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_letters_by_me',
+        verbose_name='ارجاع توسط'
+    )
+
+    assigned_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ ارجاع'
+    )
+
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_letters',
+        verbose_name='تأیید توسط'
+    )
+
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ تأیید'
+    )
+
+    rejected_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rejected_letters',
+        verbose_name='رد توسط'
+    )
+
+    rejected_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ رد'
     )
 
     file = models.FileField(
@@ -84,13 +141,38 @@ class InternalLetter(models.Model):
         ordering = ['-created_at']
 
         permissions = [
-            ('view_all_letters', 'مشاهده همه نامه‌ها'),
-            ('create_letter', 'ایجاد نامه'),
-            ('edit_letter', 'ویرایش نامه'),
-            ('delete_letter', 'حذف نامه'),
-            ('send_letter', 'ارسال نامه'),
-            ('assign_letter', 'ارجاع نامه'),
+            (
+                'view_all_letters',
+                'مشاهده همه نامه‌ها'
+            ),
+            (
+                'create_letter',
+                'ایجاد نامه'
+            ),
+            (
+                'edit_letter',
+                'ویرایش نامه'
+            ),
+            (
+                'delete_letter',
+                'حذف نامه'
+            ),
+            (
+                'assign_letter',
+                'ارجاع نامه'
+            ),
+            (
+                'approve_letter',
+                'تأیید نامه'
+            ),
+            (
+                'reject_letter',
+                'رد نامه'
+            ),
         ]
 
     def __str__(self):
+        if self.letter_number:
+            return f'{self.letter_number} - {self.title}'
+
         return self.title
