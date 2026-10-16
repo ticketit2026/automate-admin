@@ -1,7 +1,8 @@
-
+```python
 from django.urls import path
 from . import views
 from .annotation_views import letter_annotate, letter_annotation_page
+from .attachment_views import letter_attachments, letter_attachment_download
 
 urlpatterns = [
     # فهرست نامه‌ها
@@ -41,4 +42,19 @@ urlpatterns = [
         letter_annotation_page,
         name="letter_annotation_page",
     ),
+
+    # مدیریت پیوست‌های اسکن‌شده و امضاشده
+    path(
+        "<int:letter_id>/attachments/",
+        letter_attachments,
+        name="letter_attachments",
+    ),
+
+    # مشاهده یا دانلود امن پیوست
+    path(
+        "attachments/<int:attachment_id>/download/",
+        letter_attachment_download,
+        name="letter_attachment_download",
+    ),
 ]
+```
