@@ -1,281 +1,189 @@
 
 {% extends 'base.html' %}
 
-{% block title %}
-فهرست نامه‌های اداری
-{% endblock %}
+{% block title %}فهرست نامه‌های اداری{% endblock %}
 
 {% block content %}
-
 <div class="max-w-7xl mx-auto px-4 py-6" dir="rtl">
 
-    <!-- سربرگ صفحه -->
+    <!-- سربرگ -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-
         <div>
             <h1 class="text-2xl font-bold text-gray-800">
                 فهرست نامه‌های اداری
             </h1>
-
             <p class="text-sm text-gray-500 mt-2">
                 مشاهده و پیگیری نامه‌های اداری
             </p>
         </div>
 
         {% if can_create_letter %}
-        <a
-            href="{% url 'letter_create' %}"
-            class="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-xl font-semibold transition"
-        >
+        <a href="{% url 'letter_create' %}"
+           class="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-xl font-semibold transition">
             <span>+</span>
-            <span>ایجاد نامه جدید</span>
+            ایجاد نامه جدید
         </a>
         {% endif %}
-
     </div>
 
-
-    <!-- پیام‌های سیستم -->
+    <!-- پیام‌ها -->
     {% if messages %}
     <div class="space-y-3 mb-6">
-
         {% for message in messages %}
-        <div
-            class="p-4 rounded-xl border
-            {% if message.tags == 'error' %}
+        <div class="p-4 rounded-xl border
+            {% if 'error' in message.tags %}
                 bg-red-50 text-red-700 border-red-200
-            {% elif message.tags == 'success' %}
+            {% elif 'success' in message.tags %}
                 bg-green-50 text-green-700 border-green-200
-            {% elif message.tags == 'warning' %}
+            {% elif 'warning' in message.tags %}
                 bg-yellow-50 text-yellow-800 border-yellow-200
             {% else %}
                 bg-blue-50 text-blue-700 border-blue-200
-            {% endif %}"
-        >
+            {% endif %}">
             {{ message }}
         </div>
         {% endfor %}
-
     </div>
     {% endif %}
 
-
     <!-- جست‌وجو و فیلتر -->
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mb-6">
-
         <h2 class="font-bold text-gray-800 mb-4">
             جست‌وجو و فیلتر نامه‌ها
         </h2>
 
         <form method="get" action="{% url 'letter_list' %}">
-
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
-                <!-- جست‌وجو -->
                 <div>
-                    <label
-                        for="search"
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                    >
+                    <label for="search"
+                           class="block text-sm font-medium text-gray-700 mb-2">
                         جست‌وجو
                     </label>
-
                     <input
                         type="text"
                         id="search"
                         name="search"
                         value="{{ search }}"
                         placeholder="شماره، عنوان، متن یا گیرنده"
-                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
 
-
-                <!-- نوع نامه -->
                 <div>
-                    <label
-                        for="document_type"
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                    >
+                    <label for="document_type"
+                           class="block text-sm font-medium text-gray-700 mb-2">
                         نوع نامه
                     </label>
-
                     <select
                         id="document_type"
                         name="document_type"
-                        class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+
                         <option value="">همه انواع</option>
 
-                        {% for value, label in letters.model.DOCUMENT_TYPE_CHOICES %}
-                        <option
-                            value="{{ value }}"
-                            {% if document_type == value %}selected{% endif %}
-                        >
+                        {% for value, label in document_type_choices %}
+                        <option value="{{ value }}"
+                            {% if document_type == value|stringformat:"s" %}selected{% endif %}>
                             {{ label }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
-
-                <!-- وضعیت -->
                 <div>
-                    <label
-                        for="status"
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                    >
+                    <label for="status"
+                           class="block text-sm font-medium text-gray-700 mb-2">
                         وضعیت نامه
                     </label>
-
                     <select
                         id="status"
                         name="status"
-                        class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                        <option value="">همه وضعیت‌ها</option>
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500">
 
+                        <option value="">همه وضعیت‌ها</option>
                         <option value="draft" {% if status == 'draft' %}selected{% endif %}>
                             پیش‌نویس
                         </option>
-
                         <option value="pending" {% if status == 'pending' %}selected{% endif %}>
                             در انتظار بررسی
                         </option>
-
                         <option value="approved" {% if status == 'approved' %}selected{% endif %}>
                             تأیید شده
                         </option>
-
                         <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>
                             رد شده
                         </option>
                     </select>
                 </div>
 
-
-                <!-- دکمه‌ها -->
                 <div class="flex items-end gap-2">
-
                     <button
                         type="submit"
-                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition"
-                    >
+                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition">
                         جست‌وجو
                     </button>
 
                     <a
                         href="{% url 'letter_list' %}"
-                        class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-semibold transition"
-                    >
+                        class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-semibold transition">
                         پاک‌کردن
                     </a>
-
                 </div>
 
             </div>
-
         </form>
-
     </div>
 
-
-    <!-- جدول نامه‌ها -->
+    <!-- جدول -->
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
 
         <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-
-            <h2 class="font-bold text-gray-800">
-                نامه‌ها
-            </h2>
-
+            <h2 class="font-bold text-gray-800">نامه‌ها</h2>
             <span class="text-sm text-gray-500">
-                تعداد:
-                {{ letters|length }}
+                تعداد: {{ letters|length }}
             </span>
-
         </div>
 
         {% if letters %}
-
         <div class="overflow-x-auto">
-
             <table class="w-full text-sm text-right">
 
                 <thead class="bg-gray-50 text-gray-600">
-
                     <tr>
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            شماره نامه
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            عنوان
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            نوع نامه
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            ایجادکننده
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            ارجاع‌شده به
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            وضعیت
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            تاریخ ثبت
-                        </th>
-
-                        <th class="px-5 py-4 font-semibold whitespace-nowrap">
-                            عملیات
-                        </th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">شماره نامه</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">عنوان</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">نوع نامه</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">ایجادکننده</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">ارجاع‌شده به</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">وضعیت</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">تاریخ ثبت</th>
+                        <th class="px-5 py-4 font-semibold whitespace-nowrap">عملیات</th>
                     </tr>
-
                 </thead>
 
-
                 <tbody class="divide-y divide-gray-100">
-
                     {% for letter in letters %}
-
                     <tr class="hover:bg-gray-50 transition">
 
-                        <!-- شماره نامه -->
                         <td class="px-5 py-4 whitespace-nowrap text-gray-700">
                             {{ letter.letter_number|default:"—" }}
                         </td>
 
-
-                        <!-- عنوان -->
                         <td class="px-5 py-4 min-w-48">
-
                             <div class="font-semibold text-gray-800">
                                 {{ letter.title }}
                             </div>
-
                             {% if letter.sent_to %}
                             <div class="text-xs text-gray-500 mt-1">
                                 گیرنده: {{ letter.sent_to }}
                             </div>
                             {% endif %}
-
                         </td>
 
-
-                        <!-- نوع نامه -->
                         <td class="px-5 py-4 whitespace-nowrap text-gray-600">
                             {{ letter.get_document_type_display|default:letter.document_type }}
                         </td>
 
-
-                        <!-- ایجادکننده -->
                         <td class="px-5 py-4 whitespace-nowrap text-gray-600">
                             {% if letter.created_by %}
                                 {{ letter.created_by.get_full_name|default:letter.created_by.username }}
@@ -284,8 +192,6 @@
                             {% endif %}
                         </td>
 
-
-                        <!-- ارجاع‌شده به -->
                         <td class="px-5 py-4 whitespace-nowrap text-gray-600">
                             {% if letter.assigned_to %}
                                 {{ letter.assigned_to.get_full_name|default:letter.assigned_to.username }}
@@ -294,46 +200,30 @@
                             {% endif %}
                         </td>
 
-
-                        <!-- وضعیت -->
                         <td class="px-5 py-4 whitespace-nowrap">
-
                             {% if letter.status == 'draft' %}
-
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                                     پیش‌نویس
                                 </span>
-
                             {% elif letter.status == 'pending' %}
-
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                                     در انتظار بررسی
                                 </span>
-
                             {% elif letter.status == 'approved' %}
-
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                                     تأیید شده
                                 </span>
-
                             {% elif letter.status == 'rejected' %}
-
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
                                     رد شده
                                 </span>
-
                             {% else %}
-
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                                     {{ letter.get_status_display|default:letter.status }}
                                 </span>
-
                             {% endif %}
-
                         </td>
 
-
-                        <!-- تاریخ ثبت -->
                         <td class="px-5 py-4 whitespace-nowrap text-gray-600">
                             {% if letter.created_at %}
                                 {{ letter.created_at|date:"Y/m/d" }}
@@ -342,42 +232,27 @@
                             {% endif %}
                         </td>
 
-
-                        <!-- عملیات -->
                         <td class="px-5 py-4 whitespace-nowrap">
-
                             <a
                                 href="{% url 'letter_detail' letter_id=letter.id %}"
-                                class="inline-flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold transition"
-                            >
+                                class="inline-flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold transition">
                                 مشاهده
                             </a>
-
                         </td>
 
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
 
             </table>
-
         </div>
 
         {% else %}
-
-        <!-- حالت بدون نامه -->
         <div class="py-16 px-6 text-center">
-
-            <div class="text-4xl mb-4">
-                📄
-            </div>
-
+            <div class="text-4xl mb-4">📄</div>
             <h3 class="font-bold text-gray-800 text-lg">
                 نامه‌ای پیدا نشد
             </h3>
-
             <p class="text-sm text-gray-500 mt-2">
                 نامه‌ای با شرایط جست‌وجوی انتخاب‌شده وجود ندارد.
             </p>
@@ -385,18 +260,14 @@
             {% if can_create_letter %}
             <a
                 href="{% url 'letter_create' %}"
-                class="inline-flex mt-5 bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-xl font-semibold transition"
-            >
+                class="inline-flex mt-5 bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-xl font-semibold transition">
                 ایجاد نامه جدید
             </a>
             {% endif %}
-
         </div>
-
         {% endif %}
 
     </div>
 
 </div>
-
 {% endblock %}
