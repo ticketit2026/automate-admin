@@ -1,62 +1,44 @@
 
 from django.urls import path
-
 from . import views
-from .annotation_views import letter_annotate
-
+from .annotation_views import letter_annotate, letter_annotation_page
 
 urlpatterns = [
-    path(
-        "",
-        views.letter_list,
-        name="letter_list",
-    ),
+    # فهرست نامه‌ها
+    path("", views.letter_list, name="letter_list"),
 
-    path(
-        "create/",
-        views.letter_create,
-        name="letter_create",
-    ),
+    # ایجاد نامه
+    path("create/", views.letter_create, name="letter_create"),
 
-    path(
-        "<int:letter_id>/",
-        views.letter_detail,
-        name="letter_detail",
-    ),
+    # جزئیات نامه
+    path("<int:letter_id>/", views.letter_detail, name="letter_detail"),
 
-    path(
-        "<int:letter_id>/edit/",
-        views.letter_edit,
-        name="letter_edit",
-    ),
+    # ویرایش نامه
+    path("<int:letter_id>/edit/", views.letter_edit, name="letter_edit"),
 
-    path(
-        "<int:letter_id>/delete/",
-        views.letter_delete,
-        name="letter_delete",
-    ),
+    # حذف نامه
+    path("<int:letter_id>/delete/", views.letter_delete, name="letter_delete"),
 
-    path(
-        "<int:letter_id>/assign/",
-        views.letter_assign,
-        name="letter_assign",
-    ),
+    # ارجاع نامه
+    path("<int:letter_id>/assign/", views.letter_assign, name="letter_assign"),
 
-    path(
-        "<int:letter_id>/approve/",
-        views.letter_approve,
-        name="letter_approve",
-    ),
+    # تأیید نامه
+    path("<int:letter_id>/approve/", views.letter_approve, name="letter_approve"),
 
-    path(
-        "<int:letter_id>/reject/",
-        views.letter_reject,
-        name="letter_reject",
-    ),
+    # رد نامه
+    path("<int:letter_id>/reject/", views.letter_reject, name="letter_reject"),
 
+    # حاشیه‌نویسی نامه
     path(
         "<int:letter_id>/annotate/",
         letter_annotate,
         name="letter_annotate",
+    ),
+
+    # نمایش تصویر هر صفحه برای حاشیه‌نویسی
+    path(
+        "<int:letter_id>/annotate/page/<int:page_number>/",
+        letter_annotation_page,
+        name="letter_annotation_page",
     ),
 ]
