@@ -128,4 +128,4 @@ def letter_attachments(request, letter_id):
         pk=letter_id,
     )
 
-    if not user_can_view_letter(request.user, letter)
+    if not user_can_view_letter(request.user, letter):
