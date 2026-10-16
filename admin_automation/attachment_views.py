@@ -309,4 +309,3 @@ response["X-Content-Type-Options"] = "nosniff"
 response["Cache-Control"] = "private, no-store"
 
 return response
-```
