@@ -1,6 +1,9 @@
+
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -66,3 +69,11 @@ urlpatterns = [
     ),
 
 ]
+
+
+# نمایش فایل‌های پیوست در محیط توسعه
+if settings.DEBUG:
+    urlpatterns += static(
+        '/letters/',
+        document_root=settings.BASE_DIR / 'letters'
+    )
