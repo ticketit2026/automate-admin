@@ -11,17 +11,31 @@ from .models import InternalLetter
 
 
 def has_access(user, permission):
-    """مدیر اصلی دسترسی کامل دارد؛ سایر کاربران به مجوز نیاز دارند."""
+    """بررسی مجوز اختصاصی کاربر."""
     return user.is_superuser or user.has_perm(
         f'admin_automation.{permission}'
     )
 
 
 def can_view_letter(user, letter):
-    """محدود کردن مشاهده نامه به افراد مجاز."""
+    """
+    مشاهده نامه:
+    - مدیر اصلی همه نامه‌ها را می‌بیند.
+    - سایر کاربران باید مجوز مشاهده نامه داشته باشند.
+    - با مجوز مشاهده همه نامه‌ها، تمام نامه‌ها قابل مشاهده‌اند.
+    - در غیر این صورت، فقط نامه‌های ایجادشده یا ارجاع‌شده به کاربر.
+    """
+    if user.is_superuser:
+        return True
+
+    if not has_access(user, 'view_internalletter'):
+        return False
+
+    if has_access(user, 'view_all_letters'):
+        return True
+
     return (
-        has_access(user, 'view_all_letters')
-        or letter.created_by_id == user.id
+        letter.created_by_id == user.id
         or letter.assigned_to_id == user.id
     )
 
@@ -58,7 +72,11 @@ def letter_list(request):
         'rejected_by',
     )
 
-    if not has_access(request.user, 'view_all_letters'):
+    if request.user.is_superuser:
+        pass
+    elif not has_access(request.user, 'view_internalletter'):
+        letters = letters.none()
+    elif not has_access(request.user, 'view_all_letters'):
         letters = letters.filter(
             Q(created_by=request.user)
             | Q(assigned_to=request.user)
@@ -130,6 +148,11 @@ def letter_create(request):
         assigned_to_id=assigned_to_id,
     )
 
+    valid_document_types = {
+        value for value, label in
+        InternalLetter._meta.get_field('document_type').choices
+    }
+
     if not all([
         letter_number, title, content, document_type, sent_to
     ]):
@@ -137,6 +160,14 @@ def letter_create(request):
             request,
             'لطفاً تمام فیلدهای الزامی را تکمیل کنید.'
         )
+        return render(
+            request,
+            'admin_automation/letter_create.html',
+            context,
+        )
+
+    if document_type not in valid_document_types:
+        messages.error(request, 'نوع نامه انتخاب‌شده معتبر نیست.')
         return render(
             request,
             'admin_automation/letter_create.html',
@@ -201,7 +232,7 @@ def letter_detail(request, letter_id):
     if not can_view_letter(request.user, letter):
         messages.error(
             request,
-            'شما دسترسی مشاهده این نامه را ندارید.'
+            'شما مجوز مشاهده این نامه را ندارید.'
         )
         return redirect('letter_list')
 
@@ -213,6 +244,11 @@ def letter_detail(request, letter_id):
             letter.created_by_id == request.user.id
             or has_access(request.user, 'view_all_letters')
         )
+    )
+
+    can_process = (
+        is_assigned_user
+        and letter.status == 'pending'
     )
 
     return render(
@@ -227,11 +263,11 @@ def letter_detail(request, letter_id):
             'is_assigned_user': is_assigned_user,
             'can_approve': (
                 has_access(request.user, 'approve_letter')
-                and is_assigned_user
+                and can_process
             ),
             'can_reject': (
                 has_access(request.user, 'reject_letter')
-                and is_assigned_user
+                and can_process
             ),
         },
     )
@@ -242,7 +278,7 @@ def letter_edit(request, letter_id):
     letter = get_object_or_404(InternalLetter, id=letter_id)
 
     if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما دسترسی مشاهده این نامه را ندارید.')
+        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
         return redirect('letter_list')
 
     can_edit = (
@@ -274,6 +310,12 @@ def letter_edit(request, letter_id):
     document_type = request.POST.get('document_type', '').strip()
     sent_to = request.POST.get('sent_to', '').strip()
 
+    context = {
+        'letter': letter,
+        'users': get_letter_users(request),
+        'edit_mode': True,
+    }
+
     if not all([
         letter_number, title, content, document_type, sent_to
     ]):
@@ -284,11 +326,20 @@ def letter_edit(request, letter_id):
         return render(
             request,
             'admin_automation/letter_create.html',
-            {
-                'letter': letter,
-                'users': get_letter_users(request),
-                'edit_mode': True,
-            },
+            context,
+        )
+
+    valid_document_types = {
+        value for value, label in
+        InternalLetter._meta.get_field('document_type').choices
+    }
+
+    if document_type not in valid_document_types:
+        messages.error(request, 'نوع نامه انتخاب‌شده معتبر نیست.')
+        return render(
+            request,
+            'admin_automation/letter_create.html',
+            context,
         )
 
     letter.letter_number = letter_number
@@ -310,11 +361,7 @@ def letter_edit(request, letter_id):
         return render(
             request,
             'admin_automation/letter_create.html',
-            {
-                'letter': letter,
-                'users': get_letter_users(request),
-                'edit_mode': True,
-            },
+            context,
         )
 
     messages.success(request, 'نامه با موفقیت ویرایش شد.')
@@ -325,15 +372,16 @@ def letter_edit(request, letter_id):
 def letter_delete(request, letter_id):
     letter = get_object_or_404(InternalLetter, id=letter_id)
 
+    if request.method != 'POST':
+        messages.error(request, 'درخواست حذف معتبر نیست.')
+        return redirect('letter_detail', letter_id=letter.id)
+
     if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما دسترسی مشاهده این نامه را ندارید.')
+        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
         return redirect('letter_list')
 
     if not has_access(request.user, 'delete_letter'):
         messages.error(request, 'شما مجوز حذف نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if request.method != 'POST':
         return redirect('letter_detail', letter_id=letter.id)
 
     letter.delete()
@@ -345,15 +393,16 @@ def letter_delete(request, letter_id):
 def letter_assign(request, letter_id):
     letter = get_object_or_404(InternalLetter, id=letter_id)
 
+    if request.method != 'POST':
+        messages.error(request, 'درخواست ارجاع معتبر نیست.')
+        return redirect('letter_detail', letter_id=letter.id)
+
     if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما دسترسی مشاهده این نامه را ندارید.')
+        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
         return redirect('letter_list')
 
     if not has_access(request.user, 'assign_letter'):
         messages.error(request, 'شما مجوز ارجاع نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if request.method != 'POST':
         return redirect('letter_detail', letter_id=letter.id)
 
     assigned_to_id = request.POST.get('assigned_to', '').strip()
@@ -389,21 +438,20 @@ def letter_assign(request, letter_id):
 def letter_approve(request, letter_id):
     letter = get_object_or_404(InternalLetter, id=letter_id)
 
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما دسترسی مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
     if request.method != 'POST':
+        messages.error(request, 'درخواست تأیید معتبر نیست.')
         return redirect('letter_detail', letter_id=letter.id)
 
-    if not (
-        has_access(request.user, 'approve_letter')
-        and letter.assigned_to_id == request.user.id
-    ):
-        messages.error(
-            request,
-            'برای تأیید نامه باید مجوز تأیید داشته باشید و نامه به شما ارجاع شده باشد.'
-        )
+    if not can_view_letter(request.user, letter):
+        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
+        return redirect('letter_list')
+
+    if not has_access(request.user, 'approve_letter'):
+        messages.error(request, 'شما مجوز تأیید نامه را ندارید.')
+        return redirect('letter_detail', letter_id=letter.id)
+
+    if letter.assigned_to_id != request.user.id:
+        messages.error(request, 'این نامه به شما ارجاع نشده است.')
         return redirect('letter_detail', letter_id=letter.id)
 
     if letter.status != 'pending':
@@ -425,21 +473,20 @@ def letter_approve(request, letter_id):
 def letter_reject(request, letter_id):
     letter = get_object_or_404(InternalLetter, id=letter_id)
 
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما دسترسی مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
     if request.method != 'POST':
+        messages.error(request, 'درخواست رد معتبر نیست.')
         return redirect('letter_detail', letter_id=letter.id)
 
-    if not (
-        has_access(request.user, 'reject_letter')
-        and letter.assigned_to_id == request.user.id
-    ):
-        messages.error(
-            request,
-            'برای رد نامه باید مجوز رد داشته باشید و نامه به شما ارجاع شده باشد.'
-        )
+    if not can_view_letter(request.user, letter):
+        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
+        return redirect('letter_list')
+
+    if not has_access(request.user, 'reject_letter'):
+        messages.error(request, 'شما مجوز رد نامه را ندارید.')
+        return redirect('letter_detail', letter_id=letter.id)
+
+    if letter.assigned_to_id != request.user.id:
+        messages.error(request, 'این نامه به شما ارجاع نشده است.')
         return redirect('letter_detail', letter_id=letter.id)
 
     if letter.status != 'pending':
