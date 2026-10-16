@@ -1,4 +1,4 @@
-
+```html
 {% extends 'base.html' %}
 {% load jalali %}
 
@@ -17,6 +17,7 @@
         {% endif %}
     </div>
 
+    <!-- اطلاعات اصلی نامه -->
     <div class="letter-card">
         <h2>{{ letter.title }}</h2>
 
@@ -39,6 +40,7 @@
         </div>
     </div>
 
+    <!-- گردش و تاریخچه نامه -->
     <div class="letter-card">
         <h3>🔄 گردش و تاریخچه نامه</h3>
 
@@ -65,7 +67,9 @@
         <div class="history-item" style="border-right-color:#198754">
             <strong>✅ تأیید نامه</strong>
             <div>تأیید توسط: {{ letter.approved_by.get_full_name|default:letter.approved_by.username }}</div>
-            {% if letter.approved_at %}<div>🕐 {{ letter.approved_at|jalali_date }}</div>{% endif %}
+            {% if letter.approved_at %}
+            <div>🕐 {{ letter.approved_at|jalali_date }}</div>
+            {% endif %}
         </div>
         {% endif %}
 
@@ -73,7 +77,9 @@
         <div class="history-item" style="border-right-color:#dc3545">
             <strong>❌ رد نامه</strong>
             <div>رد توسط: {{ letter.rejected_by.get_full_name|default:letter.rejected_by.username }}</div>
-            {% if letter.rejected_at %}<div>🕐 {{ letter.rejected_at|jalali_date }}</div>{% endif %}
+            {% if letter.rejected_at %}
+            <div>🕐 {{ letter.rejected_at|jalali_date }}</div>
+            {% endif %}
         </div>
         {% endif %}
 
@@ -82,27 +88,45 @@
         {% endif %}
     </div>
 
+    <!-- متن نامه -->
     <div class="letter-card">
         <h3>📄 متن نامه</h3>
         <div style="line-height:2;white-space:pre-wrap">{{ letter.content }}</div>
     </div>
 
+    <!-- فایل اصلی نامه -->
     {% if letter.file %}
     <div class="letter-card">
-        <h3>📎 فایل پیوست</h3>
+        <h3>📎 فایل اصلی نامه</h3>
 
         <a href="{{ letter.file.url }}" target="_blank" rel="noopener"
            style="display:inline-block;text-decoration:none;padding:10px 18px;border-radius:8px;background:#6f42c1;color:white">
-            مشاهده / دانلود فایل
+            مشاهده / دانلود فایل اصلی
         </a>
 
         <a href="{% url 'letter_annotate' letter.id %}"
            style="display:inline-block;text-decoration:none;padding:10px 18px;margin:8px;border-radius:8px;background:#198754;color:white">
-            ✍️ امضا و نوشتن روی فایل
+            ✍️ حاشیه‌نویسی و امضا روی فایل
         </a>
     </div>
     {% endif %}
 
+    <!-- پیوست‌های اسکن‌شده و امضاشده -->
+    <div class="letter-card">
+        <h3>🖋️ نسخه اسکن‌شده یا امضاشده</h3>
+
+        <p style="line-height:2;color:#555">
+            اگر نامه را چاپ کرده‌ای، امضا یا مهر کرده‌ای و دوباره اسکن گرفته‌ای،
+            فایل آن را از این بخش بارگذاری کن. فایل اصلی نامه جداگانه حفظ می‌شود.
+        </p>
+
+        <a href="{% url 'letter_attachments' letter.id %}"
+           style="display:inline-block;text-decoration:none;padding:12px 20px;border-radius:8px;background:#0d6efd;color:white">
+            📎 مدیریت و بارگذاری پیوست‌ها
+        </a>
+    </div>
+
+    <!-- ارجاع نامه -->
     {% if can_assign %}
     <div class="letter-card">
         <h3>➡️ ارجاع نامه</h3>
@@ -119,6 +143,7 @@
     </div>
     {% endif %}
 
+    <!-- تأیید و رد نامه -->
     {% if is_assigned_user and letter.status == 'pending' %}
     <div class="letter-card">
         <h3>بررسی نامه</h3>
@@ -140,6 +165,7 @@
     </div>
     {% endif %}
 
+    <!-- حذف نامه -->
     {% if perms.admin_automation.delete_letter or user.is_superuser %}
     <div class="letter-card">
         <form method="post" action="{% url 'letter_delete' letter.id %}">
@@ -151,6 +177,7 @@
         </form>
     </div>
     {% endif %}
+
 </div>
 
 <style>
@@ -184,5 +211,12 @@
 .btn-primary { background:#0d6efd; }
 .btn-success { background:#198754; }
 .btn-danger { background:#dc3545; }
+
+@media (max-width:600px) {
+    .letter-card {
+        padding:16px;
+    }
+}
 </style>
 {% endblock %}
+```
