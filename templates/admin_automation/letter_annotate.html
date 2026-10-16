@@ -1,432 +1,602 @@
 
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}حاشیه‌نویسی نامه{% endblock %}
 
 {% block content %}
 <div class="annotation-container" dir="rtl">
-    <h2>امضا و حاشیه‌نویسی فایل</h2>
-    <p>{{ letter.title }}</p>
+    <div class="toolbar no-print">
+        <div class="toolbar-heading">
+            <h2>حاشیه‌نویسی نامه</h2>
+            <p>{{ letter.title|default:"نامه" }}</p>
+        </div>
 
-    <div class="toolbar">
-        <label>
-            رنگ قلم
-            <input id="penColor" type="color" value="#d00000">
-        </label>
+        <div class="toolbar-controls">
+            <label>
+                رنگ قلم
+                <input type="color" id="penColor" value="#e53935">
+            </label>
 
-        <label>
-            ضخامت قلم
-            <input id="penWidth" type="range" min="1" max="15" value="3">
-        </label>
+            <label>
+                ضخامت
+                <input type="range" id="penWidth" min="2" max="16" value="5">
+                <span id="widthValue">5</span>
+            </label>
 
-        <button type="button" id="penBtn">✍️ قلم</button>
-        <button type="button" id="eraserBtn">پاک‌کن</button>
-        <button type="button" id="undoBtn">↶ بازگشت</button>
-        <button type="button" id="clearBtn">پاک‌کردن نوشته‌ها</button>
-        <button type="button" id="saveBtn">ذخیره و جایگزینی فایل</button>
+            <button type="button" id="penBtn" class="tool-btn active">
+                ✏️ قلم
+            </button>
 
-        <a href="{% url 'letter_detail' letter.id %}">
-            بازگشت به نامه
-        </a>
+            <button type="button" id="eraserBtn" class="tool-btn">
+                🧽 پاک‌کن
+            </button>
+
+            <button type="button" id="undoBtn" class="tool-btn">
+                ↶ واگردانی
+            </button>
+
+            <button type="button" id="clearBtn" class="tool-btn danger">
+                پاک‌کردن همه
+            </button>
+
+            <button type="button" id="saveBtn" class="tool-btn primary">
+                💾 ذخیره روی PDF
+            </button>
+
+            <button type="button" id="printBtn" class="tool-btn">
+                🖨️ چاپ
+            </button>
+
+            <a href="javascript:history.back()" class="tool-btn">
+                بازگشت
+            </a>
+        </div>
+
+        <div id="status" role="status" aria-live="polite">
+            در حال بارگذاری صفحات...
+        </div>
     </div>
 
-    <p id="status" role="status">در حال بارگذاری فایل...</p>
-    <div id="pages"></div>
+    <div id="pages" class="pages-container"></div>
 
-    <form id="saveForm"
-          method="post"
-          enctype="multipart/form-data"
-          action="{% url 'letter_annotate' letter.id %}"
-          hidden>
+    <form id="annotationForm" method="post" enctype="multipart/form-data"
+          class="hidden">
         {% csrf_token %}
-        <input type="file" id="outputFile" name="annotated_pdf">
+        <input type="hidden" name="page_count" value="{{ page_count }}">
     </form>
 </div>
 
 <style>
 .annotation-container {
-    max-width: 1100px;
-    margin: 25px auto;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 16px;
+    color: #222;
 }
+
 .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+.toolbar-heading h2 {
+    margin: 0 0 6px;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.toolbar-heading p {
+    margin: 0 0 12px;
+    color: #666;
+}
+
+.toolbar-controls {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-    margin: 18px 0;
+    gap: 8px;
 }
-.toolbar button, .toolbar a {
-    padding: 9px 13px;
+
+.toolbar-controls label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+}
+
+.toolbar-controls input[type="range"] {
+    width: 100px;
+}
+
+.tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    background: #f8f8f8;
+    color: #222;
     cursor: pointer;
-}
-.toolbar a {
     text-decoration: none;
+    font-size: 13px;
+    font-family: inherit;
 }
-#pages {
+
+.tool-btn:hover {
+    background: #eaeaea;
+}
+
+.tool-btn.active {
+    border-color: #2563eb;
+    background: #dbeafe;
+}
+
+.tool-btn.primary {
+    color: white;
+    background: #1769aa;
+    border-color: #1769aa;
+}
+
+.tool-btn.danger {
+    color: #a21b1b;
+}
+
+.tool-btn:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+#status {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #555;
+}
+
+.pages-container {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    align-items: center;
+    gap: 24px;
 }
-.page {
-    position: relative;
-    width: fit-content;
-    max-width: 100%;
-    margin: auto;
+
+.pdf-page {
+    width: 100%;
+    max-width: 1000px;
     background: white;
-    box-shadow: 0 2px 12px #0002;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    break-after: page;
+    page-break-after: always;
 }
-.page-title {
-    padding: 8px;
-    background: #f1f3f5;
+
+.pdf-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
 }
-.page canvas.base {
+
+.page-heading {
+    margin: 0 0 8px;
+    color: #666;
+    font-size: 13px;
+}
+
+.page-canvas-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: white;
+}
+
+.page-image {
     display: block;
-    max-width: 100%;
+    width: 100%;
     height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
 }
-.page canvas.ink {
+
+.ink-canvas {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
     touch-action: none;
     cursor: crosshair;
 }
-#status {
-    margin: 12px 0;
+
+@media print {
+    @page {
+        size: auto;
+        margin: 8mm;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .pages-container,
+    .pages-container * {
+        visibility: visible !important;
+    }
+
+    .no-print,
+    .toolbar,
+    #status {
+        display: none !important;
+    }
+
+    .annotation-container {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pages-container {
+        display: block;
+    }
+
+    .pdf-page {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        box-shadow: none;
+        border-radius: 0;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .pdf-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .page-heading {
+        display: none;
+    }
+
+    .page-canvas-wrap {
+        width: 100%;
+        overflow: visible;
+    }
+
+    .page-image,
+    .ink-canvas {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
-(() => {
+(function () {
     "use strict";
 
-    const fileUrl = "{{ file_url|escapejs }}";
-    const fileExt = "{{ file_ext|escapejs }}";
+    const pageCount = Number("{{ page_count|escapejs }}");
+    const imageUrlTemplate = "{{ page_image_url_template|escapejs }}";
+    const pagesContainer = document.getElementById("pages");
+    const form = document.getElementById("annotationForm");
+    const statusBox = document.getElementById("status");
 
-    const pagesRoot = document.getElementById("pages");
-    const statusEl = document.getElementById("status");
+    const penColor = document.getElementById("penColor");
+    const penWidth = document.getElementById("penWidth");
+    const widthValue = document.getElementById("widthValue");
+
+    const penBtn = document.getElementById("penBtn");
+    const eraserBtn = document.getElementById("eraserBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    const clearBtn = document.getElementById("clearBtn");
     const saveBtn = document.getElementById("saveBtn");
+    const printBtn = document.getElementById("printBtn");
 
-    const pages = [];
-    let mode = "pen";
-    let activePage = null;
+    let tool = "pen";
+    let isSaving = false;
+    const pageStates = [];
 
-    function status(message) {
-        statusEl.textContent = message;
+    function setStatus(message) {
+        statusBox.textContent = message;
     }
 
-    function addPage(title, width, height) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "page";
-        wrapper.style.width = width + "px";
-
-        const heading = document.createElement("div");
-        heading.className = "page-title";
-        heading.textContent = title;
-
-        const base = document.createElement("canvas");
-        base.className = "base";
-        base.width = width;
-        base.height = height;
-
-        const ink = document.createElement("canvas");
-        ink.className = "ink";
-        ink.width = width;
-        ink.height = height;
-
-        wrapper.append(heading, base, ink);
-        pagesRoot.appendChild(wrapper);
-
-        const page = {
-            wrapper,
-            base,
-            ink,
-            history: [],
-            drawing: false,
-            previous: null
-        };
-
-        pages.push(page);
-        enableDrawing(page);
-
-        return page;
+    function pageImageUrl(pageNumber) {
+        return imageUrlTemplate.replace(/\/1\/$/, "/" + pageNumber + "/");
     }
 
-    function enableDrawing(page) {
-        const ctx = page.ink.getContext("2d");
+    function setTool(nextTool) {
+        tool = nextTool;
 
-        page.ink.addEventListener("pointerdown", event => {
-            event.preventDefault();
+        penBtn.classList.toggle("active", tool === "pen");
+        eraserBtn.classList.toggle("active", tool === "eraser");
+    }
 
-            page.drawing = true;
-            activePage = page;
-            page.ink.setPointerCapture(event.pointerId);
+    function makePage(pageNumber) {
+        return new Promise((resolve, reject) => {
+            const page = document.createElement("section");
+            page.className = "pdf-page";
 
-            page.history.push(
-                ctx.getImageData(0, 0, page.ink.width, page.ink.height)
-            );
+            const heading = document.createElement("div");
+            heading.className = "page-heading";
+            heading.textContent = "صفحه " + pageNumber;
 
-            const rect = page.ink.getBoundingClientRect();
+            const wrap = document.createElement("div");
+            wrap.className = "page-canvas-wrap";
 
-            page.previous = {
-                x: (event.clientX - rect.left) *
-                    page.ink.width / rect.width,
-                y: (event.clientY - rect.top) *
-                    page.ink.height / rect.height
+            const image = document.createElement("img");
+            image.className = "page-image";
+            image.alt = "صفحه " + pageNumber + " از نامه";
+            image.draggable = false;
+
+            const canvas = document.createElement("canvas");
+            canvas.className = "ink-canvas";
+            canvas.setAttribute("aria-label", "حاشیه‌نویسی صفحه " + pageNumber);
+
+            wrap.appendChild(image);
+            wrap.appendChild(canvas);
+            page.appendChild(heading);
+            page.appendChild(wrap);
+            pagesContainer.appendChild(page);
+
+            image.onload = function () {
+                canvas.width = image.naturalWidth;
+                canvas.height = image.naturalHeight;
+
+                const ctx = canvas.getContext("2d", { alpha: true });
+                if (!ctx) {
+                    reject(new Error("ساخت بوم حاشیه‌نویسی ناموفق بود."));
+                    return;
+                }
+
+                const state = {
+                    pageNumber: pageNumber,
+                    canvas: canvas,
+                    ctx: ctx,
+                    history: [],
+                    drawing: false,
+                    lastX: 0,
+                    lastY: 0
+                };
+
+                setupDrawing(state);
+                pageStates.push(state);
+                resolve(state);
             };
 
-            ctx.beginPath();
-            ctx.arc(page.previous.x, page.previous.y, 1, 0, Math.PI * 2);
+            image.onerror = function () {
+                reject(new Error("بارگذاری صفحه " + pageNumber + " ناموفق بود."));
+            };
 
-            if (mode === "pen") {
-                ctx.fillStyle = document.getElementById("penColor").value;
-                ctx.fill();
+            image.src = pageImageUrl(pageNumber);
+        });
+    }
+
+    function snapshot(state) {
+        state.history.push(
+            state.ctx.getImageData(0, 0, state.canvas.width, state.canvas.height)
+        );
+
+        if (state.history.length > 30) {
+            state.history.shift();
+        }
+    }
+
+    function setupDrawing(state) {
+        const canvas = state.canvas;
+        const ctx = state.ctx;
+
+        canvas.addEventListener("pointerdown", function (event) {
+            if (isSaving) return;
+
+            event.preventDefault();
+            snapshot(state);
+
+            state.drawing = true;
+            canvas.setPointerCapture(event.pointerId);
+
+            const rect = canvas.getBoundingClientRect();
+            state.lastX = (event.clientX - rect.left) * canvas.width / rect.width;
+            state.lastY = (event.clientY - rect.top) * canvas.height / rect.height;
+
+            ctx.beginPath();
+            ctx.arc(
+                state.lastX,
+                state.lastY,
+                Math.max(1, Number(penWidth.value) / 2),
+                0,
+                Math.PI * 2
+            );
+
+            if (tool === "eraser") {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.fillStyle = "rgba(0,0,0,1)";
+            } else {
+                ctx.globalCompositeOperation = "source-over";
+                ctx.fillStyle = penColor.value;
             }
+
+            ctx.fill();
         });
 
-        page.ink.addEventListener("pointermove", event => {
-            if (!page.drawing) return;
+        canvas.addEventListener("pointermove", function (event) {
+            if (!state.drawing) return;
 
             event.preventDefault();
 
-            const rect = page.ink.getBoundingClientRect();
-
-            const point = {
-                x: (event.clientX - rect.left) *
-                    page.ink.width / rect.width,
-                y: (event.clientY - rect.top) *
-                    page.ink.height / rect.height
-            };
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) * canvas.width / rect.width;
+            const y = (event.clientY - rect.top) * canvas.height / rect.height;
 
             ctx.beginPath();
-            ctx.moveTo(page.previous.x, page.previous.y);
-            ctx.lineTo(point.x, point.y);
+            ctx.moveTo(state.lastX, state.lastY);
+            ctx.lineTo(x, y);
+            ctx.lineWidth = Number(penWidth.value);
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
-            ctx.lineWidth = Number(
-                document.getElementById("penWidth").value
-            );
 
-            if (mode === "eraser") {
+            if (tool === "eraser") {
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.strokeStyle = "rgba(0,0,0,1)";
             } else {
                 ctx.globalCompositeOperation = "source-over";
-                ctx.strokeStyle =
-                    document.getElementById("penColor").value;
+                ctx.strokeStyle = penColor.value;
             }
 
             ctx.stroke();
+
+            state.lastX = x;
+            state.lastY = y;
+        });
+
+        function finishDrawing() {
+            state.drawing = false;
             ctx.globalCompositeOperation = "source-over";
-
-            page.previous = point;
-        });
-
-        function stopDrawing() {
-            page.drawing = false;
-            page.previous = null;
         }
 
-        page.ink.addEventListener("pointerup", stopDrawing);
-        page.ink.addEventListener("pointercancel", stopDrawing);
+        canvas.addEventListener("pointerup", finishDrawing);
+        canvas.addEventListener("pointercancel", finishDrawing);
+        canvas.addEventListener("lostpointercapture", finishDrawing);
     }
 
-    document.getElementById("penBtn").addEventListener("click", () => {
-        mode = "pen";
-        status("ابزار قلم فعال شد.");
+    function canvasToBlob(canvas) {
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(function (blob) {
+                if (blob) resolve(blob);
+                else reject(new Error("تبدیل حاشیه‌ها به تصویر ناموفق بود."));
+            }, "image/png");
+        });
+    }
+
+    penBtn.addEventListener("click", () => setTool("pen"));
+    eraserBtn.addEventListener("click", () => setTool("eraser"));
+
+    penWidth.addEventListener("input", function () {
+        widthValue.textContent = penWidth.value;
     });
 
-    document.getElementById("eraserBtn").addEventListener("click", () => {
-        mode = "eraser";
-        status("ابزار پاک‌کن فعال شد.");
-    });
+    undoBtn.addEventListener("click", function () {
+        const state = pageStates[pageStates.length - 1];
 
-    document.getElementById("undoBtn").addEventListener("click", () => {
-        if (!activePage || !activePage.history.length) {
-            status("حرکتی برای بازگشت وجود ندارد.");
+        if (!state || state.history.length === 0) {
+            setStatus("برای آخرین صفحه عملی برای واگردانی وجود ندارد.");
             return;
         }
 
-        const previous = activePage.history.pop();
-        activePage.ink.getContext("2d").putImageData(previous, 0, 0);
+        const previous = state.history.pop();
+        state.ctx.putImageData(previous, 0, 0);
+        setStatus("آخرین حرکت در صفحه " + state.pageNumber + " واگردانی شد.");
     });
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
-        if (!confirm("تمام نوشته‌های تمام صفحات پاک شوند؟")) return;
+    clearBtn.addEventListener("click", function () {
+        if (!confirm("حاشیه‌های تمام صفحات پاک شوند؟")) return;
 
-        pages.forEach(page => {
-            page.ink.getContext("2d").clearRect(
-                0, 0, page.ink.width, page.ink.height
-            );
-            page.history = [];
+        pageStates.forEach(function (state) {
+            snapshot(state);
+            state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height);
         });
 
-        status("نوشته‌ها پاک شدند.");
+        setStatus("حاشیه‌های صفحات پاک شدند.");
     });
 
-    async function loadPdf() {
-        if (!window.pdfjsLib) {
-            throw new Error(
-                "کتابخانه نمایش PDF بارگذاری نشد. اتصال اینترنت را بررسی کنید."
-            );
-        }
+    saveBtn.addEventListener("click", async function () {
+        if (isSaving) return;
 
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-        const pdf = await pdfjsLib.getDocument(fileUrl).promise;
-
-        for (let number = 1; number <= pdf.numPages; number++) {
-            const pdfPage = await pdf.getPage(number);
-            const original = pdfPage.getViewport({ scale: 1 });
-
-            const scale = Math.min(1.5, 1800 / original.width);
-            const viewport = pdfPage.getViewport({ scale });
-
-            const page = addPage(
-                "صفحه " + number,
-                Math.ceil(viewport.width),
-                Math.ceil(viewport.height)
-            );
-
-            await pdfPage.render({
-                canvasContext: page.base.getContext("2d"),
-                viewport
-            }).promise;
-        }
-    }
-
-    async function loadImage() {
-        const image = new Image();
-        image.src = fileUrl;
-
-        await new Promise((resolve, reject) => {
-            image.onload = resolve;
-            image.onerror = () => reject(
-                new Error("تصویر پیوست بارگذاری نشد.")
-            );
-        });
-
-        const scale = Math.min(1, 1800 / image.naturalWidth);
-        const width = Math.max(1, Math.round(image.naturalWidth * scale));
-        const height = Math.max(1, Math.round(image.naturalHeight * scale));
-
-        const page = addPage("تصویر پیوست", width, height);
-
-        page.base.getContext("2d").drawImage(
-            image, 0, 0, width, height
-        );
-    }
-
-    async function savePdf() {
-        if (!pages.length) {
-            status("هنوز فایلی بارگذاری نشده است.");
+        if (!pageStates.length || pageStates.length !== pageCount) {
+            setStatus("هنوز تمام صفحات بارگذاری نشده‌اند.");
             return;
         }
 
+        isSaving = true;
         saveBtn.disabled = true;
-        status("در حال آماده‌سازی PDF...");
+        printBtn.disabled = true;
+        setStatus("در حال ذخیره حاشیه‌ها روی PDF اصلی...");
 
         try {
-            if (!window.jspdf || !window.jspdf.jsPDF) {
-                throw new Error("کتابخانه ساخت PDF بارگذاری نشده است.");
+            const data = new FormData(form);
+
+            for (const state of pageStates) {
+                const blob = await canvasToBlob(state.canvas);
+                data.append(
+                    "annotation_" + state.pageNumber,
+                    blob,
+                    "annotation_" + state.pageNumber + ".png"
+                );
             }
 
-            const { jsPDF } = window.jspdf;
-            let output = null;
-
-            pages.forEach((page, index) => {
-                const width = page.base.width;
-                const height = page.base.height;
-
-                const merged = document.createElement("canvas");
-                merged.width = width;
-                merged.height = height;
-
-                const ctx = merged.getContext("2d");
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(0, 0, width, height);
-                ctx.drawImage(page.base, 0, 0);
-                ctx.drawImage(page.ink, 0, 0);
-
-                const orientation =
-                    width > height ? "landscape" : "portrait";
-
-                if (index === 0) {
-                    output = new jsPDF({
-                        orientation,
-                        unit: "px",
-                        format: [width, height],
-                        hotfixes: ["px_scaling"],
-                        compress: true
-                    });
-                } else {
-                    output.addPage(
-                        [width, height],
-                        orientation
-                    );
+            const response = await fetch(window.location.href, {
+                method: "POST",
+                body: data,
+                credentials: "same-origin",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
                 }
-
-                output.addImage(
-                    merged.toDataURL("image/jpeg", 0.92),
-                    "JPEG",
-                    0,
-                    0,
-                    width,
-                    height,
-                    undefined,
-                    "FAST"
-                );
             });
 
-            const blob = output.output("blob");
-
-            if (blob.size > 30 * 1024 * 1024) {
-                throw new Error("حجم PDF نهایی بیشتر از ۳۰ مگابایت است.");
+            if (!response.ok) {
+                const message = await response.text();
+                throw new Error(message || "ذخیره فایل ناموفق بود.");
             }
 
-            const outputFile = new File(
-                [blob],
-                "annotated.pdf",
-                { type: "application/pdf" }
-            );
+            const result = await response.json();
 
-            const transfer = new DataTransfer();
-            transfer.items.add(outputFile);
+            if (!result.ok || !result.redirect_url) {
+                throw new Error("پاسخ ذخیره فایل معتبر نیست.");
+            }
 
-            document.getElementById("outputFile").files =
-                transfer.files;
-
-            status("فایل آماده ارسال است...");
-            document.getElementById("saveForm").requestSubmit();
+            setStatus("فایل ذخیره شد؛ در حال بارگذاری نسخه نهایی...");
+            window.location.href = result.redirect_url;
 
         } catch (error) {
-            status(error.message || "ساخت PDF ناموفق بود.");
+            console.error(error);
+            setStatus("ذخیره ناموفق بود. " + error.message);
+        } finally {
+            isSaving = false;
             saveBtn.disabled = false;
-        }
-    }
-
-    saveBtn.addEventListener("click", () => {
-        if (confirm("فایل نهایی جایگزین پیوست فعلی شود؟")) {
-            savePdf();
+            printBtn.disabled = false;
         }
     });
 
-    (async () => {
+    printBtn.addEventListener("click", function () {
+        if (pageStates.length !== pageCount) {
+            setStatus("ابتدا منتظر بمان تا همه صفحات بارگذاری شوند.");
+            return;
+        }
+
+        window.print();
+    });
+
+    (async function init() {
         try {
-            if (fileExt === ".pdf") {
-                await loadPdf();
-            } else {
-                await loadImage();
+            if (!Number.isInteger(pageCount) || pageCount < 1) {
+                throw new Error("تعداد صفحات معتبر نیست.");
             }
 
-            status("فایل آماده است. روی صفحه بنویسید یا امضا کنید.");
+            for (let number = 1; number <= pageCount; number++) {
+                setStatus("در حال بارگذاری صفحه " + number + " از " + pageCount + "...");
+                await makePage(number);
+            }
+
+            pageStates.sort((a, b) => a.pageNumber - b.pageNumber);
+            setStatus("همه صفحات آماده‌اند. می‌توانی حاشیه‌نویسی، ذخیره یا چاپ کنی.");
+
         } catch (error) {
-            status(error.message || "بارگذاری فایل ناموفق بود.");
+            console.error(error);
+            setStatus("خطا در بارگذاری صفحات: " + error.message);
+            saveBtn.disabled = true;
+            printBtn.disabled = true;
         }
     })();
 })();
