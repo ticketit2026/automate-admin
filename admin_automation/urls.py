@@ -1,4 +1,3 @@
-```python
 from django.urls import path
 from . import views
 from .annotation_views import letter_annotate, letter_annotation_page
@@ -57,4 +56,3 @@ urlpatterns = [
         name="letter_attachment_download",
     ),
 ]
-```
