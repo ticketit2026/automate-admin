@@ -1,504 +1,199 @@
 
-from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db import IntegrityError
-from django.db.models import Q
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-
-from .models import InternalLetter
-
-
-def has_access(user, permission):
-    """بررسی مجوز اختصاصی کاربر."""
-    return user.is_superuser or user.has_perm(
-        f'admin_automation.{permission}'
-    )
-
-
-def can_view_letter(user, letter):
-    """
-    مشاهده نامه:
-    - مدیر اصلی همه نامه‌ها را می‌بیند.
-    - سایر کاربران باید مجوز مشاهده نامه داشته باشند.
-    - با مجوز مشاهده همه نامه‌ها، تمام نامه‌ها قابل مشاهده‌اند.
-    - در غیر این صورت، فقط نامه‌های ایجادشده یا ارجاع‌شده به کاربر.
-    """
-    if user.is_superuser:
-        return True
-
-    if not has_access(user, 'view_internalletter'):
-        return False
-
-    if has_access(user, 'view_all_letters'):
-        return True
-
-    return (
-        letter.created_by_id == user.id
-        or letter.assigned_to_id == user.id
-    )
-
-
-def get_letter_users(request):
-    return User.objects.filter(
-        is_active=True
-    ).exclude(
-        id=request.user.id
-    ).order_by('username')
-
-
-def letter_form_context(request, **extra):
-    context = {
-        'users': get_letter_users(request),
-        'letter_number': '',
-        'title': '',
-        'content': '',
-        'document_type': '',
-        'sent_to': '',
-        'assigned_to_id': '',
-    }
-    context.update(extra)
-    return context
+from django.contrib.auth.models import User, Permission
+from django.contrib import messages
 
 
 @login_required
-def letter_list(request):
-    letters = InternalLetter.objects.select_related(
-        'created_by',
-        'assigned_to',
-        'assigned_by',
-        'approved_by',
-        'rejected_by',
-    )
-
-    if request.user.is_superuser:
-        pass
-    elif not has_access(request.user, 'view_internalletter'):
-        letters = letters.none()
-    elif not has_access(request.user, 'view_all_letters'):
-        letters = letters.filter(
-            Q(created_by=request.user)
-            | Q(assigned_to=request.user)
-        )
-
-    search = request.GET.get('search', '').strip()
-    document_type = request.GET.get('document_type', '').strip()
-    status = request.GET.get('status', '').strip()
-
-    if search:
-        letters = letters.filter(
-            Q(letter_number__icontains=search)
-            | Q(title__icontains=search)
-            | Q(content__icontains=search)
-            | Q(sent_to__icontains=search)
-        )
-
-    if document_type:
-        letters = letters.filter(document_type=document_type)
-
-    if status:
-        letters = letters.filter(status=status)
+def user_list(request):
+    users = User.objects.all().order_by('username')
 
     return render(
         request,
-        'admin_automation/letter_list.html',
-        {
-            'letters': letters,
-            'search': search,
-            'document_type': document_type,
-            'status': status,
-            'document_type_choices': InternalLetter._meta.get_field(
-                'document_type'
-            ).choices,
-            'can_create_letter': has_access(
-                request.user, 'create_letter'
-            ),
-        },
+        'user_management/user_list.html',
+        {'users': users}
     )
 
 
 @login_required
-def letter_create(request):
-    if not has_access(request.user, 'create_letter'):
-        messages.error(request, 'شما مجوز ایجاد نامه را ندارید.')
-        return redirect('letter_list')
+def user_create(request):
+    if not request.user.is_superuser:
+        messages.error(request, 'شما اجازه ایجاد کاربر را ندارید.')
+        return redirect('user_management')
 
-    if request.method != 'POST':
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            letter_form_context(request),
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        if not username or not password:
+            messages.error(
+                request,
+                'نام کاربری و رمز عبور الزامی هستند.'
+            )
+            return redirect('user_create')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(
+                request,
+                'این نام کاربری قبلاً ثبت شده است.'
+            )
+            return redirect('user_create')
+
+        User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
         )
 
-    letter_number = request.POST.get('letter_number', '').strip()
-    title = request.POST.get('title', '').strip()
-    content = request.POST.get('content', '').strip()
-    document_type = request.POST.get('document_type', '').strip()
-    sent_to = request.POST.get('sent_to', '').strip()
-    assigned_to_id = request.POST.get('assigned_to', '').strip()
+        messages.success(request, 'کاربر با موفقیت ایجاد شد.')
+        return redirect('user_management')
 
-    context = letter_form_context(
+    return render(request, 'user_management/user_create.html')
+
+
+@login_required
+def user_edit(request, user_id):
+    if not request.user.is_superuser:
+        messages.error(
+            request,
+            'شما اجازه ویرایش کاربران را ندارید.'
+        )
+        return redirect('user_management')
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name', '').strip()
+        user.last_name = request.POST.get('last_name', '').strip()
+        user.email = request.POST.get('email', '').strip()
+        user.is_active = request.POST.get('is_active') == 'on'
+
+        user.save()
+
+        messages.success(
+            request,
+            'اطلاعات کاربر با موفقیت ذخیره شد.'
+        )
+        return redirect('user_management')
+
+    return render(
         request,
-        letter_number=letter_number,
-        title=title,
-        content=content,
-        document_type=document_type,
-        sent_to=sent_to,
-        assigned_to_id=assigned_to_id,
+        'user_management/user_edit.html',
+        {'user_obj': user}
     )
-
-    valid_document_types = {
-        value for value, label in
-        InternalLetter._meta.get_field('document_type').choices
-    }
-
-    if not all([
-        letter_number, title, content, document_type, sent_to
-    ]):
-        messages.error(
-            request,
-            'لطفاً تمام فیلدهای الزامی را تکمیل کنید.'
-        )
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            context,
-        )
-
-    if document_type not in valid_document_types:
-        messages.error(request, 'نوع نامه انتخاب‌شده معتبر نیست.')
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            context,
-        )
-
-    assigned_to = None
-
-    if assigned_to_id:
-        assigned_to = get_object_or_404(
-            User,
-            id=assigned_to_id,
-            is_active=True,
-        )
-
-    try:
-        letter = InternalLetter.objects.create(
-            letter_number=letter_number,
-            title=title,
-            content=content,
-            document_type=document_type,
-            sent_to=sent_to,
-            assigned_to=assigned_to,
-            assigned_by=request.user if assigned_to else None,
-            assigned_at=timezone.now() if assigned_to else None,
-            created_by=request.user,
-            status='pending' if assigned_to else 'draft',
-        )
-
-        if request.FILES.get('file'):
-            letter.file = request.FILES['file']
-            letter.save()
-
-    except IntegrityError:
-        messages.error(
-            request,
-            'این شماره نامه قبلاً ثبت شده است. لطفاً شماره دیگری وارد کنید.'
-        )
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            context,
-        )
-
-    messages.success(request, 'نامه با موفقیت ایجاد شد.')
-    return redirect('letter_detail', letter_id=letter.id)
 
 
 @login_required
-def letter_detail(request, letter_id):
-    letter = get_object_or_404(
-        InternalLetter.objects.select_related(
-            'created_by',
-            'assigned_to',
-            'assigned_by',
-            'approved_by',
-            'rejected_by',
-        ),
-        id=letter_id,
-    )
-
-    if not can_view_letter(request.user, letter):
+def user_password(request, user_id):
+    if not request.user.is_superuser:
         messages.error(
             request,
-            'شما مجوز مشاهده این نامه را ندارید.'
+            'شما اجازه تغییر رمز عبور کاربران را ندارید.'
         )
-        return redirect('letter_list')
+        return redirect('user_management')
 
-    is_assigned_user = letter.assigned_to_id == request.user.id
+    user = get_object_or_404(User, id=user_id)
 
-    can_edit = (
-        has_access(request.user, 'edit_letter')
-        and (
-            letter.created_by_id == request.user.id
-            or has_access(request.user, 'view_all_letters')
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+        password_confirm = request.POST.get('password_confirm', '')
+
+        if not password:
+            messages.error(request, 'رمز عبور را وارد کنید.')
+            return redirect('user_password', user_id=user.id)
+
+        if password != password_confirm:
+            messages.error(
+                request,
+                'رمزهای عبور یکسان نیستند.'
+            )
+            return redirect('user_password', user_id=user.id)
+
+        user.set_password(password)
+        user.save()
+
+        messages.success(
+            request,
+            'رمز عبور کاربر با موفقیت تغییر کرد.'
+        )
+        return redirect('user_management')
+
+    return render(
+        request,
+        'user_management/user_password.html',
+        {'user_obj': user}
+    )
+
+
+@login_required
+def user_permissions(request, user_id):
+    if not request.user.is_superuser:
+        messages.error(
+            request,
+            'شما اجازه مدیریت دسترسی کاربران را ندارید.'
+        )
+        return redirect('user_management')
+
+    user = get_object_or_404(User, id=user_id)
+
+    # مجوزهایی که نباید در صفحه مدیریت دسترسی نمایش داده شوند
+    # مجوز view_internalletter عمداً مخفی نشده است.
+    hidden_codenames = [
+        'add_internalletter',
+        'change_internalletter',
+        'delete_internalletter',
+    ]
+
+    permissions = (
+        Permission.objects
+        .select_related('content_type')
+        .exclude(codename__in=hidden_codenames)
+        .order_by(
+            'content_type__app_label',
+            'content_type__model',
+            'codename'
         )
     )
 
-    can_process = (
-        is_assigned_user
-        and letter.status == 'pending'
+    if request.method == 'POST':
+        # مجوزهای قابل نمایش در همین صفحه
+        for permission in permissions:
+            choice = request.POST.get(
+                f'permission_{permission.id}'
+            )
+
+            if choice == 'allow':
+                user.user_permissions.add(permission)
+
+            elif choice == 'deny':
+                user.user_permissions.remove(permission)
+
+        messages.success(
+            request,
+            'دسترسی‌های کاربر با موفقیت ذخیره شد.'
+        )
+
+        return redirect(
+            'user_permissions',
+            user_id=user.id
+        )
+
+    selected_permissions = set(
+        user.user_permissions.values_list('id', flat=True)
     )
 
     return render(
         request,
-        'admin_automation/letter_detail.html',
+        'user_management/user_permissions.html',
         {
-            'letter': letter,
-            'users': get_letter_users(request),
-            'can_edit': can_edit,
-            'can_delete': has_access(request.user, 'delete_letter'),
-            'can_assign': has_access(request.user, 'assign_letter'),
-            'is_assigned_user': is_assigned_user,
-            'can_approve': (
-                has_access(request.user, 'approve_letter')
-                and can_process
-            ),
-            'can_reject': (
-                has_access(request.user, 'reject_letter')
-                and can_process
-            ),
-        },
+            'user_obj': user,
+            'permissions': permissions,
+            'selected_permissions': selected_permissions,
+        }
     )
-
-
-@login_required
-def letter_edit(request, letter_id):
-    letter = get_object_or_404(InternalLetter, id=letter_id)
-
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
-    can_edit = (
-        has_access(request.user, 'edit_letter')
-        and (
-            letter.created_by_id == request.user.id
-            or has_access(request.user, 'view_all_letters')
-        )
-    )
-
-    if not can_edit:
-        messages.error(request, 'شما مجوز ویرایش این نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if request.method != 'POST':
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            {
-                'letter': letter,
-                'users': get_letter_users(request),
-                'edit_mode': True,
-            },
-        )
-
-    letter_number = request.POST.get('letter_number', '').strip()
-    title = request.POST.get('title', '').strip()
-    content = request.POST.get('content', '').strip()
-    document_type = request.POST.get('document_type', '').strip()
-    sent_to = request.POST.get('sent_to', '').strip()
-
-    context = {
-        'letter': letter,
-        'users': get_letter_users(request),
-        'edit_mode': True,
-    }
-
-    if not all([
-        letter_number, title, content, document_type, sent_to
-    ]):
-        messages.error(
-            request,
-            'لطفاً تمام فیلدهای الزامی را تکمیل کنید.'
-        )
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            context,
-        )
-
-    valid_document_types = {
-        value for value, label in
-        InternalLetter._meta.get_field('document_type').choices
-    }
-
-    if document_type not in valid_document_types:
-        messages.error(request, 'نوع نامه انتخاب‌شده معتبر نیست.')
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            context,
-        )
-
-    letter.letter_number = letter_number
-    letter.title = title
-    letter.content = content
-    letter.document_type = document_type
-    letter.sent_to = sent_to
-
-    if request.FILES.get('file'):
-        letter.file = request.FILES['file']
-
-    try:
-        letter.save()
-    except IntegrityError:
-        messages.error(
-            request,
-            'این شماره نامه قبلاً برای نامه دیگری ثبت شده است.'
-        )
-        return render(
-            request,
-            'admin_automation/letter_create.html',
-            context,
-        )
-
-    messages.success(request, 'نامه با موفقیت ویرایش شد.')
-    return redirect('letter_detail', letter_id=letter.id)
-
-
-@login_required
-def letter_delete(request, letter_id):
-    letter = get_object_or_404(InternalLetter, id=letter_id)
-
-    if request.method != 'POST':
-        messages.error(request, 'درخواست حذف معتبر نیست.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
-    if not has_access(request.user, 'delete_letter'):
-        messages.error(request, 'شما مجوز حذف نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    letter.delete()
-    messages.success(request, 'نامه با موفقیت حذف شد.')
-    return redirect('letter_list')
-
-
-@login_required
-def letter_assign(request, letter_id):
-    letter = get_object_or_404(InternalLetter, id=letter_id)
-
-    if request.method != 'POST':
-        messages.error(request, 'درخواست ارجاع معتبر نیست.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
-    if not has_access(request.user, 'assign_letter'):
-        messages.error(request, 'شما مجوز ارجاع نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    assigned_to_id = request.POST.get('assigned_to', '').strip()
-
-    if not assigned_to_id:
-        messages.error(request, 'لطفاً کاربر مقصد را انتخاب کنید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    assigned_to = get_object_or_404(
-        User,
-        id=assigned_to_id,
-        is_active=True,
-    )
-
-    letter.assigned_to = assigned_to
-    letter.assigned_by = request.user
-    letter.assigned_at = timezone.now()
-    letter.status = 'pending'
-    letter.approved_by = None
-    letter.approved_at = None
-    letter.rejected_by = None
-    letter.rejected_at = None
-    letter.save()
-
-    messages.success(
-        request,
-        f'نامه به {assigned_to.get_full_name() or assigned_to.username} ارجاع شد.'
-    )
-    return redirect('letter_detail', letter_id=letter.id)
-
-
-@login_required
-def letter_approve(request, letter_id):
-    letter = get_object_or_404(InternalLetter, id=letter_id)
-
-    if request.method != 'POST':
-        messages.error(request, 'درخواست تأیید معتبر نیست.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
-    if not has_access(request.user, 'approve_letter'):
-        messages.error(request, 'شما مجوز تأیید نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if letter.assigned_to_id != request.user.id:
-        messages.error(request, 'این نامه به شما ارجاع نشده است.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if letter.status != 'pending':
-        messages.warning(request, 'این نامه در وضعیت قابل تأیید نیست.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    letter.status = 'approved'
-    letter.approved_by = request.user
-    letter.approved_at = timezone.now()
-    letter.rejected_by = None
-    letter.rejected_at = None
-    letter.save()
-
-    messages.success(request, 'نامه با موفقیت تأیید شد.')
-    return redirect('letter_detail', letter_id=letter.id)
-
-
-@login_required
-def letter_reject(request, letter_id):
-    letter = get_object_or_404(InternalLetter, id=letter_id)
-
-    if request.method != 'POST':
-        messages.error(request, 'درخواست رد معتبر نیست.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if not can_view_letter(request.user, letter):
-        messages.error(request, 'شما مجوز مشاهده این نامه را ندارید.')
-        return redirect('letter_list')
-
-    if not has_access(request.user, 'reject_letter'):
-        messages.error(request, 'شما مجوز رد نامه را ندارید.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if letter.assigned_to_id != request.user.id:
-        messages.error(request, 'این نامه به شما ارجاع نشده است.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    if letter.status != 'pending':
-        messages.warning(request, 'این نامه در وضعیت قابل رد نیست.')
-        return redirect('letter_detail', letter_id=letter.id)
-
-    letter.status = 'rejected'
-    letter.rejected_by = request.user
-    letter.rejected_at = timezone.now()
-    letter.approved_by = None
-    letter.approved_at = None
-    letter.save()
-
-    messages.success(request, 'نامه با موفقیت رد شد.')
-    return redirect('letter_detail', letter_id=letter.id)
