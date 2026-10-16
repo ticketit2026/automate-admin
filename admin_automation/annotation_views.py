@@ -18,7 +18,7 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_GET
-
+from django.utils import timezone
 from .models import InternalLetter
 
 
