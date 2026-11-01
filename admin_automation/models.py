@@ -1,3 +1,4 @@
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -107,7 +108,7 @@ class InternalLetter(models.Model):
         verbose_name='تاریخ رد'
     )
 
-    # فایل اصلی نامه؛ با افزودن پیوست امضاشده تغییر نمی‌کند.
+    # فایل اصلی نامه
     file = models.FileField(
         upload_to='letters/',
         null=True,
@@ -132,7 +133,7 @@ class InternalLetter(models.Model):
         verbose_name='آخرین ویرایش'
     )
 
-     class Meta:
+    class Meta:
         verbose_name = 'نامه اداری'
         verbose_name_plural = 'نامه‌های اداری'
         ordering = ['-created_at']
@@ -140,6 +141,7 @@ class InternalLetter(models.Model):
         # فقط دسترسی مشاهده پیش‌فرض Django حفظ شود
         default_permissions = ('view',)
 
+        # دسترسی‌های اختصاصی نامه‌های اداری
         permissions = [
             ('create_letter', 'ایجاد نامه'),
             ('view_all_letters', 'مشاهده همه نامه‌ها'),
