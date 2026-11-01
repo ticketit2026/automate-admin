@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -49,22 +48,22 @@ class Ticket(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-    verbose_name = 'تیکت'
-    verbose_name_plural = 'تیکت‌ها'
+        verbose_name = "تیکت"
+        verbose_name_plural = "تیکت‌ها"
 
-    # تعریف دستی دسترسی‌ها
-    default_permissions = ()
+        # فقط همین هفت دسترسی برای مدل Ticket ساخته می‌شوند.
+        # نام کدها انگلیسی و نام نمایشی آن‌ها فارسی است.
+        default_permissions = ()
+        permissions = [
+            ("add_ticket", "ایجاد تیکت"),
+            ("view_ticket", "مشاهده تیکت"),
+            ("view_all_tickets", "مشاهده همه تیکت‌ها"),
+            ("change_ticket", "ویرایش"),
+            ("delete_ticket", "حذف"),
+            ("reply_ticket", "جواب دادن به تیکت"),
+            ("assign_ticket", "ارجاع"),
+        ]
 
-    permissions = [
-        ('add_ticket', 'ایجاد تیکت'),
-        ('view_ticket', 'مشاهده تیکت'),
-        ('view_all_tickets', 'مشاهده همه تیکت‌ها'),
-        ('change_ticket', 'ویرایش تیکت'),
-        ('delete_ticket', 'حذف تیکت'),
-        ('reply_ticket', 'جواب دادن به تیکت'),
-        ('assign_ticket', 'ارجاع تیکت'),
-    ]
-    
     def __str__(self):
         return self.title
 
@@ -83,6 +82,14 @@ class TicketReply(models.Model):
 
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "پاسخ تیکت"
+        verbose_name_plural = "پاسخ‌های تیکت"
+
+        # دسترسی‌های پاسخ در مدل Ticket تعریف شده‌اند؛
+        # از ساخت دسترسی‌های تکراری add_ticketreply و... جلوگیری می‌شود.
+        default_permissions = ()
 
     def __str__(self):
         return (
