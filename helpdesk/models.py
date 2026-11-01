@@ -49,21 +49,22 @@ class Ticket(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        permissions = [
-            (
-                "view_all_tickets",
-                "مشاهده همه تیکت‌ها",
-            ),
-            (
-                "change_ticket_status",
-                "تغییر وضعیت تیکت",
-            ),
-            (
-                "assign_ticket",
-                "تخصیص تیکت",
-            ),
-        ]
+    verbose_name = 'تیکت'
+    verbose_name_plural = 'تیکت‌ها'
 
+    # تعریف دستی دسترسی‌ها
+    default_permissions = ()
+
+    permissions = [
+        ('add_ticket', 'ایجاد تیکت'),
+        ('view_ticket', 'مشاهده تیکت'),
+        ('view_all_tickets', 'مشاهده همه تیکت‌ها'),
+        ('change_ticket', 'ویرایش تیکت'),
+        ('delete_ticket', 'حذف تیکت'),
+        ('reply_ticket', 'جواب دادن به تیکت'),
+        ('assign_ticket', 'ارجاع تیکت'),
+    ]
+    
     def __str__(self):
         return self.title
 
