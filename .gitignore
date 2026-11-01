@@ -3,4 +3,5 @@ __pycache__/
 db.sqlite3
 .env
 .venv/
-venv/
+venv/admin_automation/templates_docs/
+/admin_automation/templates_docs/
