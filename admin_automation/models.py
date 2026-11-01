@@ -132,7 +132,7 @@ class InternalLetter(models.Model):
         verbose_name='آخرین ویرایش'
     )
 
-        class Meta:
+     class Meta:
         verbose_name = 'نامه اداری'
         verbose_name_plural = 'نامه‌های اداری'
         ordering = ['-created_at']
