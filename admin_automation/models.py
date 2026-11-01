@@ -132,14 +132,17 @@ class InternalLetter(models.Model):
         verbose_name='آخرین ویرایش'
     )
 
-    class Meta:
+        class Meta:
         verbose_name = 'نامه اداری'
         verbose_name_plural = 'نامه‌های اداری'
         ordering = ['-created_at']
 
+        # فقط دسترسی مشاهده پیش‌فرض Django حفظ شود
+        default_permissions = ('view',)
+
         permissions = [
-            ('view_all_letters', 'مشاهده همه نامه‌ها'),
             ('create_letter', 'ایجاد نامه'),
+            ('view_all_letters', 'مشاهده همه نامه‌ها'),
             ('edit_letter', 'ویرایش نامه'),
             ('delete_letter', 'حذف نامه'),
             ('assign_letter', 'ارجاع نامه'),
