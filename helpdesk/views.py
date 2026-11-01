@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -20,6 +19,7 @@ VALID_PRIORITIES = {"low", "medium", "high"}
 # --------------------------------------------------
 
 def has_ticket_permission(user, codename):
+    """بررسی یکی از هفت دسترسی تعریف‌شده برای تیکت."""
     if not user.is_authenticated:
         return False
 
@@ -29,11 +29,17 @@ def has_ticket_permission(user, codename):
 
 
 def can_view_ticket(user, ticket):
+    """مشاهده همه تیکت‌ها یا فقط تیکت‌های خود کاربر/ارجاع‌شده به او."""
     if not user.is_authenticated:
         return False
 
+    # این دسترسی اجازه مشاهده تمام تیکت‌ها را می‌دهد.
     if has_ticket_permission(user, "view_all_tickets"):
         return True
+
+    # بدون دسترسی مشاهده تیکت، حتی تیکت‌های شخصی هم قابل مشاهده نیستند.
+    if not has_ticket_permission(user, "view_ticket"):
+        return False
 
     return (
         ticket.created_by_id == user.id
@@ -64,26 +70,16 @@ def get_authorized_ticket(user, ticket_id):
 
 @login_required
 def ticket_list(request):
-
     if request.method == "POST":
         if not has_ticket_permission(request.user, "add_ticket"):
-            raise PermissionDenied(
-                "اجازه ثبت تیکت را ندارید."
-            )
+            raise PermissionDenied("اجازه ثبت تیکت را ندارید.")
 
         title = request.POST.get("title", "").strip()
-        description = request.POST.get(
-            "description", ""
-        ).strip()
-        priority = request.POST.get(
-            "priority", "medium"
-        ).strip()
+        description = request.POST.get("description", "").strip()
+        priority = request.POST.get("priority", "medium").strip()
 
         if not title or not description:
-            messages.error(
-                request,
-                "عنوان و شرح مشکل را وارد کنید.",
-            )
+            messages.error(request, "عنوان و شرح مشکل را وارد کنید.")
             return redirect("ticket_list")
 
         if len(title) > 200:
@@ -94,10 +90,7 @@ def ticket_list(request):
             return redirect("ticket_list")
 
         if priority not in VALID_PRIORITIES:
-            messages.error(
-                request,
-                "اولویت انتخاب‌شده معتبر نیست.",
-            )
+            messages.error(request, "اولویت انتخاب‌شده معتبر نیست.")
             return redirect("ticket_list")
 
         Ticket.objects.create(
@@ -107,21 +100,20 @@ def ticket_list(request):
             created_by=request.user,
         )
 
-        messages.success(
-            request,
-            "تیکت با موفقیت ثبت شد.",
-        )
+        messages.success(request, "تیکت با موفقیت ثبت شد.")
         return redirect("ticket_list")
 
-    if has_ticket_permission(
-        request.user, "view_all_tickets"
-    ):
+    # مشاهده همه: تمام تیکت‌ها
+    if has_ticket_permission(request.user, "view_all_tickets"):
         tickets = Ticket.objects.all()
-    else:
+    # مشاهده تیکت: فقط تیکت‌های ایجادشده توسط کاربر یا ارجاع‌شده به او
+    elif has_ticket_permission(request.user, "view_ticket"):
         tickets = Ticket.objects.filter(
-            Q(created_by=request.user)
-            | Q(assigned_to=request.user)
+            Q(created_by=request.user) | Q(assigned_to=request.user)
         )
+    # کاربری که فقط مجوز ایجاد دارد، فهرست تیکت‌ها را نمی‌بیند.
+    else:
+        tickets = Ticket.objects.none()
 
     search_query = request.GET.get("q", "").strip()
 
@@ -129,24 +121,12 @@ def ticket_list(request):
         search_filter = (
             Q(title__icontains=search_query)
             | Q(description__icontains=search_query)
-            | Q(
-                created_by__username__icontains=search_query
-            )
-            | Q(
-                created_by__first_name__icontains=search_query
-            )
-            | Q(
-                created_by__last_name__icontains=search_query
-            )
-            | Q(
-                assigned_to__username__icontains=search_query
-            )
-            | Q(
-                assigned_to__first_name__icontains=search_query
-            )
-            | Q(
-                assigned_to__last_name__icontains=search_query
-            )
+            | Q(created_by__username__icontains=search_query)
+            | Q(created_by__first_name__icontains=search_query)
+            | Q(created_by__last_name__icontains=search_query)
+            | Q(assigned_to__username__icontains=search_query)
+            | Q(assigned_to__first_name__icontains=search_query)
+            | Q(assigned_to__last_name__icontains=search_query)
         )
 
         if search_query.isdigit():
@@ -154,23 +134,15 @@ def ticket_list(request):
 
         tickets = tickets.filter(search_filter)
 
-    selected_status = request.GET.get(
-        "status", ""
-    ).strip()
-
+    selected_status = request.GET.get("status", "").strip()
     if selected_status in VALID_STATUSES:
         tickets = tickets.filter(status=selected_status)
     else:
         selected_status = ""
 
-    selected_priority = request.GET.get(
-        "priority", ""
-    ).strip()
-
+    selected_priority = request.GET.get("priority", "").strip()
     if selected_priority in VALID_PRIORITIES:
-        tickets = tickets.filter(
-            priority=selected_priority
-        )
+        tickets = tickets.filter(priority=selected_priority)
     else:
         selected_priority = ""
 
@@ -180,9 +152,7 @@ def ticket_list(request):
     ).order_by("-created_at")
 
     paginator = Paginator(tickets, 20)
-    page_obj = paginator.get_page(
-        request.GET.get("page")
-    )
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     return render(
         request,
@@ -199,8 +169,9 @@ def ticket_list(request):
             "can_view_all_tickets": has_ticket_permission(
                 request.user, "view_all_tickets"
             ),
+            # تغییر وضعیت زیرمجموعه دسترسی «ویرایش» است.
             "can_change_status": has_ticket_permission(
-                request.user, "change_ticket_status"
+                request.user, "change_ticket"
             ),
             "can_assign": has_ticket_permission(
                 request.user, "assign_ticket"
@@ -215,13 +186,9 @@ def ticket_list(request):
 
 @login_required
 def ticket_detail(request, ticket_id):
-    ticket = get_authorized_ticket(
-        request.user, ticket_id
-    )
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    replies = ticket.replies.select_related(
-        "user"
-    ).order_by("created_at")
+    replies = ticket.replies.select_related("user").order_by("created_at")
 
     return render(
         request,
@@ -236,10 +203,10 @@ def ticket_detail(request, ticket_id):
                 request.user, "delete_ticket"
             ),
             "can_reply": has_ticket_permission(
-                request.user, "add_ticketreply"
+                request.user, "reply_ticket"
             ),
             "can_change_status": has_ticket_permission(
-                request.user, "change_ticket_status"
+                request.user, "change_ticket"
             ),
             "can_assign": has_ticket_permission(
                 request.user, "assign_ticket"
@@ -254,55 +221,30 @@ def ticket_detail(request, ticket_id):
 
 @login_required
 def edit_ticket(request, ticket_id):
-    if not has_ticket_permission(
-        request.user, "change_ticket"
-    ):
-        raise PermissionDenied(
-            "اجازه ویرایش تیکت را ندارید."
-        )
+    if not has_ticket_permission(request.user, "change_ticket"):
+        raise PermissionDenied("اجازه ویرایش تیکت را ندارید.")
 
-    ticket = get_authorized_ticket(
-        request.user, ticket_id
-    )
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
     if request.method == "POST":
         title = request.POST.get("title", "").strip()
-        description = request.POST.get(
-            "description", ""
-        ).strip()
-        priority = request.POST.get(
-            "priority", ""
-        ).strip()
+        description = request.POST.get("description", "").strip()
+        priority = request.POST.get("priority", "").strip()
 
         if not title or not description:
-            messages.error(
-                request,
-                "عنوان و شرح مشکل الزامی است.",
-            )
+            messages.error(request, "عنوان و شرح مشکل الزامی است.")
         elif len(title) > 200:
-            messages.error(
-                request,
-                "عنوان نباید بیشتر از ۲۰۰ نویسه باشد.",
-            )
+            messages.error(request, "عنوان نباید بیشتر از ۲۰۰ نویسه باشد.")
         elif priority not in VALID_PRIORITIES:
-            messages.error(
-                request,
-                "اولویت انتخاب‌شده معتبر نیست.",
-            )
+            messages.error(request, "اولویت انتخاب‌شده معتبر نیست.")
         else:
             ticket.title = title
             ticket.description = description
             ticket.priority = priority
             ticket.save()
 
-            messages.success(
-                request,
-                "تیکت با موفقیت ویرایش شد.",
-            )
-            return redirect(
-                "ticket_detail",
-                ticket_id=ticket.id,
-            )
+            messages.success(request, "تیکت با موفقیت ویرایش شد.")
+            return redirect("ticket_detail", ticket_id=ticket.id)
 
     return render(
         request,
@@ -317,16 +259,10 @@ def edit_ticket(request, ticket_id):
 
 @login_required
 def delete_ticket(request, ticket_id):
-    if not has_ticket_permission(
-        request.user, "delete_ticket"
-    ):
-        raise PermissionDenied(
-            "اجازه حذف تیکت را ندارید."
-        )
+    if not has_ticket_permission(request.user, "delete_ticket"):
+        raise PermissionDenied("اجازه حذف تیکت را ندارید.")
 
-    ticket = get_authorized_ticket(
-        request.user, ticket_id
-    )
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
     if request.method == "POST":
         ticket.delete()
@@ -347,30 +283,15 @@ def delete_ticket(request, ticket_id):
 @login_required
 @require_POST
 def add_ticket_reply(request, ticket_id):
-    if not has_ticket_permission(
-        request.user, "add_ticketreply"
-    ):
-        raise PermissionDenied(
-            "اجازه پاسخ به تیکت را ندارید."
-        )
+    if not has_ticket_permission(request.user, "reply_ticket"):
+        raise PermissionDenied("اجازه پاسخ به تیکت را ندارید.")
 
-    ticket = get_authorized_ticket(
-        request.user, ticket_id
-    )
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    message = request.POST.get(
-        "message", ""
-    ).strip()
-
+    message = request.POST.get("message", "").strip()
     if not message:
-        messages.error(
-            request,
-            "متن پاسخ را وارد کنید.",
-        )
-        return redirect(
-            "ticket_detail",
-            ticket_id=ticket.id,
-        )
+        messages.error(request, "متن پاسخ را وارد کنید.")
+        return redirect("ticket_detail", ticket_id=ticket.id)
 
     TicketReply.objects.create(
         ticket=ticket,
@@ -380,62 +301,34 @@ def add_ticket_reply(request, ticket_id):
 
     if ticket.status == "closed":
         ticket.status = "open"
-        ticket.save(
-            update_fields=["status", "updated_at"]
-        )
+        ticket.save(update_fields=["status", "updated_at"])
 
-    messages.success(
-        request,
-        "پاسخ با موفقیت ثبت شد.",
-    )
-
-    return redirect(
-        "ticket_detail",
-        ticket_id=ticket.id,
-    )
+    messages.success(request, "پاسخ با موفقیت ثبت شد.")
+    return redirect("ticket_detail", ticket_id=ticket.id)
 
 
 # --------------------------------------------------
-# تغییر وضعیت
+# تغییر وضعیت (با دسترسی ویرایش)
 # --------------------------------------------------
 
 @login_required
 def update_ticket_status(request, ticket_id):
-    if not has_ticket_permission(
-        request.user, "change_ticket_status"
-    ):
-        raise PermissionDenied(
-            "اجازه تغییر وضعیت تیکت را ندارید."
-        )
+    if not has_ticket_permission(request.user, "change_ticket"):
+        raise PermissionDenied("اجازه تغییر وضعیت تیکت را ندارید.")
 
-    ticket = get_authorized_ticket(
-        request.user, ticket_id
-    )
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
     if request.method == "POST":
-        status = request.POST.get(
-            "status", ""
-        ).strip()
+        status = request.POST.get("status", "").strip()
 
         if status not in VALID_STATUSES:
-            messages.error(
-                request,
-                "وضعیت انتخاب‌شده معتبر نیست.",
-            )
+            messages.error(request, "وضعیت انتخاب‌شده معتبر نیست.")
         else:
             ticket.status = status
-            ticket.save(
-                update_fields=["status", "updated_at"]
-            )
-            messages.success(
-                request,
-                "وضعیت تیکت تغییر کرد.",
-            )
+            ticket.save(update_fields=["status", "updated_at"])
+            messages.success(request, "وضعیت تیکت تغییر کرد.")
 
-        return redirect(
-            "ticket_detail",
-            ticket_id=ticket.id,
-        )
+        return redirect("ticket_detail", ticket_id=ticket.id)
 
     return render(
         request,
@@ -450,61 +343,33 @@ def update_ticket_status(request, ticket_id):
 
 @login_required
 def assign_ticket(request, ticket_id):
-    if not has_ticket_permission(
-        request.user, "assign_ticket"
-    ):
-        raise PermissionDenied(
-            "اجازه ارجاع تیکت را ندارید."
-        )
+    if not has_ticket_permission(request.user, "assign_ticket"):
+        raise PermissionDenied("اجازه ارجاع تیکت را ندارید.")
 
-    ticket = get_authorized_ticket(
-        request.user, ticket_id
-    )
+    ticket = get_authorized_ticket(request.user, ticket_id)
 
-    users = User.objects.filter(
-        is_active=True
-    ).order_by(
+    users = User.objects.filter(is_active=True).order_by(
         "first_name",
         "last_name",
         "username",
     )
 
     if request.method == "POST":
-        user_id = request.POST.get(
-            "assigned_to", ""
-        ).strip()
+        user_id = request.POST.get("assigned_to", "").strip()
 
         if not user_id:
             ticket.assigned_to = None
         else:
             try:
-                assigned_user = users.get(
-                    pk=int(user_id)
-                )
+                assigned_user = users.get(pk=int(user_id))
                 ticket.assigned_to = assigned_user
             except (User.DoesNotExist, ValueError):
-                messages.error(
-                    request,
-                    "کاربر انتخاب‌شده معتبر نیست.",
-                )
-                return redirect(
-                    "assign_ticket",
-                    ticket_id=ticket.id,
-                )
+                messages.error(request, "کاربر انتخاب‌شده معتبر نیست.")
+                return redirect("assign_ticket", ticket_id=ticket.id)
 
-        ticket.save(
-            update_fields=["assigned_to", "updated_at"]
-        )
-
-        messages.success(
-            request,
-            "مسئول رسیدگی به تیکت تغییر کرد.",
-        )
-
-        return redirect(
-            "ticket_detail",
-            ticket_id=ticket.id,
-        )
+        ticket.save(update_fields=["assigned_to", "updated_at"])
+        messages.success(request, "مسئول رسیدگی به تیکت تغییر کرد.")
+        return redirect("ticket_detail", ticket_id=ticket.id)
 
     return render(
         request,
